@@ -1,0 +1,60 @@
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v4
+      with:
+        build-root-directory: backend/ongi
+
+    - name: Create .env file from secrets
+      run: |
+        echo "${{ secrets.ENV_FILE }}" > .env
+      working-directory: backend/ongi
+
+    - name: Build with Gradle Wrapper
+      run: ./gradlew build
+      working-directory: backend/ongi
+
+  dependency-submission:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        java-version: '21'
+        distribution: 'temurin'
+
+    - name: Create .env file from secrets
+      run: |
+        echo "${{ secrets.ENV_FILE }}" > .env
+      working-directory: backend/ongi
+
+    - name: Generate and submit dependency graph
+      uses: gradle/actions/dependency-submission@v4
+      with:
+        build-root-directory: backend/ongi
