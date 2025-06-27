@@ -25,15 +25,22 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         build-root-directory: backend/ongi
-
+        
     - name: Create .env file from secrets
+      shell: bash
       run: |
-        echo "${{ secrets.ENV_FILE }}" > .env
-      working-directory: backend/ongi
+        cat <<'EOF' > backend/ongi/.env
+        ${{ secrets.ENV_FILE }}
+        EOF
 
-    - name: Build with Gradle Wrapper
-      run: ./gradlew build
+    - name: Load .env and build
       working-directory: backend/ongi
+      shell: bash
+      run: |
+        set -a
+        source .env
+        set +a
+        ./gradlew build
 
   dependency-submission:
     runs-on: ubuntu-latest
@@ -50,9 +57,11 @@ jobs:
         distribution: 'temurin'
 
     - name: Create .env file from secrets
+      shell: bash
       run: |
-        echo "${{ secrets.ENV_FILE }}" > .env
-      working-directory: backend/ongi
+        cat <<'EOF' > backend/ongi/.env
+        ${{ secrets.ENV_FILE }}
+        EOF
 
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@v4
