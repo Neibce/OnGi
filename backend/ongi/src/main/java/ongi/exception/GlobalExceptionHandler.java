@@ -24,6 +24,14 @@ public class GlobalExceptionHandler {
                         exception.getMessage()));
     }
 
+    @ExceptionHandler(EntityAlreadyExistException.class)
+    public ResponseEntity<ErrorResponse> handleProductNotFound(
+            EntityAlreadyExistException exception) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse(ErrorStatus.ENTITY_ALREADY_EXIST.getCode(),
+                        exception.getMessage()));
+    }
+
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleBadCredential() {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
