@@ -27,9 +27,10 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(auth -> auth.requestMatchers("/auth/**").permitAll()
-                        .anyRequest().authenticated()
-                ).addFilterBefore(new AuthenticationFilter(tokenProvider),
+                .authorizeHttpRequests(
+                        auth -> auth.requestMatchers("/auth/**", "/users/exists").permitAll()
+                                .anyRequest().authenticated())
+                .addFilterBefore(new AuthenticationFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
