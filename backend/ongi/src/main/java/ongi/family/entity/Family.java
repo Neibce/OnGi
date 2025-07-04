@@ -33,6 +33,9 @@ public class Family {
     @Column(nullable = false)
     private List<UUID> members;
 
+    @Column(nullable = false)
+    private String name;
+
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

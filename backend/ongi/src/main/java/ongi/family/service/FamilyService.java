@@ -6,6 +6,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import ongi.exception.EntityAlreadyExistException;
 import ongi.exception.EntityNotFoundException;
+import ongi.family.dto.FamilyCreateRequest;
 import ongi.family.dto.FamilyInfo;
 import ongi.family.dto.FamilyJoinRequest;
 import ongi.family.entity.Family;
@@ -33,7 +34,7 @@ public class FamilyService {
     }
 
     @Transactional
-    public FamilyInfo createFamily(User user) {
+    public FamilyInfo createFamily(User user, FamilyCreateRequest request) {
         if (familyRepository.existsByMembersContains(user.getUuid())) {
             throw new EntityAlreadyExistException("이미 소속된 가족이 있습니다.");
         }
@@ -49,6 +50,7 @@ public class FamilyService {
 
             Family newFamily = familyRepository.save(Family.builder()
                     .code(code)
+                    .name(request.name())
                     .members(members)
                     .build());
 
@@ -76,7 +78,7 @@ public class FamilyService {
 
         return family.getMembers().stream()
                 .map(memberId -> new UserInfo(userRepository.findByUuid(memberId)
-                        .orElseThrow(()-> new EntityNotFoundException("가족 멤버 중 탈퇴한 사용자가 있습니다."))))
+                        .orElseThrow(() -> new EntityNotFoundException("가족 멤버 중 탈퇴한 사용자가 있습니다."))))
                 .toList();
     }
 }

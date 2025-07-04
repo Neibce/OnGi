@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import ongi.family.dto.FamilyCreateRequest;
 import ongi.family.dto.FamilyInfo;
 import ongi.family.dto.FamilyJoinRequest;
 import ongi.family.service.FamilyService;
@@ -41,8 +42,9 @@ public class FamilyController {
 
     @PostMapping
     public ResponseEntity<FamilyInfo> createFamily(
-            @AuthenticationPrincipal CustomUserDetails userDetails) {
-        FamilyInfo createdFamilyinfo = familyService.createFamily(userDetails.getUser());
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody FamilyCreateRequest request) {
+        FamilyInfo createdFamilyinfo = familyService.createFamily(userDetails.getUser(), request);
         return ResponseEntity.created(URI.create("/")).body(createdFamilyinfo);
     }
 
