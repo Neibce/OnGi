@@ -39,20 +39,19 @@ public class TemperatureService {
         // 가족의 모든 온도 기록 조회
         List<Temperature> temperatures = temperatureRepository.findByFamilyId(familyId);
         
-        // 사용자별 온도 합계 계산
+        // 전체 온도 합계 계산 (Repository 메서드 사용)
+        Double totalContributedTemperature = temperatureRepository.getTotalTemperatureByFamilyId(familyId);
+        final Double finalTotalContributedTemperature = totalContributedTemperature != null ? totalContributedTemperature : 0.0;
+        
+        // 가족 온도 계산 (기본값 + 기여 온도)
+        Double familyTemperature = BASE_TEMPERATURE + finalTotalContributedTemperature;
+        
+        // 사용자별 온도 합계 계산 (여전히 필요 - 개별 사용자 정보를 위해)
         Map<UUID, Double> userTemperatures = temperatures.stream()
                 .collect(Collectors.groupingBy(
                         Temperature::getUserId,
                         Collectors.summingDouble(Temperature::getTemperature)
                 ));
-        
-        // 전체 온도 합계 계산
-        Double totalContributedTemperature = userTemperatures.values().stream()
-                .mapToDouble(Double::doubleValue)
-                .sum();
-        
-        // 가족 온도 계산 (기본값 + 기여 온도)
-        Double familyTemperature = BASE_TEMPERATURE + totalContributedTemperature;
         
         // 사용자 정보 조회
         List<UUID> userIds = userTemperatures.keySet().stream().toList();
@@ -67,8 +66,8 @@ public class TemperatureService {
                     User user = users.get(userId);
                     
                     // 퍼센트 계산
-                    Double percentage = totalContributedTemperature > 0 
-                            ? (contributedTemperature / totalContributedTemperature) * 100 
+                    Double percentage = finalTotalContributedTemperature > 0 
+                            ? (contributedTemperature / finalTotalContributedTemperature) * 100 
                             : 0.0;
                     
                     // 소수점 2자리로 반올림
@@ -87,7 +86,7 @@ public class TemperatureService {
         
         return FamilyTemperatureResponse.builder()
                 .familyTemperature(familyTemperature)
-                .totalContributedTemperature(totalContributedTemperature)
+                .totalContributedTemperature(finalTotalContributedTemperature)
                 .memberTemperatures(memberTemperatures)
                 .build();
     }
@@ -101,13 +100,14 @@ public class TemperatureService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         
-        // 사용자의 온도 기록 조회
-        List<Temperature> temperatures = temperatureRepository.findByFamilyIdAndUserId(familyId, userId);
+        // 사용자가 기여한 온도 합계 (Repository 메서드 사용)
+        Double contributedTemperature = temperatureRepository.getTotalTemperatureByFamilyIdAndUserId(familyId, userId);
+        if (contributedTemperature == null) {
+            contributedTemperature = 0.0;
+        }
         
-        // 사용자가 기여한 온도 합계
-        Double contributedTemperature = temperatures.stream()
-                .mapToDouble(Temperature::getTemperature)
-                .sum();
+        // 사용자의 온도 기록 조회 (상세 정보를 위해)
+        List<Temperature> temperatures = temperatureRepository.findByFamilyIdAndUserId(familyId, userId);
         
         // 전체 기여 온도 합계
         Double totalContributedTemperature = temperatureRepository.getTotalTemperatureByFamilyId(familyId);
