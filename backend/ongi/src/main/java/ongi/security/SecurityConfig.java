@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                        auth -> auth.requestMatchers("/auth/**", "/users/exists").permitAll()
+                        auth -> auth.requestMatchers("/auth/**", "/users/exists", "/api/temperatures/**").permitAll()
                                 .anyRequest().authenticated())
                 .addFilterBefore(new AuthenticationFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
