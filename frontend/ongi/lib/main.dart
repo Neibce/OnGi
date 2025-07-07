@@ -1,23 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:ongi/screens/parent_init_screen.dart';
+import 'package:ongi/screens/health_log_screen.dart';
 import 'package:ongi/screens/home_screen.dart';
+import 'package:ongi/screens/login_screen.dart';
+import 'package:ongi/screens/start_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(const OngiApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class OngiApp extends StatelessWidget {
+  const OngiApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final bool isLoggedIn = AuthService.instance.isLoggedIn; // 동기 예시
-
     return MaterialApp(
       title: 'Ongi',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        fontFamily: "Pretendard"
       ),
-      home: isLoggedIn ? const HomeScreen() : const LoginScreen(),
+
+      home: const StartScreen(),
     );
   }
 }
