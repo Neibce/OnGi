@@ -30,25 +30,26 @@ class HomeScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                const Text(
-                  '우리 가족의',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontWeight: FontWeight.w400,
-                    fontSize: 60,
-                    color: AppColors.ongiOrange,
+                RichText(
+                  text: TextSpan(
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontSize: 60,
+                      color: AppColors.ongiOrange,
+                    ),
+                    children: const [
+                      TextSpan(
+                        text: '우리 가족의 ',
+                        style: TextStyle(fontWeight: FontWeight.w400),
+                      ),
+                      TextSpan(
+                        text: '온기는',
+                        style: TextStyle(fontWeight: FontWeight.w700), // 굵게!
+                      ),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  '온기는',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 60,
-                    color: AppColors.ongiOrange,
-                  ),
-                ),
+
                 const SizedBox(height: 32),
                 Expanded(
                   child: Row(
