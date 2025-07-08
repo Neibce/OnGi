@@ -1,7 +1,7 @@
 name: ongi
 description: "A new Flutter project."
 
-publish_to: 'none'
+publish_to: "none"
 
 version: 1.0.0+1
 
@@ -11,7 +11,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
+  flutter_svg: ^2.0.7
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -25,6 +25,10 @@ flutter:
   assets:
     - assets/images/logo.svg
     - assets/images/logo.png
+    - assets/images/nav_Home.svg
+    - assets/images/nav_Heart.svg
+    - assets/images/nav_Commun.svg
+    - assets/images/nav_Mypage.svg
 
   fonts:
     - family: Pretendard
