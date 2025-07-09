@@ -19,7 +19,7 @@ class OngiApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        fontFamily: "Pretendard"
+        fontFamily: 'Pretendard',
       ),
 
       home: const StartScreen(),
