@@ -23,6 +23,12 @@ class OngiApp extends StatelessWidget {
       ),
 
       home: const StartScreen(),
+
+      // Login이랑 Signup 화면 만들면 주석 풀기
+      // route: {
+      //   '/login': (context) => const LoginScreen(),
+      //   '/signup': (context) => const SignupScreen(),
+      // }
     );
   }
 }
