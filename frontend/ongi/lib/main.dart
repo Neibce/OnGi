@@ -3,7 +3,8 @@ import 'package:ongi/screens/parent_init_screen.dart';
 import 'package:ongi/screens/health_log_screen.dart';
 import 'package:ongi/screens/home_screen.dart';
 import 'package:ongi/screens/login_screen.dart';
-import 'package:ongi/screens/start_screen.dart';
+import 'package:ongi/screens/home_screen.dart';
+import 'package:ongi/screens/bottom_nav.dart';
 
 void main() {
   runApp(const OngiApp());
@@ -22,7 +23,7 @@ class OngiApp extends StatelessWidget {
         fontFamily: 'Pretendard',
       ),
 
-      home: const StartScreen(),
+      home: const BottomNavScreen(),
     );
   }
 }
