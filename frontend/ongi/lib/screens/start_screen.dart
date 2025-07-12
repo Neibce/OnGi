@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:ongi/core/app_background.dart';
+import 'package:ongi/core/app_email_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/services/email_service.dart';
 
@@ -220,7 +221,7 @@ class _EmailScreenState extends State<EmailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: AppBackground(
+      body: AppEmailBackground(
         child: SingleChildScrollView(
           child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
