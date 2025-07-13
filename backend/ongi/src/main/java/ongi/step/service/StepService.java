@@ -28,6 +28,15 @@ public class StepService {
     private final FamilyRepository familyRepository;
     private final UserRepository userRepository;
     
+    /**
+     * Inserts or updates the step count for a user on the current date within their family.
+     *
+     * If a step record for the user and date exists, updates the step count; otherwise, creates a new record.
+     *
+     * @param userId the unique identifier of the user whose steps are being recorded
+     * @param request the request containing the step count to upsert
+     * @throws EntityNotFoundException if the user is not associated with any family
+     */
     @Transactional
     public void upsertStep(UUID userId, StepUpsertRequest request) {
         Family family = familyRepository.findByMembersContains(userId)
@@ -52,6 +61,13 @@ public class StepService {
         }
     }
     
+    /**
+     * Retrieves the total and per-member step counts for a user's family on the current date.
+     *
+     * @param userId the UUID of the user whose family's step data is to be retrieved
+     * @return a {@link FamilyStepResponse} containing the total steps, date, and step information for each family member
+     * @throws EntityNotFoundException if the user's family cannot be found
+     */
     public FamilyStepResponse getFamilySteps(UUID userId) {
         Family family = familyRepository.findByMembersContains(userId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));

@@ -46,6 +46,11 @@ public class Step {
     @Column(nullable = false)
     private LocalDateTime updatedAt;
 
+    /**
+     * Updates the step count for this entity to the specified value.
+     *
+     * @param newSteps the new step count to set
+     */
     public void updateSteps(Integer newSteps) {
         this.steps = newSteps;
     }
