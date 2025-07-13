@@ -27,7 +27,6 @@ public class MemberTemperatureResponse {
     public static class TemperatureRecord {
         private Long temperatureId;
         private Double temperature;
-        private String activity;
         private LocalDateTime createdAt;
     }
 } 

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/temperatures")
+@RequestMapping("/temperatures")
 @RequiredArgsConstructor
 public class TemperatureController {
     private final TemperatureService temperatureService;

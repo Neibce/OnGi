@@ -35,7 +35,7 @@ public class TemperatureService {
     // 온도 조회 메서드 
     public FamilyTemperatureResponse getFamilyTemperature(String familyId) {
         // 가족 존재 확인
-        Family family = familyRepository.findById(familyId)
+        familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
         
         // 가족의 모든 온도 기록 조회
@@ -48,7 +48,7 @@ public class TemperatureService {
         // 가족 온도 계산 (기본값 + 기여 온도)
         Double familyTemperature = BASE_TEMPERATURE + finalTotalContributedTemperature;
         
-        // 사용자별 온도 합계 계산 (여전히 필요 - 개별 사용자 정보를 위해)
+        // 사용자별 온도 합계 계산 
         Map<UUID, Double> userTemperatures = temperatures.stream()
                 .collect(Collectors.groupingBy(
                         Temperature::getUserId,
@@ -95,20 +95,20 @@ public class TemperatureService {
     
     public MemberTemperatureResponse getMemberTemperature(String familyId, UUID userId) {
         // 가족 존재 확인
-        Family family = familyRepository.findById(familyId)
+        familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
         
         // 사용자 존재 확인
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자를 찾을 수 없습니다."));
         
-        // 사용자가 기여한 온도 합계 (Repository 메서드 사용)
+        // 사용자가 기여한 온도 합계 
         Double contributedTemperature = temperatureRepository.getTotalTemperatureByFamilyIdAndUserId(familyId, userId);
         if (contributedTemperature == null) {
             contributedTemperature = 0.0;
         }
         
-        // 사용자의 온도 기록 조회 (상세 정보를 위해)
+        // 사용자의 온도 기록 조회
         List<Temperature> temperatures = temperatureRepository.findByFamilyIdAndUserId(familyId, userId);
         
         // 전체 기여 온도 합계
@@ -132,7 +132,6 @@ public class TemperatureService {
                 .map(temp -> MemberTemperatureResponse.TemperatureRecord.builder()
                         .temperatureId(temp.getId())
                         .temperature(temp.getTemperature())
-                        .activity(temp.getActivity())
                         .createdAt(temp.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
