@@ -9,6 +9,7 @@ import ongi.exception.EntityNotFoundException;
 import ongi.family.dto.FamilyCreateRequest;
 import ongi.family.dto.FamilyInfo;
 import ongi.family.dto.FamilyJoinRequest;
+import ongi.family.dto.FamilyParentResponse;
 import ongi.family.entity.Family;
 import ongi.family.repository.FamilyRepository;
 import ongi.family.support.FamilyCodeGenerator;
@@ -76,9 +77,30 @@ public class FamilyService {
         Family family = familyRepository.findByMembersContains(user.getUuid())
                 .orElseThrow(() -> new EntityNotFoundException("가족 정보를 찾을 수 없습니다."));
 
-        return family.getMembers().stream()
-                .map(memberId -> new UserInfo(userRepository.findByUuid(memberId)
-                        .orElseThrow(() -> new EntityNotFoundException("가족 멤버 중 탈퇴한 사용자가 있습니다."))))
+        List<User> members = userRepository.findAllById(family.getMembers());
+        
+        if (members.size() != family.getMembers().size()) {
+            throw new EntityNotFoundException("가족 멤버 중 탈퇴한 사용자가 있습니다.");
+        }
+
+        return members.stream()
+                .map(UserInfo::new)
+                .toList();
+    }
+
+    public List<FamilyParentResponse> getFamilyParents(User user) {
+        Family family = familyRepository.findByMembersContains(user.getUuid())
+                .orElseThrow(() -> new EntityNotFoundException("가족 정보를 찾을 수 없습니다."));
+
+        List<User> members = userRepository.findAllById(family.getMembers());
+        
+        if (members.size() != family.getMembers().size()) {
+            throw new EntityNotFoundException("가족 멤버 중 탈퇴한 사용자가 있습니다.");
+        }
+
+        return members.stream()
+                .filter(User::getIsParent)
+                .map(FamilyParentResponse::new)
                 .toList();
     }
 }

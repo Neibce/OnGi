@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import ongi.family.dto.FamilyCreateRequest;
 import ongi.family.dto.FamilyInfo;
 import ongi.family.dto.FamilyJoinRequest;
+import ongi.family.dto.FamilyParentResponse;
 import ongi.family.service.FamilyService;
 import ongi.security.CustomUserDetails;
 import ongi.user.dto.UserInfo;
@@ -38,6 +39,13 @@ public class FamilyController {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
         List<UserInfo> familyMembers = familyService.getFamilyMembers(userDetails.getUser());
         return ResponseEntity.ok(familyMembers);
+    }
+
+    @GetMapping("/parents")
+    public ResponseEntity<List<FamilyParentResponse>> getFamilyParents(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<FamilyParentResponse> parents = familyService.getFamilyParents(userDetails.getUser());
+        return ResponseEntity.ok(parents);
     }
 
     @PostMapping
