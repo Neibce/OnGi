@@ -154,7 +154,7 @@ public class TemperatureService {
     }
 
     // 가족 모두 감정기록 업로드 시 온도 추가 상승
-    public void increaseTemperatureForAllEmotionpload(String familyId) {
+    public void increaseTemperatureForAllEmotionUpload(String familyId) {
         // TODO: 가족 모두 업로드 확인 및 온도 추가 상승(+0.5도) 로직 구현
     }
 
