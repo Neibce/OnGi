@@ -31,6 +31,8 @@ public class TemperatureService {
     
     private static final double BASE_TEMPERATURE = 36.5;
     
+  
+    // 온도 조회 메서드 
     public FamilyTemperatureResponse getFamilyTemperature(String familyId) {
         // 가족 존재 확인
         Family family = familyRepository.findById(familyId)
@@ -142,5 +144,51 @@ public class TemperatureService {
                 .percentage(percentage)
                 .temperatureRecords(temperatureRecords)
                 .build();
+    }
+
+
+
+
+    // 온도 상승 메서드
+    // 감정기록 업로드 시 온도 상승 (하루 1회만 적용)
+    public void increaseTemperatureForEmotionUpload(UUID userId, String familyId) {
+        // TODO: 하루 1회 제한 및 온도 상승(+0.1도) 로직 구현
+    }
+
+    // 가족 모두 감정기록 업로드 시 온도 추가 상승
+    public void increaseTemperatureForAllEmotionUpload(String familyId) {
+        // TODO: 가족 모두 업로드 확인 및 온도 추가 상승(+0.5도) 로직 구현
+    }
+
+    // 부모 건강 정보 입력 시 온도 상승 (최대 0.6도)
+    public void increaseTemperatureForParentHealthInput(UUID userId, String familyId) {
+        // TODO: 하루 최대 0.6도까지 온도 상승(+0.2도씩) 로직 구현
+    }
+
+    // 자녀가 부모 건강 정보 열람 시 온도 상승 (최대 0.9도)
+    public void increaseTemperatureForChildHealthView(UUID userId, String familyId) {
+        // TODO: 하루 최대 0.9도까지 온도 상승(+0.3도씩) 로직 구현
+    }
+
+    // 가족 만보기 걸음수 충족 시 온도 상승
+    public void increaseTemperatureForStepGoal(String familyId) {
+        // TODO: 걸음수 충족 시 온도 상승(+0.2도) 로직 구현
+    }
+
+
+    // 온도 하락 메서드
+    // 부모 1명 이상 일주일 미접속 시 온도 하락
+    public void decreaseTemperatureForInactiveParent(String familyId) {
+        // TODO: 부모 미접속 시 온도 하락(-15도) 로직 구현
+    }
+
+    // 자녀 1명 이상 일주일 미접속 시 온도 하락
+    public void decreaseTemperatureForInactiveChild(String familyId) {
+        // TODO: 자녀 미접속 시 온도 하락(-15도) 로직 구현
+    }
+
+    // 하루 동안 아무도 미접속 시 온도 하락
+    public void decreaseTemperatureForNoLogin(String familyId) {
+        // TODO: 하루 미접속 시 온도 하락(-1도) 로직 구현
     }
 } 
