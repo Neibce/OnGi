@@ -33,7 +33,7 @@ class ParentInitScreen extends StatelessWidget {
                     '더해볼까요?',
                     style: TextStyle(
                       fontSize: 60,
-                      fontWeight: FontWeight.w300, // 기본 폰트는 w100 적용 안 됨, 폰트 적용 후 굵기 변경하기
+                      fontWeight: FontWeight.w300,
                       height: 1.2,
                       color: Colors.white,
                     ),

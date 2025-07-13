@@ -31,6 +31,7 @@ public class TemperatureService {
     
     private static final double BASE_TEMPERATURE = 36.5;
     
+  
     // 온도 조회 메서드 
     public FamilyTemperatureResponse getFamilyTemperature(String familyId) {
         // 가족 존재 확인
@@ -144,6 +145,7 @@ public class TemperatureService {
                 .temperatureRecords(temperatureRecords)
                 .build();
     }
+
 
 
 
