@@ -5,6 +5,8 @@ import 'package:ongi/core/app_background.dart';
 import 'package:ongi/core/app_email_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/services/email_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ongi/screens/signup/password_screen.dart';
 
 class StartScreen extends StatelessWidget {
   const StartScreen({super.key});
@@ -123,7 +125,7 @@ class _NextScreenState extends State<NextScreen> {
                     '안녕하세요',
                     style: TextStyle(
                       fontSize: 60,
-                      fontWeight: FontWeight.w300,
+                      fontWeight: FontWeight.w200,
                       height: 1.2,
                       color: Colors.white,
                     ),
@@ -206,7 +208,14 @@ class _EmailScreenState extends State<EmailScreen> {
       if (exists) {
         Navigator.pushNamed(context, '/login');
       } else {
-        Navigator.pushNamed(context, '/signup');
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('signup_email', email);
+        
+        if (!mounted) return;
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const PasswordScreen()),
+        );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
