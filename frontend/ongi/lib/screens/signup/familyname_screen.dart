@@ -119,7 +119,8 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 30, right: 30, top: 20),
+
+              padding: const EdgeInsets.only(left: 40, right: 40, top: 40),
               child: Row(
                 children: [
                   Checkbox(
@@ -185,31 +186,67 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 40, right: 40, top: 20),
-              child: SizedBox(
-                width: double.infinity,
-                height: 65,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    backgroundColor: AppColors.ongiOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+              padding: const EdgeInsets.only(left: 40, right: 30, top: 10),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: _isChecked,
+                    activeColor: AppColors.ongiOrange,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    visualDensity: VisualDensity.compact,
+
+                    onChanged: (bool? value) {
+                      if (value == null) return;
+                      setState(() => _isChecked = value);
+
+                      if (value) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const FamilycodeScreen(),
+                          ),
+                        ).then((_) => setState(() => _isChecked = false));
+                      }
+                    },
                   ),
-                  onPressed: _handleSubmit,
-                  child: const Text(
-                    '함께하기',
+                  const Text(
+                    '이미 가입한 가족이 있어요!',
                     style: TextStyle(
-                      fontSize: 33,
+                      fontSize: 20,
                       fontWeight: FontWeight.w400,
-                      color: Colors.white,
+                      height: 1.2,
+                      color: AppColors.ongiOrange,
                     ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.only(left: 40, right: 40, bottom: 16),
+        child: SizedBox(
+          width: double.infinity,
+          height: 65,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              backgroundColor: AppColors.ongiOrange,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+            ),
+            onPressed: _handleSubmit,
+            child: const Text(
+              '함께하기',
+              style: TextStyle(
+                fontSize: 33,
+                fontWeight: FontWeight.w400,
+                color: Colors.white,
+              ),
+            ),
+          ),
         ),
       ),
     );
