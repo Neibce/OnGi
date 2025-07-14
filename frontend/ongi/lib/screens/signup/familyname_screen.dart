@@ -119,7 +119,41 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
               ),
             ),
             Padding(
+
               padding: const EdgeInsets.only(left: 40, right: 40, top: 40),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: _isChecked,
+                    activeColor: AppColors.ongiOrange,
+                    onChanged: (bool? value) {
+                      if (value == null) return;
+                      setState(() => _isChecked = value);
+
+                      if (value) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const FamilycodeScreen(),
+                          ),
+                        ).then((_) => setState(() => _isChecked = false));
+                      }
+                    },
+                  ),
+                  const Text(
+                    '이미 가입한 가족이 있어요!',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w400,
+                      height: 1.2,
+                      color: AppColors.ongiOrange,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 40, right: 40, top: 5),
               child: TextField(
                 controller: _familynameCtrl,
                 keyboardType: TextInputType.text,
