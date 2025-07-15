@@ -176,7 +176,10 @@ class CapsuleButton extends StatelessWidget {
                 svgAsset,
                 width: 32,
                 height: 32,
-                color: selected ? Colors.white : AppColors.ongiOrange!,
+                colorFilter: ColorFilter.mode(
+                selected ? Colors.white : AppColors.ongiOrange,
+                BlendMode.srcIn,
+                ),
               ),
             ],
           ),
