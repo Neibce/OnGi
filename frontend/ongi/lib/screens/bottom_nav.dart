@@ -70,7 +70,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               'assets/images/nav_Health.svg',
               color: _currentIndex == 1
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
+                  : Colors.grey[300]!,
               width: 32,
               height: 32,
             ),
@@ -105,7 +105,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               'assets/images/nav_Commun.svg',
               color: _currentIndex == 3
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
+                  : Colors.grey[300]!,
               width: 24,
               height: 24,
             ),
