@@ -61,7 +61,7 @@ class HomeScreen extends StatelessWidget {
                         child: Padding(
                           padding: EdgeInsets.only(top: 0),
                           child: Transform.translate(
-                            offset: Offset(120, 0),
+                            offset: Offset(MediaQuery.of(context).size.width * 0.3, 0),
                             child: ButtonColumn(),
                           ),
                         ),
@@ -101,7 +101,7 @@ class FamilyDonutPainter extends CustomPainter {
     final gradient = LinearGradient(
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
-      colors: [AppColors.ongiOrange, AppColors.ongiBlue],
+      colors: colors,
       stops: [0.0, 1.0],
     );
     final shader = gradient.createShader(rect);

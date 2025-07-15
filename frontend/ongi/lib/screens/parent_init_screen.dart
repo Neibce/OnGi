@@ -24,7 +24,6 @@ class ParentInitScreen extends StatelessWidget {
           ),
 
           Center(
-            child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -80,7 +79,7 @@ class ParentInitScreen extends StatelessWidget {
                 ],
               ),
             ),
-          ),
+
         ],
       ),
     );
