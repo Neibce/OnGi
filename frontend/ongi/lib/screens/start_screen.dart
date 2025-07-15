@@ -222,12 +222,12 @@ class _EmailScreenState extends State<EmailScreen> {
 
       if (!mounted) return;
 
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('signup_email', email);
+
       if (exists) {
         Navigator.pushNamed(context, '/login');
       } else {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('signup_email', email);
-        
         if (!mounted) return;
         Navigator.push(
           context,
