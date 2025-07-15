@@ -184,7 +184,24 @@ class _EmailScreenState extends State<EmailScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
-            '이메일 형식이 올바르지 않습니다.',
+            '이메일 형식이 올바르지 않아요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    else if (RegExp(r'[ㄱ-ㅎㅏ-ㅣ가-힣]').hasMatch(email)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '영문과 숫자, 일부 특수문자만 입력해주세요.',
             style: TextStyle(color: AppColors.ongiOrange),
           ),
           backgroundColor: Colors.white,

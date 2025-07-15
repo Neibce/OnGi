@@ -3,7 +3,6 @@ import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/signup/familycode_screen.dart';
 import 'package:ongi/screens/signup/familycode_create_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ongi/services/auth_service.dart';
 
 class FamilynameScreen extends StatefulWidget {
   const FamilynameScreen({super.key});
@@ -20,32 +19,25 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
     final familyName = _familynameCtrl.text.trim();
     if (familyName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('가족 이름을 입력해주세요')),
+        SnackBar(
+          content: const Text(
+            '가족이름을 입력해주세요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
       return;
     }
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final email = prefs.getString('signup_email') ?? '';
-      final password = prefs.getString('signup_password') ?? '';
-      final name = prefs.getString('signup_username') ?? '';
-      final isParent = prefs.getString('user_mode') == 'parent';
-
-      if (email.isEmpty || password.isEmpty || name.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('회원가입 정보가 올바르지 않습니다')),
-        );
-        return;
-      }
-
-      final authService = AuthService();
-      await authService.register(
-        email: email,
-        password: password,
-        name: name,
-        isParent: isParent,
-      );
+      await prefs.setString('family_name', familyName);
 
       if (!mounted) return;
       Navigator.push(
@@ -56,7 +48,7 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('회원가입 실패: $e')),
+        SnackBar(content: Text('오류가 발생했습니다: $e')),
       );
     }
   }
@@ -119,41 +111,7 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
               ),
             ),
             Padding(
-
-              padding: const EdgeInsets.only(left: 40, right: 40, top: 40),
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: _isChecked,
-                    activeColor: AppColors.ongiOrange,
-                    onChanged: (bool? value) {
-                      if (value == null) return;
-                      setState(() => _isChecked = value);
-
-                      if (value) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const FamilycodeScreen(),
-                          ),
-                        ).then((_) => setState(() => _isChecked = false));
-                      }
-                    },
-                  ),
-                  const Text(
-                    '이미 가입한 가족이 있어요!',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w400,
-                      height: 1.2,
-                      color: AppColors.ongiOrange,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 40, right: 40, top: 5),
+              padding: const EdgeInsets.only(left: 40, right: 40, top: 30),
               child: TextField(
                 controller: _familynameCtrl,
                 keyboardType: TextInputType.text,

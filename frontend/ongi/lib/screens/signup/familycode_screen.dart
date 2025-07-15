@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/signup/ready_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ongi/services/auth_service.dart';
+import 'package:ongi/services/family_join_service.dart';
 
 class FamilycodeScreen extends StatefulWidget {
   const FamilycodeScreen({super.key});
@@ -13,50 +12,49 @@ class FamilycodeScreen extends StatefulWidget {
 
 class _FamilycodeScreenState extends State<FamilycodeScreen> {
   final TextEditingController _familycodeCtrl = TextEditingController();
+  final FamilyJoinService _familyJoinService = FamilyJoinService();
+  bool _isLoading = false;
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: AppColors.ongiOrange),
+        ),
+        backgroundColor: Colors.white,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
 
   Future<void> _handleSubmit() async {
     final familyCode = _familycodeCtrl.text.trim();
     if (familyCode.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('가족 코드를 입력해주세요')),
-      );
+      _showErrorSnackBar('가족코드를 입력해주세요.');
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final email = prefs.getString('signup_email') ?? '';
-      final password = prefs.getString('signup_password') ?? '';
-      final name = prefs.getString('signup_username') ?? '';
-      final isParent = prefs.getString('user_mode') == 'parent';
-
-      if (email.isEmpty || password.isEmpty || name.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('회원가입 정보가 올바르지 않습니다')),
-        );
-        return;
-      }
-
-      final authService = AuthService();
-      await authService.register(
-        email: email,
-        password: password,
-        name: name,
-        isParent: isParent,
-      );
-
-      // 회원가입 성공 후 준비 완료 화면으로 이동
-      if (!mounted) return;
-      Navigator.push(
+      final result = await _familyJoinService.familyJoin(code: familyCode);
+      Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (context) => const ReadyScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => const ReadyScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('회원가입 실패: $e')),
-      );
+      _showErrorSnackBar('존재하지 않는 가족이에요.');
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
     }
   }
 
@@ -163,15 +161,17 @@ class _FamilycodeScreenState extends State<FamilycodeScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: _handleSubmit,
-                  child: const Text(
-                    '입력하기',
-                    style: TextStyle(
-                      fontSize: 33,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.white,
-                    ),
-                  ),
+                  onPressed: _isLoading ? null : _handleSubmit,
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: AppColors.ongiOrange)
+                      : const Text(
+                          '입력하기',
+                          style: TextStyle(
+                            fontSize: 33,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white,
+                          ),
+                        ),
                 ),
               ),
             ),
