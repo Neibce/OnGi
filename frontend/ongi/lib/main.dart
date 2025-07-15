@@ -1,11 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:ongi/screens/parent_init_screen.dart';
-import 'package:ongi/screens/health_log_screen.dart';
-import 'package:ongi/screens/home_screen.dart';
-import 'package:ongi/screens/login_screen.dart';
+import 'package:ongi/screens/login/login_pw_screen.dart';
 import 'package:ongi/screens/start_screen.dart';
 import 'package:ongi/screens/signup/password_screen.dart';
-import 'package:ongi/screens/bottom_nav.dart';
 
 void main() {
   runApp(const OngiApp());
@@ -27,7 +23,7 @@ class OngiApp extends StatelessWidget {
       home: const StartScreen(),
 
       routes: {
-        // '/login': (context) => const LoginScreen(),
+        '/login': (context) => const LoginPwScreen(),
         '/signup': (context) => const PasswordScreen(),
       }
     );
