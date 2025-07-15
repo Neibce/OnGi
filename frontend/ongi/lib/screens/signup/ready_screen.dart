@@ -28,21 +28,19 @@ class ReadyScreen extends StatelessWidget {
               const SizedBox(height: 80),
               const Text(
                 '더 따뜻해질\n준비\n되셨나요?',
-                textAlign: TextAlign.right,
                 style: TextStyle(
                   fontSize: 60,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w200,
                   height: 1.2,
                   color: Colors.white,
                 ),
               ),
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                height: 65,
+              Padding(
+                padding: const EdgeInsets.only(left: 10, top: 45, right: 10),
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    minimumSize: const Size(double.infinity, 35),
                     backgroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -62,7 +60,6 @@ class ReadyScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 40),
             ],
           ),
         ),

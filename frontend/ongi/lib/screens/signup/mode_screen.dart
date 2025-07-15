@@ -2,20 +2,94 @@ import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/signup/familyname_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ongi/services/signup_service.dart';
+import 'package:ongi/services/login_service.dart';
 
 class ModeScreen extends StatelessWidget {
   final String username;
 
   const ModeScreen(this.username, {super.key});
 
-  Future<void> _setModeAndNavigate(BuildContext context, String mode) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user_mode', mode);
-
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const FamilynameScreen()),
+  Future<void> _setModeAndRegister(BuildContext context, String mode) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text(
+          '회원가입 진행 중이에요...',
+          style: TextStyle(color: AppColors.ongiOrange),
+        ),
+        backgroundColor: Colors.white,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        duration: const Duration(seconds: 2),
+      ),
     );
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user_mode', mode);
+
+      final email = prefs.getString('signup_email') ?? '';
+      final password = prefs.getString('signup_password') ?? '';
+      final name = prefs.getString('signup_username') ?? '';
+      final isParent = mode == 'parent';
+
+      if (email.isEmpty || password.isEmpty || name.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text(
+              '회원가입 정보가 올바르지 않아요.',
+              style: TextStyle(color: AppColors.ongiOrange),
+            ),
+            backgroundColor: Colors.white,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+        return;
+      }
+
+      final signupService = SignupService();
+      await signupService.register(
+        email: email,
+        password: password,
+        name: name,
+        isParent: isParent,
+      );
+
+      final loginService = LoginService();
+      await loginService.login(
+        email: email,
+        password: password,
+      );
+
+      if (!context.mounted) return;
+      
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const FamilynameScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '회원가입 또는 로그인 실패: $e',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   @override
@@ -79,7 +153,7 @@ class ModeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   ElevatedButton(
-                    onPressed: () => _setModeAndNavigate(context, 'parent'),
+                    onPressed: () => _setModeAndRegister(context, 'parent'),
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       minimumSize: const Size(155, 190),
@@ -99,7 +173,7 @@ class ModeScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 25),
                   ElevatedButton(
-                    onPressed: () => _setModeAndNavigate(context, 'child'),
+                    onPressed: () => _setModeAndRegister(context, 'child'),
                     style: ElevatedButton.styleFrom(
                       elevation: 0,
                       minimumSize: const Size(155, 190),

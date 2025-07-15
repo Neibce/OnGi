@@ -1,26 +1,27 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:ongi/utils/token_storage.dart';
 
-class AuthService {
+class CodeService {
   static const String baseUrl = 'https://ongi-1049536928483.asia-northeast1.run.app';
 
-  Future<Map<String, dynamic>> register({
-    required String email,
-    required String password,
+  Future<Map<String, dynamic>> familyCreate ({
     required String name,
-    required bool isParent,
   }) async {
+    final accessToken = await TokenStorage.getAccessToken();
+
+    if (accessToken == null)
+      throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
+
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/auth/register'),
+        Uri.parse('$baseUrl/family'),
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
         },
         body: jsonEncode({
-          'email': email,
-          'password': password,
           'name': name,
-          'isParent': isParent,
         }),
       );
 
@@ -33,4 +34,4 @@ class AuthService {
       throw Exception('회원가입 중 오류가 발생했습니다: $e');
     }
   }
-} 
+}

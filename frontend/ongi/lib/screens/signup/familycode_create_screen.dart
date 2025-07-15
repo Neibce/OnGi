@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/signup/ready_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:ongi/services/auth_service.dart';
+import 'package:ongi/services/code_service.dart';
 
 class FamilycodeCreateScreen extends StatefulWidget {
   const FamilycodeCreateScreen({super.key});
@@ -13,44 +13,56 @@ class FamilycodeCreateScreen extends StatefulWidget {
 
 class _FamilycodeCreateScreenState extends State<FamilycodeCreateScreen> {
   final TextEditingController _familycodeCtrl = TextEditingController();
+  bool _isCodeGenerated = false;
 
   Future<void> _handleSubmit() async {
-    final familyCode = _familycodeCtrl.text.trim();
-
+    if (_isCodeGenerated) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const ReadyScreen()),
+      );
+      return;
+    }
 
     try {
       final prefs = await SharedPreferences.getInstance();
-      final email = prefs.getString('signup_email') ?? '';
-      final password = prefs.getString('signup_password') ?? '';
-      final name = prefs.getString('signup_username') ?? '';
-      final isParent = prefs.getString('user_mode') == 'parent';
-
-      if (email.isEmpty || password.isEmpty || name.isEmpty) {
+      final familyName = prefs.getString('family_name') ?? '';
+      
+      if (familyName.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('회원가입 정보가 올바르지 않습니다')),
+          SnackBar(
+            content: const Text(
+              '가족이름을 입력해주세요.',
+              style: TextStyle(color: AppColors.ongiOrange),
+            ),
+            backgroundColor: Colors.white,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
         return;
       }
 
-      final authService = AuthService();
-      await authService.register(
-        email: email,
-        password: password,
-        name: name,
-        isParent: isParent,
-      );
+      final codeService = CodeService();
+      final response = await codeService.familyCreate(name: familyName);
 
-      // 회원가입 성공 후 준비 완료 화면으로 이동
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const ReadyScreen(),
-        ),
-      );
+      final code = response['code'];
+      if (code != null) {
+        setState(() {
+          _familycodeCtrl.text = code;
+          _isCodeGenerated = true;
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('코드 생성에 실패했습니다.')),
+        );
+      }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('회원가입 실패: $e')),
+        SnackBar(content: Text('코드 생성 실패: $e')),
       );
     }
   }
@@ -116,6 +128,7 @@ class _FamilycodeCreateScreenState extends State<FamilycodeCreateScreen> {
               padding: const EdgeInsets.only(left: 40, right: 40, top: 40),
               child: TextField(
                 controller: _familycodeCtrl,
+                readOnly: true,
                 keyboardType: TextInputType.text,
                 style: const TextStyle(
                   fontSize: 25,
@@ -159,9 +172,9 @@ class _FamilycodeCreateScreenState extends State<FamilycodeCreateScreen> {
                     ),
                   ),
                   onPressed: _handleSubmit,
-                  child: const Text(
-                    '생성하기',
-                    style: TextStyle(
+                  child: Text(
+                    _isCodeGenerated ? '함께하기' : '생성하기',
+                    style: const TextStyle(
                       fontSize: 33,
                       fontWeight: FontWeight.w400,
                       color: Colors.white,
