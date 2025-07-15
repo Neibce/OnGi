@@ -163,8 +163,7 @@ class CapsuleButton extends StatelessWidget {
             boxShadow: selected
                 ? [
                     BoxShadow(
-                      color: AppColors.ongiOrange.withOpacity(0.3),
-                      blurRadius: 12,
+                      color: AppColors.ongiOrange,
                       offset: Offset(0, 4),
                     ),
                   ]
@@ -177,7 +176,7 @@ class CapsuleButton extends StatelessWidget {
                 svgAsset,
                 width: 32,
                 height: 32,
-                color: selected ? Colors.white : AppColors.ongiOrange,
+                color: selected ? Colors.white : AppColors.ongiOrange!,
               ),
             ],
           ),

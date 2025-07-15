@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ongi/screens/home_screen.dart';
 import 'package:ongi/screens/health_log_screen.dart';
 import 'package:ongi/screens/family_tempbar_screen.dart';
-import 'package:ongi/screens/home_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/photo_record.dart';
@@ -60,7 +59,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               height: 24,
               color: _currentIndex == 0
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
+                  : Colors.grey[300]!,
             ),
             '홈',
           ),
@@ -117,7 +116,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               'assets/images/nav_Mypage.svg',
               color: _currentIndex == 4
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
+                  : Colors.grey[300]!,
               width: 24,
               height: 24,
             ),
