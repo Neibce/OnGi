@@ -27,24 +27,6 @@ class _FamilycodeCreateScreenState extends State<FamilycodeCreateScreen> {
     try {
       final prefs = await SharedPreferences.getInstance();
       final familyName = prefs.getString('family_name') ?? '';
-      
-      if (familyName.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text(
-              '가족이름을 입력해주세요.',
-              style: TextStyle(color: AppColors.ongiOrange),
-            ),
-            backgroundColor: Colors.white,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-        return;
-      }
 
       final codeService = CodeService();
       final response = await codeService.familyCreate(name: familyName);
