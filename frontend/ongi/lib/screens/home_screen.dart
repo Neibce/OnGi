@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ongi/core/home_background_logo.dart';
+import 'package:ongi/core/home_ourfamilyongi_text.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -11,114 +14,57 @@ class HomeScreen extends StatelessWidget {
       body: Stack(
         children: [
           // Background logo (top right)
-          Positioned(
-            top: -140,
-            right: -200,
-            child: Opacity(
-              opacity: 0.30,
-              child: Image.asset(
-                'assets/images/logo.png',
-                width: 480,
-                height: 480,
-                fit: BoxFit.contain,
-              ),
-            ),
-          ),
+          const HomeBackgroundLogo(),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 126),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 24),
-                RichText(
-                  text: TextSpan(
-                    style: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 60,
-                      color: AppColors.ongiOrange,
-                    ),
-                    children: const [
-                      TextSpan(
-                        text: '우리 가족의 ',
-                        style: TextStyle(fontWeight: FontWeight.w400),
-                      ),
-                      TextSpan(
-                        text: '온기는',
-                        style: TextStyle(fontWeight: FontWeight.w700), // 굵게!
-                      ),
-                    ],
-                  ),
-                ),
+                const HomeOngiText(),
 
-                const SizedBox(height: 32),
+              const SizedBox(height: 88),
                 Expanded(
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      // Circular temperature graph
                       Expanded(
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            SizedBox(
-                              width: 180,
-                              height: 180,
-                              child: CustomPaint(painter: _TempArcPainter()),
-                            ),
-                            const Positioned(
-                              left: 36,
-                              top: 70,
-                              child: Text(
-                                '36.5',
-                                style: TextStyle(
-                                  fontFamily: 'Pretendard',
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 36,
-                                  color: AppColors.ongiOrange,
+                        flex: 2,
+                        child: Align(
+                          alignment: Alignment.centerRight,
+                          child: Builder(
+                            builder: (context) {
+                              double donutSize = MediaQuery.of(context).size.width * 0.8;
+                              return Transform.translate(
+                                offset: Offset(-donutSize * 0.13, 0), // 위치도 화면 크기에 맞게 조정
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    CustomPaint(
+                                      size: Size(donutSize, donutSize),
+                                      painter: FamilyDonutPainter(
+                                        contributions: [0.2, 0.2, 0.1, 0.5],
+                                        colors: [AppColors.ongiOrange, AppColors.ongiBlue],
+                                      ),
+                                    ),
+
+                                  ],
                                 ),
-                              ),
-                            ),
-                            const Positioned(
-                              left: 120,
-                              top: 90,
-                              child: Text(
-                                '℃',
-                                style: TextStyle(
-                                  fontFamily: 'Pretendard',
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 16,
-                                  color: AppColors.ongiOrange,
-                                ),
-                              ),
-                            ),
-                          ],
+                              );
+                            },
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      // Right side buttons
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _CircleButton(
-                            icon: Icons.sync,
-                            color: AppColors.ongiOrange,
-                            iconColor: Colors.white,
+
+                      Expanded(
+                        flex: 2,
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 0),
+                          child: Transform.translate(
+                            offset: Offset(120, 0),
+                            child: ButtonColumn(),
                           ),
-                          const SizedBox(height: 16),
-                          _CircleButton(
-                            icon: Icons.location_on,
-                            color: Colors.white,
-                            iconColor: AppColors.ongiOrange,
-                            border: true,
-                          ),
-                          const SizedBox(height: 16),
-                          _CircleButton(
-                            icon: Icons.directions_run,
-                            color: Colors.white,
-                            iconColor: AppColors.ongiOrange,
-                            border: true,
-                          ),
-                        ],
+                        ),
                       ),
                     ],
                   ),
@@ -132,53 +78,151 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class _TempArcPainter extends CustomPainter {
+class FamilyDonutPainter extends CustomPainter {
+  final List<double> contributions;
+  final List<Color> colors; 
+  final double gapAngle;
+
+  FamilyDonutPainter({
+    required this.contributions,
+    required this.colors,
+    this.gapAngle = 0.06,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = AppColors.ongiOrange
-      ..strokeWidth = 24
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-    // Draw arc (about 270 degrees)
-    canvas.drawArc(
-      Rect.fromLTWH(0, 0, size.width, size.height),
-      3.14 * 0.7,
-      3.14 * 1.6,
-      false,
-      paint,
+    final double radius = size.width / 2;
+    final double strokeWidth = 60;
+    double startAngle = -3.141592653589793 / 2;
+    final double totalSweep = 2 * 3.141592653589793;
+
+    // LinearGradient 생성 (위→아래)
+    final rect = Rect.fromCircle(center: Offset(radius, radius), radius: radius);
+    final gradient = LinearGradient(
+      begin: Alignment.topRight,
+      end: Alignment.bottomLeft,
+      colors: [AppColors.ongiOrange, AppColors.ongiBlue],
+      stops: [0.0, 1.0],
     );
+    final shader = gradient.createShader(rect);
+
+    for (int i = 0; i < contributions.length; i++) {
+      final sweep = (totalSweep * contributions[i]) - gapAngle;
+      final paint = Paint()
+        ..shader = shader
+        ..strokeWidth = strokeWidth
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.butt;
+      canvas.drawArc(
+        Rect.fromCircle(center: Offset(radius, radius), radius: radius),
+        startAngle,
+        sweep > 0 ? sweep : 0,
+        false,
+        paint,
+      );
+      startAngle += (totalSweep * contributions[i]);
+    }
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 }
 
-class _CircleButton extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final Color iconColor;
-  final bool border;
-  const _CircleButton({
-    required this.icon,
-    required this.color,
-    required this.iconColor,
-    this.border = false,
+
+class CapsuleButton extends StatelessWidget {
+  final String svgAsset;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const CapsuleButton({
+    required this.svgAsset,
+    required this.selected,
+    required this.onTap,
     super.key,
   });
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: color,
-        shape: BoxShape.circle,
-        border: border
-            ? Border.all(color: AppColors.ongiOrange, width: 2)
-            : null,
+    return GestureDetector(
+      onTap: onTap,
+      child: FractionallySizedBox(
+        widthFactor: selected ? 1.2 : 1.0, // 선택 시 더 길게 (2.8)
+        alignment: Alignment.centerRight,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          width: double.infinity,
+          height: 72,
+          margin: const EdgeInsets.symmetric(vertical: 2),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.ongiOrange : Colors.white,
+            border: Border.all(
+              color: AppColors.ongiOrange,
+              width: 2,
+            ),
+            borderRadius: BorderRadius.circular(39),
+            boxShadow: selected
+                ? [
+                    BoxShadow(
+                      color: AppColors.ongiOrange.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: Offset(0, 4),
+                    ),
+                  ]
+                : [],
+          ),
+          child: Row(
+            children: [
+              SizedBox(width: 20),
+              SvgPicture.asset(
+                svgAsset,
+                width: 32,
+                height: 32,
+                color: selected ? Colors.white : AppColors.ongiOrange,
+              ),
+            ],
+          ),
+        ),
       ),
-      child: Icon(icon, color: iconColor, size: 28),
     );
+  }
+}
+
+class ButtonColumn extends StatefulWidget {
+  const ButtonColumn({super.key});
+  @override
+  State<ButtonColumn> createState() => _ButtonColumnState();
+}
+
+class _ButtonColumnState extends State<ButtonColumn> {
+  int selectedIdx = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min, // overflow 방지
+          children: [
+            CapsuleButton(
+              svgAsset: 'assets/images/capsule_pill.svg',
+              selected: selectedIdx == 0,
+              onTap: () => setState(() => selectedIdx = 0),
+            ),
+            const SizedBox(height: 8),
+            CapsuleButton(
+              svgAsset: 'assets/images/capsule_location.svg',
+              selected: selectedIdx == 1,
+              onTap: () => setState(() => selectedIdx = 1),
+            ),
+            const SizedBox(height: 8),
+            CapsuleButton(
+              svgAsset: 'assets/images/capsule_run.svg',
+              selected: selectedIdx == 2,
+              onTap: () => setState(() => selectedIdx = 2),
+            ),
+          ],
+        ),
+    );
+
   }
 }

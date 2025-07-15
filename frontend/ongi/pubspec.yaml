@@ -13,6 +13,7 @@ dependencies:
     sdk: flutter
   flutter_svg: ^2.0.7
   cupertino_icons: ^1.0.8
+  provider: ^6.1.2
 
 dev_dependencies:
   flutter_test:
@@ -27,8 +28,12 @@ flutter:
     - assets/images/logo.png
     - assets/images/nav_Home.svg
     - assets/images/nav_Heart.svg
+    - assets/images/nav_Health.svg
     - assets/images/nav_Commun.svg
-    - assets/images/nav_Mypage.svg
+    - assets/images/nav_Mypage.svg  
+    - assets/images/capsule_pill.svg
+    - assets/images/capsule_location.svg
+    - assets/images/capsule_run.svg
 
   fonts:
     - family: Pretendard
