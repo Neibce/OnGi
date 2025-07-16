@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_background.dart';
-import 'package:ongi/screens/home/home_screen.dart';
+import 'package:ongi/screens/bottom_nav.dart';
+
 
 class LoginReadyScreen extends StatefulWidget {
   final String username;
@@ -21,7 +22,7 @@ class _LoginReadyScreenState extends State<LoginReadyScreen> {
     _timer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
       );
     });
   }

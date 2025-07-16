@@ -3,11 +3,36 @@ import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/core/home_logo.dart';
 import 'package:ongi/core/home_ourfamily_text.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  String _username = '사용자';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedUsername = prefs.getString('signup_username');
+    if (savedUsername != null) {
+      setState(() {
+        _username = savedUsername;
+      });
+    }
+  }
+
+  @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -16,14 +41,16 @@ class HomeScreen extends StatelessWidget {
           // Background logo (top right)
           const HomeBackgroundLogo(),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 126),
+            padding: EdgeInsets.symmetric(
+              horizontal: 32,
+              vertical: MediaQuery.of(context).size.height * 0.1,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 24),
-                const HomeOngiText(),
-
-                const SizedBox(height: 88),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.03),
+                HomeOngiText(username: _username),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.11),
                 Expanded(
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -81,7 +108,8 @@ class CapsuleButton extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
-          height: 72,
+          height: 68,
+
           margin: const EdgeInsets.symmetric(vertical: 2),
           decoration: BoxDecoration(
             color: selected ? AppColors.ongiOrange : Colors.white,
@@ -104,8 +132,9 @@ class CapsuleButton extends StatelessWidget {
               SizedBox(width: 20),
               SvgPicture.asset(
                 svgAsset,
-                width: 32,
-                height: 32,
+                width: MediaQuery.of(context).size.width * 0.07,
+                height: MediaQuery.of(context).size.width * 0.07,
+
                 colorFilter: ColorFilter.mode(
                   selected ? Colors.white : AppColors.ongiOrange,
                   BlendMode.srcIn,
@@ -155,6 +184,5 @@ class _ButtonColumnState extends State<ButtonColumn> {
         ],
       ),
     );
-
   }
 }

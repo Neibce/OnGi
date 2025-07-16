@@ -4,6 +4,8 @@ import 'package:ongi/screens/health_log_screen.dart';
 import 'package:ongi/screens/family_tempbar_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ongi/screens/photo_screen.dart';
+import 'package:ongi/screens/mypage_screen.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -39,8 +41,13 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   Widget _buildCustomBottomNav() {
     return Container(
-      height: 120,
-      decoration: const BoxDecoration(color: Colors.white),
+      height: 72,
+      margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
@@ -52,19 +59,21 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               height: 24,
               color: _currentIndex == 0
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
+                  : Colors.grey[300]!,
             ),
+            '홈',
           ),
           _buildNavItem(
             1,
             SvgPicture.asset(
-              'assets/images/nav_Heart.svg',
+              'assets/images/nav_Health.svg',
               color: _currentIndex == 1
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
-              width: 24,
-              height: 24,
+                  : Colors.grey[300]!,
+              width: 32,
+              height: 32,
             ),
+            '건강 기록',
           ),
           GestureDetector(
             onTap: () => _onTabTapped(2),
@@ -72,7 +81,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               width: 56,
               height: 56,
               decoration: BoxDecoration(
-                color: AppColors.ongiOrange,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [ AppColors.ongiBlue, AppColors.ongiOrange ],
+                ),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -91,10 +104,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               'assets/images/nav_Commun.svg',
               color: _currentIndex == 3
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
+                  : Colors.grey[300]!,
               width: 24,
               height: 24,
             ),
+            '앨범',
           ),
           _buildNavItem(
             4,
@@ -102,104 +116,38 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               'assets/images/nav_Mypage.svg',
               color: _currentIndex == 4
                   ? AppColors.ongiOrange
-                  : Colors.grey[300],
+                  : Colors.grey[300]!,
               width: 24,
               height: 24,
             ),
+            '마이페이지',
           ),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(int index, Widget iconWidget) {
+  Widget _buildNavItem(int index, Widget iconWidget, String text) {
+    final isSelected = index == _currentIndex;
     return GestureDetector(
       onTap: () => _onTabTapped(index),
       child: Container(
         width: 56,
         height: 56,
         alignment: Alignment.center,
-        child: iconWidget,
-      ),
-    );
-  }
-}
-
-class AddRecordScreen extends StatelessWidget {
-  const AddRecordScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          '기록 추가',
-          style: TextStyle(
-            fontFamily: 'Pretendard',
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
-      body: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.add_circle, size: 80, color: AppColors.ongiOrange),
-            SizedBox(height: 16),
+            iconWidget,
+            const SizedBox(height: 4),
             Text(
-              '새 기록 추가',
+              text,
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 12,
+                color:isSelected? AppColors.ongiOrange
+                    : Colors.grey[300],
                 fontFamily: 'Pretendard',
                 fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '건강 상태를 기록해보세요',
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Pretendard',
-                color: Colors.grey,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.person, size: 80, color: Colors.grey),
-            SizedBox(height: 16),
-            Text(
-              '프로필 화면',
-              style: TextStyle(
-                fontSize: 24,
-                fontFamily: 'Pretendard',
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '사용자 정보 및 설정',
-              style: TextStyle(
-                fontSize: 16,
-                fontFamily: 'Pretendard',
-                color: Colors.grey,
               ),
             ),
           ],
