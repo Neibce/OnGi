@@ -32,6 +32,9 @@ flutter:
     - assets/images/nav_Heart.svg
     - assets/images/nav_Commun.svg
     - assets/images/nav_Mypage.svg
+    - assets/images/pills.png
+    - assets/images/pill_item_icon.svg
+    - assets/images/add_icon.svg
 
   fonts:
     - family: Pretendard
