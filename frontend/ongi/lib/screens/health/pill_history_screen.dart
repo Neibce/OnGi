@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../core/app_colors.dart';
+import '../../core/app_colors.dart';
 
-class PillScreen extends StatefulWidget {
-  const PillScreen({super.key});
+class PillHistoryScreen extends StatefulWidget {
+  const PillHistoryScreen({super.key});
 
   @override
-  State<PillScreen> createState() => _PillScreenState();
+  State<PillHistoryScreen> createState() => _PillHistoryScreenState();
 }
 
-class _PillScreenState extends State<PillScreen> {
+class _PillHistoryScreenState extends State<PillHistoryScreen> {
   Map<int, int> selectedDosages = {};
 
   @override
@@ -19,6 +19,7 @@ class _PillScreenState extends State<PillScreen> {
     final circleSize = screenWidth * 1.56;
 
     return Scaffold(
+      backgroundColor: AppColors.ongiLigntgrey,
       body: SafeArea(
         child: Stack(
           clipBehavior: Clip.none,
@@ -26,7 +27,7 @@ class _PillScreenState extends State<PillScreen> {
             Align(
               alignment: Alignment.topCenter,
               child: Transform.translate(
-                offset: Offset(0, -circleSize * 0.81),
+                offset: Offset(0, -circleSize * 0.82),
                 child: OverflowBox(
                   maxWidth: double.infinity,
                   maxHeight: double.infinity,
@@ -39,8 +40,7 @@ class _PillScreenState extends State<PillScreen> {
                     ),
                     child: Center(
                       child: Padding(
-                        padding: EdgeInsets.only(top: circleSize * 0.8),
-                        // 보이는 부분에 텍스트 배치
+                        padding: EdgeInsets.only(top: circleSize * 0.815),
                         child: OverflowBox(
                           maxHeight: double.infinity,
                           child: Column(
@@ -63,8 +63,8 @@ class _PillScreenState extends State<PillScreen> {
                                 ),
                               ),
                               Image.asset(
-                                'assets/images/pills.png',
-                                width: circleSize * 0.3,
+                                'assets/images/pill_history_title_logo.png',
+                                width: circleSize * 0.26,
                               ),
                             ],
                           ),
