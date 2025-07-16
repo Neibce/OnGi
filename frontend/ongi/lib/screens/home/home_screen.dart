@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -108,6 +109,7 @@ class CapsuleButton extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           width: double.infinity,
           height: 68,
+
           margin: const EdgeInsets.symmetric(vertical: 2),
           decoration: BoxDecoration(
             color: selected ? AppColors.ongiOrange : Colors.white,
@@ -132,6 +134,7 @@ class CapsuleButton extends StatelessWidget {
                 svgAsset,
                 width: MediaQuery.of(context).size.width * 0.07,
                 height: MediaQuery.of(context).size.width * 0.07,
+
                 colorFilter: ColorFilter.mode(
                   selected ? Colors.white : AppColors.ongiOrange,
                   BlendMode.srcIn,

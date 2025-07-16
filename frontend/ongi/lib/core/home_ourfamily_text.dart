@@ -38,6 +38,7 @@ class HomeOngiText extends StatelessWidget {
           ),
         ),
       ],
+
     );
   }
 }
