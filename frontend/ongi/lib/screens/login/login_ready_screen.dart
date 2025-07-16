@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_background.dart';
-import 'package:ongi/screens/home_screen.dart';
+import 'package:ongi/screens/home/home_screen.dart';
 
 class LoginReadyScreen extends StatefulWidget {
   final String username;

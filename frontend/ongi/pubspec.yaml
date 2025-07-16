@@ -32,6 +32,10 @@ flutter:
     - assets/images/nav_Heart.svg
     - assets/images/nav_Commun.svg
     - assets/images/nav_Mypage.svg
+    - assets/images/homebar_capsule.svg
+    - assets/images/homebar_med.svg
+    - assets/images/homebar_walk.svg
+
 
   fonts:
     - family: Pretendard
