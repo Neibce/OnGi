@@ -16,7 +16,7 @@ public class FamilyTemperatureResponse {
     private Double familyTemperature;
     private Double totalContributedTemperature;
     private List<MemberTemperatureInfo> memberTemperatures;
-    
+
     @Getter
     @Builder
     @NoArgsConstructor
