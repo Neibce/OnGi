@@ -5,17 +5,19 @@ class HomeBackgroundLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
     return Stack(
       children: [
         Positioned(
-          top: -140,
-          right: -200,
+          top: -screenHeight * 0.16,
+          right: -screenWidth * 0.5,
           child: Opacity(
             opacity: 0.30,
             child: Image.asset(
               'assets/images/logo.png',
-              width: 480,
-              height: 480,
+              width: screenWidth * 1.2,
+              height: screenWidth * 1.2,
               fit: BoxFit.contain,
             ),
           ),

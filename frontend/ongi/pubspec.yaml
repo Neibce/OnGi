@@ -29,7 +29,7 @@ flutter:
     - assets/images/logo.svg
     - assets/images/logo.png
     - assets/images/nav_Home.svg
-    - assets/images/nav_Heart.svg
+    - assets/images/nav_Health.svg
     - assets/images/nav_Commun.svg
     - assets/images/nav_Mypage.svg
     - assets/images/homebar_capsule.svg
