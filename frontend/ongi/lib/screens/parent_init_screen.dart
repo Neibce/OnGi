@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/screens/health_log_screen.dart';
-import 'package:ongi/screens/home_screen.dart';
+import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/core/app_background.dart';
 

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:ongi/screens/home_screen.dart';
+import 'package:ongi/screens/home/home_screen.dart';
 
 class HealthLogScreen extends StatefulWidget {
   const HealthLogScreen({super.key});
