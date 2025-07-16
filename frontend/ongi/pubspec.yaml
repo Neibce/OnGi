@@ -32,10 +32,13 @@ flutter:
     - assets/images/nav_Health.svg
     - assets/images/nav_Commun.svg
     - assets/images/nav_Mypage.svg
+    - assets/images/pill_history_title_logo.png
+    - assets/images/pill_item_icon.svg
+    - assets/images/add_icon.svg
+    - assets/images/step_tracker_title_logo.png
     - assets/images/homebar_capsule.svg
     - assets/images/homebar_med.svg
     - assets/images/homebar_walk.svg
-
 
   fonts:
     - family: Pretendard
