@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/PNUSW-2025-OnGi-10.iml" filepath="$PROJECT_DIR$/.idea/PNUSW-2025-OnGi-10.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ongi.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ongi.main.iml" />
     </modules>
   </component>
 </project>

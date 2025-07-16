@@ -20,13 +20,13 @@ public interface TemperatureRepository extends JpaRepository<Temperature, Long> 
     Double getTotalTemperatureByFamilyId(@Param("familyId") String familyId);
     
     // 최근 5일간 가족 온도 총합 (날짜별)
-    @Query("SELECT new ongi.temperature.dto.FamilyTemperatureDailyResponse$DailyTemperature(CAST(t.createdAt AS date), SUM(t.temperature)) " +
+    @Query("SELECT new ongi.temperature.dto.FamilyTemperatureDailyResponse.DailyTemperature(CAST(t.createdAt AS date), SUM(t.temperature)) " +
             "FROM Temperature t WHERE t.familyId = :familyId AND t.createdAt >= :fromDate " +
             "GROUP BY CAST(t.createdAt AS date) ORDER BY CAST(t.createdAt AS date) DESC")
     List<FamilyTemperatureDailyResponse.DailyTemperature> getFamilyTemperatureDaily(@Param("familyId") String familyId, @Param("fromDate") java.time.LocalDateTime fromDate);
     
     // 최근 5일간 가족 구성원별 온도 기여 내역
-    @Query("SELECT new ongi.temperature.dto.FamilyTemperatureContributionResponse$Contribution(CAST(t.createdAt AS date), t.userId, SUM(t.temperature)) " +
+    @Query("SELECT new ongi.temperature.dto.FamilyTemperatureContributionResponse.Contribution(CAST(t.createdAt AS date), t.userId, SUM(t.temperature)) " +
             "FROM Temperature t WHERE t.familyId = :familyId AND t.createdAt >= :fromDate " +
             "GROUP BY CAST(t.createdAt AS date), t.userId ORDER BY CAST(t.createdAt AS date) DESC")
     List<FamilyTemperatureContributionResponse.Contribution> getFamilyTemperatureContributions(@Param("familyId") String familyId, @Param("fromDate") java.time.LocalDateTime fromDate);
