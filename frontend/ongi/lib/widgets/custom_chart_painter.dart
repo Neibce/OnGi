@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'dart:math';
 
 class CustomChartPainter extends CustomPainter {
@@ -255,6 +256,6 @@ class CustomChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomChartPainter oldDelegate) {
-    return percentages != oldDelegate.percentages;
+    return !listEquals(percentages, oldDelegate.percentages);
   }
 }
