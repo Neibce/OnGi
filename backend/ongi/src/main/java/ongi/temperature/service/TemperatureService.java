@@ -82,23 +82,19 @@ public class TemperatureService {
 
     // 최근 5일간 가족 온도 총합 조회
     public FamilyTemperatureDailyResponse getFamilyTemperatureDaily(String familyId) {
-        
         familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
-
-        // 날짜별 온도 합계 리스트 조회
-        List<FamilyTemperatureDailyResponse.DailyTemperature> dailyList = temperatureRepository.getFamilyTemperatureDaily(familyId, 5);
+        java.time.LocalDateTime fromDate = java.time.LocalDate.now().minusDays(4).atStartOfDay(); // 최근 5일
+        List<FamilyTemperatureDailyResponse.DailyTemperature> dailyList = temperatureRepository.getFamilyTemperatureDaily(familyId, fromDate);
         return new FamilyTemperatureDailyResponse(dailyList);
     }
 
     // 최근 5일간 가족 구성원별 온도 기여 내역 조회
     public FamilyTemperatureContributionResponse getFamilyTemperatureContributions(String familyId) {
-        
         familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
-
-        // 날짜별, 구성원별 온도 기여 내역 리스트 조회
-        List<FamilyTemperatureContributionResponse.Contribution> contributions = temperatureRepository.getFamilyTemperatureContributions(familyId, 5);
+        java.time.LocalDateTime fromDate = java.time.LocalDate.now().minusDays(4).atStartOfDay(); // 최근 5일
+        List<FamilyTemperatureContributionResponse.Contribution> contributions = temperatureRepository.getFamilyTemperatureContributions(familyId, fromDate);
         return new FamilyTemperatureContributionResponse(contributions);
     }
 

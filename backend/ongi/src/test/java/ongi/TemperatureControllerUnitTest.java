@@ -1,13 +1,9 @@
 package ongi;
 
-import java.util.Collections;
 import ongi.exception.EntityNotFoundException;
-import ongi.exception.GlobalExceptionHandler;
 import ongi.temperature.controller.TemperatureController;
-import ongi.temperature.dto.FamilyTemperatureResponse;
-import ongi.temperature.dto.FamilyTemperatureResponse.MemberTemperatureInfo;
-import ongi.temperature.dto.MemberTemperatureResponse;
-import ongi.temperature.dto.MemberTemperatureResponse.TemperatureRecord;
+import ongi.temperature.dto.FamilyTemperatureDailyResponse;
+import ongi.temperature.dto.FamilyTemperatureContributionResponse;
 import ongi.temperature.service.TemperatureService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,18 +12,15 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
-
+import ongi.temperature.dto.FamilyTemperatureResponse;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
+@ActiveProfiles("test")
 class TemperatureControllerUnitTest {
 
     @Mock
@@ -36,98 +29,133 @@ class TemperatureControllerUnitTest {
     @InjectMocks
     private TemperatureController temperatureController;
 
-    private MockMvc mockMvc;
     private String testFamilyId;
-    private UUID testUserId;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(temperatureController)
-                .setControllerAdvice(new GlobalExceptionHandler())
-                .build();
-
         testFamilyId = "FAM123";
-        testUserId = UUID.randomUUID();
     }
 
     @Test
-    @DisplayName("GET /api/temperatures/family/{familyId} - 가족 온도 조회 성공")
-    void getFamilyTemperature_Success() throws Exception {
+    @DisplayName("가족 온도 요약 - 여러 가족, 구성원, 기여도 포함 성공")
+    void getFamilyTemperatureSummary_MultipleFamiliesAndMembers_Success() {
         // given
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID();
+        UUID userId3 = UUID.randomUUID();
+        FamilyTemperatureResponse.MemberTemperatureInfo m1 = FamilyTemperatureResponse.MemberTemperatureInfo.builder()
+            .userId(userId1).userName("홍길동").contributedTemperature(1.2).percentage(30.0).build();
+        FamilyTemperatureResponse.MemberTemperatureInfo m2 = FamilyTemperatureResponse.MemberTemperatureInfo.builder()
+            .userId(userId2).userName("김철수").contributedTemperature(2.8).percentage(70.0).build();
+        FamilyTemperatureResponse.MemberTemperatureInfo m3 = FamilyTemperatureResponse.MemberTemperatureInfo.builder()
+            .userId(userId3).userName("이영희").contributedTemperature(0.0).percentage(0.0).build();
         FamilyTemperatureResponse response = FamilyTemperatureResponse.builder()
-                .familyTemperature(36.8)
-                .totalContributedTemperature(73.6)
-                .memberTemperatures(Collections.singletonList(
-                        MemberTemperatureInfo.builder()
-                                .userId(testUserId)
-                                .userName("홍길동")
-                                .contributedTemperature(36.8)
-                                .percentage(50.0)
-                                .build()
-                ))
-                .build();
-        given(temperatureService.getFamilyTemperature(testFamilyId)).willReturn(response);
+            .familyTemperature(36.5)
+            .totalContributedTemperature(4.0)
+            .memberTemperatures(java.util.Arrays.asList(m1, m2, m3))
+            .build();
+        given(temperatureService.getFamilyTemperatureSummary(testFamilyId)).willReturn(response);
 
-        // when & then
-        mockMvc.perform(get("/api/temperatures/family/{familyId}", testFamilyId))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.familyTemperature").value(36.8))
-                .andExpect(jsonPath("$.totalContributedTemperature").value(73.6))
-                .andExpect(jsonPath("$.memberTemperatures[0].userName").value("홍길동"));
+        // when
+        FamilyTemperatureResponse result = temperatureController.getFamilyTemperatureSummary(testFamilyId).getBody();
+
+        // then
+        assertNotNull(result);
+        assertEquals(36.5, result.getFamilyTemperature());
+        assertEquals(4.0, result.getTotalContributedTemperature());
+        assertEquals("홍길동", result.getMemberTemperatures().get(0).getUserName());
+        assertEquals("김철수", result.getMemberTemperatures().get(1).getUserName());
+        assertEquals("이영희", result.getMemberTemperatures().get(2).getUserName());
     }
 
     @Test
-    @DisplayName("GET /api/temperatures/family/{familyId} - 존재하지 않는 가족")
-    void getFamilyTemperature_FamilyNotFound() throws Exception {
+    @DisplayName("가족 온도 요약 - 존재하지 않는 가족")
+    void getFamilyTemperatureSummary_FamilyNotFound() {
         // given
-        given(temperatureService.getFamilyTemperature(testFamilyId))
-                .willThrow(new EntityNotFoundException("가족을 찾을 수 없습니다."));
+        given(temperatureService.getFamilyTemperatureSummary(testFamilyId))
+            .willThrow(new EntityNotFoundException("가족을 찾을 수 없습니다."));
 
         // when & then
-        mockMvc.perform(get("/api/temperatures/family/{familyId}", testFamilyId))
-                .andExpect(status().isNotFound());
+        assertThrows(EntityNotFoundException.class, () ->
+            temperatureController.getFamilyTemperatureSummary(testFamilyId)
+        );
     }
 
     @Test
-    @DisplayName("GET /api/temperatures/family/{familyId}/member/{userId} - 개인별 온도 조회 성공")
-    void getMemberTemperature_Success() throws Exception {
+    @DisplayName("가족 온도 일별 로그 - 여러 가족, 여러 일자 온도 로그 포함 성공")
+    void getFamilyTemperatureDaily_MultipleFamiliesAndLogs_Success() {
         // given
-        MemberTemperatureResponse response = MemberTemperatureResponse.builder()
-                .userId(testUserId)
-                .userName("홍길동")
-                .contributedTemperature(36.8)
-                .percentage(50.0)
-                .temperatureRecords(Collections.singletonList(
-                        TemperatureRecord.builder()
-                                .temperatureId(1L)
-                                .temperature(1.5)
-                                .activity("밥 먹기")
-                                .createdAt(LocalDateTime.now())
-                                .build()
-                ))
-                .build();
-        given(temperatureService.getMemberTemperature(testFamilyId, testUserId)).willReturn(response);
+        FamilyTemperatureDailyResponse.DailyTemperature daily1 = new FamilyTemperatureDailyResponse.DailyTemperature(
+            java.time.LocalDate.now().minusDays(2), 36.6);
+        FamilyTemperatureDailyResponse.DailyTemperature daily2 = new FamilyTemperatureDailyResponse.DailyTemperature(
+            java.time.LocalDate.now().minusDays(1), 36.7);
+        FamilyTemperatureDailyResponse.DailyTemperature daily3 = new FamilyTemperatureDailyResponse.DailyTemperature(
+            java.time.LocalDate.now(), 36.8);
+        FamilyTemperatureDailyResponse response = new FamilyTemperatureDailyResponse(
+            java.util.Arrays.asList(daily1, daily2, daily3));
+        given(temperatureService.getFamilyTemperatureDaily(testFamilyId)).willReturn(response);
 
-        // when & then
-        mockMvc.perform(get("/api/temperatures/family/{familyId}/member/{userId}", testFamilyId, testUserId))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.userId").value(testUserId.toString()))
-                .andExpect(jsonPath("$.userName").value("홍길동"))
-                .andExpect(jsonPath("$.contributedTemperature").value(36.8))
-                .andExpect(jsonPath("$.temperatureRecords[0].activity").value("밥 먹기"));
+        // when
+        FamilyTemperatureDailyResponse result = temperatureController.getFamilyTemperatureDaily(testFamilyId).getBody();
+
+        // then
+        assertNotNull(result);
+        assertEquals(3, result.getDailyTemperatures().size());
+        assertEquals(36.6, result.getDailyTemperatures().get(0).getTotalTemperature());
+        assertEquals(36.7, result.getDailyTemperatures().get(1).getTotalTemperature());
+        assertEquals(36.8, result.getDailyTemperatures().get(2).getTotalTemperature());
     }
 
     @Test
-    @DisplayName("GET /api/temperatures/family/{familyId}/member/{userId} - 존재하지 않는 사용자")
-    void getMemberTemperature_UserNotFound() throws Exception {
+    @DisplayName("가족 온도 일별 로그 - 존재하지 않는 가족")
+    void getFamilyTemperatureDaily_FamilyNotFound() {
         // given
-        given(temperatureService.getMemberTemperature(testFamilyId, testUserId))
-                .willThrow(new EntityNotFoundException("사용자를 찾을 수 없습니다."));
+        given(temperatureService.getFamilyTemperatureDaily(testFamilyId))
+            .willThrow(new EntityNotFoundException("가족을 찾을 수 없습니다."));
 
         // when & then
-        mockMvc.perform(get("/api/temperatures/family/{familyId}/member/{userId}", testFamilyId, testUserId))
-                .andExpect(status().isNotFound());
+        assertThrows(EntityNotFoundException.class, () ->
+            temperatureController.getFamilyTemperatureDaily(testFamilyId)
+        );
+    }
+
+    @Test
+    @DisplayName("가족 온도 기여도 - 여러 가족, 여러 구성원, 여러 일자 기여도 포함 성공")
+    void getFamilyTemperatureContributions_MultipleFamiliesMembersLogs_Success() {
+        // given
+        java.util.UUID userId1 = java.util.UUID.randomUUID();
+        java.util.UUID userId2 = java.util.UUID.randomUUID();
+        FamilyTemperatureContributionResponse.Contribution c1 = new FamilyTemperatureContributionResponse.Contribution(
+            java.time.LocalDate.now().minusDays(2), userId1, 1.1);
+        FamilyTemperatureContributionResponse.Contribution c2 = new FamilyTemperatureContributionResponse.Contribution(
+            java.time.LocalDate.now().minusDays(1), userId2, 2.2);
+        FamilyTemperatureContributionResponse.Contribution c3 = new FamilyTemperatureContributionResponse.Contribution(
+            java.time.LocalDate.now(), userId1, 3.3);
+        FamilyTemperatureContributionResponse response = new FamilyTemperatureContributionResponse(
+            java.util.Arrays.asList(c1, c2, c3));
+        given(temperatureService.getFamilyTemperatureContributions(testFamilyId)).willReturn(response);
+
+        // when
+        FamilyTemperatureContributionResponse result = temperatureController.getFamilyTemperatureContributions(testFamilyId).getBody();
+
+        // then
+        assertNotNull(result);
+        assertEquals(3, result.getContributions().size());
+        assertEquals(1.1, result.getContributions().get(0).getContributed());
+        assertEquals(2.2, result.getContributions().get(1).getContributed());
+        assertEquals(3.3, result.getContributions().get(2).getContributed());
+    }
+
+    @Test
+    @DisplayName("가족 온도 기여도 - 존재하지 않는 가족")
+    void getFamilyTemperatureContributions_FamilyNotFound() {
+        // given
+        given(temperatureService.getFamilyTemperatureContributions(testFamilyId))
+            .willThrow(new EntityNotFoundException("가족을 찾을 수 없습니다."));
+
+        // when & then
+        assertThrows(EntityNotFoundException.class, () ->
+            temperatureController.getFamilyTemperatureContributions(testFamilyId)
+        );
     }
 }
