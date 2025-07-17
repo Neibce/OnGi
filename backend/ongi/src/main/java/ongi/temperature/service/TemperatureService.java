@@ -85,7 +85,13 @@ public class TemperatureService {
         familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
         java.time.LocalDateTime fromDate = java.time.LocalDate.now().minusDays(4).atStartOfDay(); // 최근 5일
-        List<FamilyTemperatureDailyResponse.DailyTemperature> dailyList = temperatureRepository.getFamilyTemperatureDaily(familyId, fromDate);
+        List<Object[]> rawList = temperatureRepository.getFamilyTemperatureDailyRaw(familyId, fromDate);
+        List<FamilyTemperatureDailyResponse.DailyTemperature> dailyList = rawList.stream()
+            .map(arr -> new FamilyTemperatureDailyResponse.DailyTemperature(
+                (java.time.LocalDate) arr[0],
+                (Double) arr[1]
+            ))
+            .toList();
         return new FamilyTemperatureDailyResponse(dailyList);
     }
 
@@ -94,7 +100,14 @@ public class TemperatureService {
         familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
         java.time.LocalDateTime fromDate = java.time.LocalDate.now().minusDays(4).atStartOfDay(); // 최근 5일
-        List<FamilyTemperatureContributionResponse.Contribution> contributions = temperatureRepository.getFamilyTemperatureContributions(familyId, fromDate);
+        List<Object[]> rawList = temperatureRepository.getFamilyTemperatureContributionsRaw(familyId, fromDate);
+        List<FamilyTemperatureContributionResponse.Contribution> contributions = rawList.stream()
+            .map(arr -> new FamilyTemperatureContributionResponse.Contribution(
+                (java.time.LocalDate) arr[0],
+                (java.util.UUID) arr[1],
+                (Double) arr[2]
+            ))
+            .toList();
         return new FamilyTemperatureContributionResponse(contributions);
     }
 
