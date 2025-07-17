@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/screens/health_log_screen.dart';
 import 'package:ongi/screens/family_tempbar_screen.dart';
-import 'package:ongi/core/app_colors.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/photo_screen.dart';
 import 'package:ongi/screens/mypage_screen.dart';
+import 'package:ongi/core/app_colors.dart';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});

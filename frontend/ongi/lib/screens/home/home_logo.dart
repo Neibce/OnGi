@@ -18,6 +18,7 @@ class HomeBackgroundLogo extends StatelessWidget {
               'assets/images/logo.png',
               width: screenWidth * 1.2,
               height: screenWidth * 1.2,
+              color: Colors.white,
               fit: BoxFit.contain,
             ),
           ),
