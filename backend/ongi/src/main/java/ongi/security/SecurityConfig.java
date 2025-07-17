@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(
-                        auth -> auth.requestMatchers("/auth/**", "/users/exists", "/api/temperatures/**").permitAll()
+                        auth -> auth.requestMatchers("/auth/**", "/users/exists").permitAll() //TODO: 권한 체크 필요
                                 .anyRequest().authenticated())
                 .addFilterBefore(new AuthenticationFilter(tokenProvider),
                         UsernamePasswordAuthenticationFilter.class);
