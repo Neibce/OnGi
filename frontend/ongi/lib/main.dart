@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ongi/screens/login/login_pw_screen.dart';
 import 'package:ongi/screens/start_screen.dart';
 import 'package:ongi/screens/signup/password_screen.dart';
-import 'package:ongi/screens/bottom_nav.dart';
 
 void main() {
   runApp(const OngiApp());
