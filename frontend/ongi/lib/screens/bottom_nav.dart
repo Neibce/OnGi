@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/screens/home/home_screen.dart';
-import 'package:ongi/screens/health_log_screen.dart';
+import 'package:ongi/screens/health/health_home_screen.dart';
 import 'package:ongi/screens/family_tempbar_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -19,7 +19,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   final List<Widget> _screens = [
     const HomeScreen(),
-    const HealthLogScreen(),
+    const HealthHomeScreen(),
     const AddRecordScreen(),
     const FamilyTempbarScreen(),
     const ProfileScreen(),
