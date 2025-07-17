@@ -18,7 +18,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Temperature {
+public class
+
+
+Temperature {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,9 +35,6 @@ public class Temperature {
     
     @Column(nullable = false)
     private Double temperature;
-    
-    @Column(nullable = false)
-    private String activity;
     
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
