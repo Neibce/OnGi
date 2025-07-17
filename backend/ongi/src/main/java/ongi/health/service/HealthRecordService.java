@@ -10,9 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import ongi.health.dto.ExerciseRecordWithDiffResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -32,9 +30,11 @@ public class HealthRecordService {
         return painRecordRepository.save(record);
     }
 
-    // 통증 기록 조회 (날짜별)
-    public List<PainRecord> getPainRecords(UUID parentId, LocalDate date) {
-        return painRecordRepository.findByParentIdAndDate(parentId, date);
+    // 최근 7일간 통증 기록 조회
+    public List<PainRecord> getPainRecordsForLast7Days(UUID parentId) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(6); // 오늘 포함 7일
+        return painRecordRepository.findByParentIdAndDateBetweenOrderByDateDesc(parentId, startDate, endDate);
     }
 
     // 운동 기록 추가
@@ -48,18 +48,10 @@ public class HealthRecordService {
         return exerciseRecordRepository.save(record);
     }
 
-    // 운동 기록 조회 (날짜별)
-    public Optional<ExerciseRecord> getExerciseRecord(UUID parentId, LocalDate date) {
-        return exerciseRecordRepository.findByParentIdAndDate(parentId, date);
-    }
-
-    // 오늘+전날 운동 기록 및 증감량을 한 번에 반환
-    public ExerciseRecordWithDiffResponse getExerciseRecordWithDiff(UUID parentId, LocalDate date) {
-        ExerciseRecord today = exerciseRecordRepository.findByParentIdAndDate(parentId, date).orElse(null);
-        ExerciseRecord prev = exerciseRecordRepository.findByParentIdAndDate(parentId, date.minusDays(1)).orElse(null);
-        int prevDuration = prev != null ? prev.getDuration() : 0;
-        int todayDuration = today != null ? today.getDuration() : 0;
-        int diff = todayDuration - prevDuration;
-        return new ExerciseRecordWithDiffResponse(today, prevDuration, diff);
+    // 최근 7일간 운동 기록 조회
+    public List<ExerciseRecord> getExerciseRecordsForLast7Days(UUID parentId) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(6); // 오늘 포함 7일
+        return exerciseRecordRepository.findByParentIdAndDateBetweenOrderByDateDesc(parentId, startDate, endDate);
     }
 } 

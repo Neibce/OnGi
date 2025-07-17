@@ -14,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import ongi.health.dto.PainRecordResponse;
-import ongi.health.dto.ExerciseRecordWithDiffResponse;
+import ongi.health.dto.ExerciseRecordResponse;
 
 @RestController
 @RequestMapping("/health")
@@ -35,40 +35,37 @@ public class HealthRecordController {
         return ResponseEntity.ok(response);
     }
 
-    // 운동 기록 추가 
+    // 운동 기록 추가
     @PostMapping("/exercise")
-    public ResponseEntity<ExerciseRecordWithDiffResponse> addExerciseRecord(
+    public ResponseEntity<ExerciseRecordResponse> addExerciseRecord(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestParam int duration
     ) {
         ExerciseRecord record = healthRecordService.addExerciseRecord(userDetails.getUser().getUuid(), date, duration);
-        // prevDuration, diff는 0으로 세팅 (추가 API에서는 증감 불필요)
-        ExerciseRecordWithDiffResponse response = new ExerciseRecordWithDiffResponse(
-            record.getId(), record.getDate(), record.getDuration(), 0, 0);
+        ExerciseRecordResponse response = new ExerciseRecordResponse(record);
         return ResponseEntity.ok(response);
     }
 
-    // 자녀용: 부모 통증 기록 조회 
-    @GetMapping("/parents/pain")
-    public ResponseEntity<List<PainRecordResponse>> getParentPainRecordsForChild(
-            @RequestParam UUID parentId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    // 최근 7일간 통증 기록 조회
+    @GetMapping("/pain/view")
+    public ResponseEntity<List<PainRecordResponse>> getParentPainRecordsForLast7Days(
+            @RequestParam UUID parentId
     ) {
-        List<PainRecord> records = healthRecordService.getPainRecords(parentId, date);
-        List<PainRecordResponse> response = records.stream()
+        List<PainRecordResponse> response = healthRecordService.getPainRecordsForLast7Days(parentId).stream()
             .map(PainRecordResponse::new)
             .toList();
         return ResponseEntity.ok(response);
     }
 
-    // 자녀용: 부모 운동 기록 + 전날 대비 증감 조회
-    @GetMapping("/parents/exercise")
-    public ResponseEntity<ExerciseRecordWithDiffResponse> getParentExerciseRecordForChild(
-            @RequestParam UUID parentId,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    // 최근 7일간 운동 기록 조회
+    @GetMapping("/exercise/view")
+    public ResponseEntity<List<ExerciseRecordResponse>> getParentExerciseRecordsForLast7Days(
+            @RequestParam UUID parentId
     ) {
-        ExerciseRecordWithDiffResponse resp = healthRecordService.getExerciseRecordWithDiff(parentId, date);
-        return ResponseEntity.ok(resp);
+        List<ExerciseRecordResponse> response = healthRecordService.getExerciseRecordsForLast7Days(parentId).stream()
+            .map(ExerciseRecordResponse::new)
+            .toList();
+        return ResponseEntity.ok(response);
     }
 } 
