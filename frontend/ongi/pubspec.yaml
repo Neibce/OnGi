@@ -16,6 +16,7 @@ dependencies:
   flutter_svg: ^2.0.7
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.3
+  align_positioned: ^5.0.1
 
 dev_dependencies:
   flutter_test:
@@ -35,10 +36,14 @@ flutter:
     - assets/images/pill_history_title_logo.png
     - assets/images/pill_item_icon.svg
     - assets/images/add_icon.svg
+    - assets/images/ruler_icon.svg
+    - assets/images/parent_exercise_icon.png
+    - assets/images/sitting_mom_icon.png
     - assets/images/step_tracker_title_logo.png
     - assets/images/homebar_capsule.svg
     - assets/images/homebar_med.svg
     - assets/images/homebar_walk.svg
+    - assets/images/walk_icon.svg
 
   fonts:
     - family: Pretendard

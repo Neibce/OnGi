@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:ongi/screens/health/health_home_screen.dart';
 import 'package:ongi/screens/login/login_pw_screen.dart';
 import 'package:ongi/screens/start_screen.dart';
+import 'package:ongi/screens/bottom_nav.dart';
 import 'package:ongi/screens/signup/password_screen.dart';
 
 void main() {
@@ -20,7 +22,7 @@ class OngiApp extends StatelessWidget {
         fontFamily: 'Pretendard',
       ),
 
-      home: const StartScreen(),
+      home: const BottomNavScreen(),
 
       routes: {
         '/login': (context) => const LoginPwScreen(),
