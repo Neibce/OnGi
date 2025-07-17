@@ -10,6 +10,6 @@ import java.util.UUID;
 
 @Repository
 public interface PainRecordRepository extends JpaRepository<PainRecord, Long> {
-    List<PainRecord> findByParentIdAndDate(UUID parentId, LocalDate date);
-    List<PainRecord> findByParentId(UUID parentId);
+    // 최근 7일간 통증 기록 조회
+    List<PainRecord> findByParentIdAndDateBetweenOrderByDateDesc(UUID parentId, LocalDate startDate, LocalDate endDate);
 } 

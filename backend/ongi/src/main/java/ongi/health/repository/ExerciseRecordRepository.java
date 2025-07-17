@@ -6,11 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface ExerciseRecordRepository extends JpaRepository<ExerciseRecord, Long> {
-    Optional<ExerciseRecord> findByParentIdAndDate(UUID parentId, LocalDate date);
-    List<ExerciseRecord> findByParentId(UUID parentId);
+    // 최근 7일간 운동 기록 조회
+    List<ExerciseRecord> findByParentIdAndDateBetweenOrderByDateDesc(UUID parentId, LocalDate startDate, LocalDate endDate);
 } 
