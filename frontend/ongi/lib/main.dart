@@ -21,7 +21,7 @@ class OngiApp extends StatelessWidget {
         fontFamily: 'Pretendard',
       ),
 
-      home: const BottomNavScreen(),
+      home: const StartScreen(),
 
       routes: {
         '/login': (context) => const LoginPwScreen(),

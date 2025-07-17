@@ -92,10 +92,8 @@ class CapsuleButton extends StatelessWidget {
                   BlendMode.srcIn,
                 ),
               ),
-              const SizedBox(width: 8),
-              Spacer(flex: 1),
+              const SizedBox(width: 20),
               Expanded(
-                flex: 2,
                 child: Text(
                   notificationText,
                   overflow: TextOverflow.ellipsis,
