@@ -331,6 +331,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                 const SizedBox(height: 10),
 
                 Stack(
+                  clipBehavior: Clip.none,
                   children: [
                     SizedBox(
                       width: double.infinity,
@@ -351,7 +352,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '오늘은 30분간',
+                                '오늘은 1시간 30분',
                                 style: TextStyle(
                                   fontSize: 25,
                                   fontWeight: FontWeight.w600,
@@ -376,9 +377,14 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                     Positioned(
                       right: 0,
                       top: -20,
-                      child: Image.asset(
-                        'assets/images/parent_exercise_icon.png',
-                        width: 170,
+                      child: Container(
+                        height: 150,
+                        clipBehavior: Clip.hardEdge,
+                        decoration: const BoxDecoration(),
+                        child: Image.asset(
+                          'assets/images/parent_exercise_icon.png',
+                          width: 170,
+                        ),
                       ),
                     ),
                   ],
