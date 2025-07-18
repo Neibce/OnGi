@@ -27,7 +27,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
             Align(
               alignment: Alignment.topCenter,
               child: Transform.translate(
-                offset: Offset(0, -circleSize * 0.82),
+                offset: Offset(0, -circleSize * 0.76),
                 child: OverflowBox(
                   maxWidth: double.infinity,
                   maxHeight: double.infinity,
