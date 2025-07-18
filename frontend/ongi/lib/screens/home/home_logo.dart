@@ -10,14 +10,14 @@ class HomeBackgroundLogo extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          top: -screenHeight * 0.16,
-          right: -screenWidth * 0.5,
+          top: -screenHeight * 0.2,
+          right: -screenWidth * 0.57,
           child: Opacity(
             opacity: 0.30,
             child: Image.asset(
               'assets/images/logo.png',
-              width: screenWidth * 1.2,
-              height: screenWidth * 1.2,
+              width: screenWidth * 1.3,
+              height: screenWidth * 1.3,
               color: Colors.white,
               fit: BoxFit.contain,
             ),
