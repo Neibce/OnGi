@@ -14,8 +14,9 @@ class CustomChartPainter extends CustomPainter {
     final double innerRadius = outerRadius * 0.65;
 
     final int segmentCount = percentages.length;
-    final double totalAngle = 2 * pi;
-    final double gapAngle = 0.185;
+
+    final double totalAngle = 240 * pi / 180;
+    final double gapAngle = 0.155;
     final double totalGaps = gapAngle * segmentCount;
 
     final double totalPercentage = percentages.reduce((a, b) => a + b);
@@ -31,7 +32,7 @@ class CustomChartPainter extends CustomPainter {
       begin: Alignment.topRight,
       end: Alignment.bottomLeft,
       colors: [Color(0xFFFD6C01), Color(0xFFBFECFF)],
-      stops: [0.1, 0.9],
+      stops: [0.1, 0.8],
     );
 
     final shader = gradient.createShader(
@@ -57,21 +58,22 @@ class CustomChartPainter extends CustomPainter {
         center: shadowOffset,
         radius: (outerRadius + innerRadius) / 2,
       ),
-      0,
-      2 * pi,
+      -120 * pi / 180,
+      totalAngle,
       false,
       shadowPaint,
     );
 
     canvas.drawArc(
       Rect.fromCircle(center: center, radius: (outerRadius + innerRadius) / 2),
-      0,
-      2 * pi,
+      -120 * pi / 180,
+      totalAngle,
       false,
       whitePaint,
     );
 
-    double currentAngle = -pi / 2 + gapAngle / 2;
+    // -110도에서 시작 (왼쪽으로 90도 회전)
+    double currentAngle = -120 * pi / 180 + gapAngle / 2;
 
     for (int i = 0; i < segmentCount; i++) {
       final double startAngle = currentAngle;

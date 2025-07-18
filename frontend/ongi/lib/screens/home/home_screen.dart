@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/home/home_logo.dart';
 import 'package:ongi/screens/home/home_ourfamily_text.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,54 +37,43 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppColors.ongiOrange,
       body: Stack(
         children: [
-          // Background logo (top right)
-          const HomeBackgroundLogo(),
           Positioned(
-            child: CustomPaint(
-              size: Size(
-                MediaQuery.of(context).size.width *1.5,
-                MediaQuery.of(context).size.width *1.5,
+            bottom: -MediaQuery.of(context).size.width * 0.6,
+            left: 0,
+            right: 0,
+            height: MediaQuery.of(context).size.height * 0.45,
+            child: OverflowBox(
+              maxWidth: double.infinity,
+              maxHeight: double.infinity,
+              child: Center(
+                child: Container(
+                  width: MediaQuery.of(context).size.width * 1.5,
+                  height: MediaQuery.of(context).size.height,
+                  decoration: BoxDecoration(
+                    color: AppColors.ongiLigntgrey,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(260),
+                      topRight: Radius.circular(260),
+                    ),
+                  ),
+                ),
               ),
-              painter: Painter(),
             ),
           ),
-          Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: 32,
-              vertical: MediaQuery.of(context).size.height * 0.1,
-            ),
-            child: Column(
+
+          // Background logo (top right)
+          const HomeBackgroundLogo(),
+          Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.14),
                 HomeOngiText(username: _username),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.01),
                 HomeCapsuleSection(),
               ],
             ),
-          ),
         ],
       ),
     );
   }
-}
-
-class Painter extends CustomPainter{
-  @override
-  void paint(Canvas canvas, Size size) {
-    final double rectWidth = size.width * 1.5;
-    final double rectHeight = size.width * 1.5;
-
-    final double left = size.width * -0.2;
-    final double top = size.height * 0.6;
-
-    final rect = Rect.fromLTWH(left, top, rectWidth, rectHeight);
-    final rrect = RRect.fromRectAndRadius(rect, Radius.circular(255));
-
-    canvas.drawRRect(
-      rrect,
-      Paint()..color = const Color(0xFFF7F7F7),
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

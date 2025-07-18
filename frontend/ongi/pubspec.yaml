@@ -44,6 +44,7 @@ flutter:
     - assets/images/homebar_med.svg
     - assets/images/homebar_walk.svg
     - assets/images/walk_icon.svg
+    - assets/images/users/elderly_woman.png
 
   fonts:
     - family: Pretendard
