@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class SignupService {
-  static const String baseUrl = 'https://ongi-1049536928483.asia-northeast1.run.app';
+  static const String baseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
 
   Future<Map<String, dynamic>> register({
     required String email,
