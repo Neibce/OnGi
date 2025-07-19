@@ -46,9 +46,10 @@ class ReadyScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: () => Navigator.push(
+                  onPressed: () => Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+                        (Route<dynamic> route) => false,
                   ),
                   child: const Text(
                     '준비완료!',
