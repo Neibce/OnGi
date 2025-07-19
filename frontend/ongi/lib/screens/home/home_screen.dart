@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/home/home_logo.dart';
 import 'package:ongi/screens/home/home_ourfamily_text.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/screens/home/home_donutCapsule.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -22,8 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadUserName() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedUsername = prefs.getString('signup_username');
+    String? savedUsername = await PrefsManager.getUserName();
     if (savedUsername != null) {
       setState(() {
         _username = savedUsername;

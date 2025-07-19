@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_light_background.dart';
-import 'package:ongi/services/user_service.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/health/family_step_tracker_screen.dart';
 import 'package:ongi/screens/health/pill_history_screen.dart';
@@ -15,28 +15,20 @@ class HealthHomeScreen extends StatefulWidget {
 }
 
 class _HealthHomeScreenState extends State<HealthHomeScreen> {
-  String username = '';
+  String username = '사용자';
   String _currentView = 'home'; // 'home', 'pain', 'pills', 'exercise', 'steps'
-  final UserService _userService = UserService();
 
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
+    _loadUserName();
   }
 
-  Future<void> _loadUserInfo() async {
-    try {
-      final userInfo = await _userService.user();
-      print('user name: ${userInfo['name']}');
-
+  Future<void> _loadUserName() async {
+    String? savedUsername = await PrefsManager.getUserName();
+    if (savedUsername != null) {
       setState(() {
-        username = userInfo['name'] ?? '사용자';
-      });
-    } catch (e) {
-      print('사용자 정보 가져오기 실패: $e');
-      setState(() {
-        username = '사용자';
+        username = savedUsername;
       });
     }
   }
