@@ -23,7 +23,10 @@ class HomeCapsuleSection extends StatelessWidget {
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Transform.translate(
-                    offset: Offset(-MediaQuery.of(context).size.width * 0.35, 0), // 왼쪽으로 이동
+                    offset: Offset(
+                      -MediaQuery.of(context).size.width * 0.35,
+                      0,
+                    ),
                     child: OverflowBox(
                       maxWidth: double.infinity,
                       maxHeight: double.infinity,
@@ -41,7 +44,9 @@ class HomeCapsuleSection extends StatelessWidget {
                 ),
                 // 텍스트 (화면 안에 있음)
                 Positioned(
-                  left: MediaQuery.of(context).size.width * 0.05, // 도넛 차트 중심에 맞춰 조정
+                  left:
+                      MediaQuery.of(context).size.width *
+                      0.04,
                   top: 0,
                   bottom: 0,
                   child: Center(
@@ -105,7 +110,9 @@ class CapsuleButton extends StatelessWidget {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
         height: MediaQuery.of(context).size.width * 0.18,
-        width: selected ? MediaQuery.of(context).size.width * 0.9 : MediaQuery.of(context).size.width * 0.17,
+        width: selected
+            ? MediaQuery.of(context).size.width * 0.9
+            : MediaQuery.of(context).size.width * 0.17,
         margin: const EdgeInsets.only(top: 2, bottom: 2, left: 0, right: 0),
         decoration: BoxDecoration(
           color: selected ? AppColors.ongiOrange : AppColors.ongiLigntgrey,
@@ -140,14 +147,20 @@ class CapsuleButton extends StatelessWidget {
             if (selected && notificationText.isNotEmpty) ...[
               const SizedBox(width: 20),
               Expanded(
-                child: Text(
-                  notificationText,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center, // 텍스트 중앙 정렬
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 22,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      notificationText,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 20,
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -180,25 +193,24 @@ class _ButtonColumnState extends State<ButtonColumn> {
           CapsuleButton(
             svgAsset: 'assets/images/homebar_capsule.svg',
             selected: selectedIdx == 0,
-            onTap: () => setState(() => selectedIdx = selectedIdx == 0 ? -1 : 0),
-            notificationText: selectedIdx == 0
-                ? '23분 뒤, 이부프로펜 1알 섭취 예정'
-                : '',
+            onTap: () =>
+                setState(() => selectedIdx = selectedIdx == 0 ? -1 : 0),
+            notificationText: selectedIdx == 0 ? '23분 뒤, 이부프로펜 1알 섭취 예정' : '',
           ),
           const SizedBox(height: 8),
           CapsuleButton(
             svgAsset: 'assets/images/homebar_med.svg',
             selected: selectedIdx == 1,
-            onTap: () => setState(() => selectedIdx = selectedIdx == 1 ? -1 : 1),
-            notificationText: selectedIdx == 1
-                ? '오늘의 통증 부위: 허리, 오른쪽 무릎'
-                : '',
+            onTap: () =>
+                setState(() => selectedIdx = selectedIdx == 1 ? -1 : 1),
+            notificationText: selectedIdx == 1 ? '오늘의 통증 부위: 허리, 오른쪽 무릎' : '',
           ),
           const SizedBox(height: 8),
           CapsuleButton(
             svgAsset: 'assets/images/homebar_walk.svg',
             selected: selectedIdx == 2,
-            onTap: () => setState(() => selectedIdx = selectedIdx == 2 ? -1 : 2),
+            onTap: () =>
+                setState(() => selectedIdx = selectedIdx == 2 ? -1 : 2),
             notificationText: selectedIdx == 2 ? '12,000 걸음' : '',
           ),
         ],
