@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-import '../utils/token_storage.dart';
+import '../utils/prefs_manager.dart';
 
 class LoginService {
   static const String baseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
@@ -25,7 +25,8 @@ class LoginService {
 
     if (response.statusCode == 200) {
       final responseJson = jsonDecode(response.body);
-      await TokenStorage.saveAccessToken(responseJson["accessToken"]);
+      await PrefsManager.saveAccessToken(responseJson["accessToken"]);
+      await PrefsManager.saveUserName(responseJson["userInfo"]["name"]);
       return responseJson;
     } else {
       throw Exception('로그인 실패: ${response.statusCode} ${response.body}');

@@ -1,13 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:ongi/utils/token_storage.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class FamilyJoinService {
   static const String baseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
   Future<Map<String, dynamic>> familyJoin ({
     required String code,
   }) async {
-    final accessToken = await TokenStorage.getAccessToken();
+    final accessToken = await PrefsManager.getAccessToken();
     
     if (accessToken == null)
       throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
