@@ -11,7 +11,6 @@ class ModeScreen extends StatelessWidget {
   const ModeScreen(this.username, {super.key});
 
   Future<void> _setModeAndRegister(BuildContext context, String mode) async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text(
@@ -20,9 +19,7 @@ class ModeScreen extends StatelessWidget {
         ),
         backgroundColor: Colors.white,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -63,16 +60,14 @@ class ModeScreen extends StatelessWidget {
       );
 
       final loginService = LoginService();
-      await loginService.login(
-        email: email,
-        password: password,
-      );
+      await loginService.login(email: email, password: password);
 
       if (!context.mounted) return;
-      
-      Navigator.push(
+
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (context) => const FamilynameScreen()),
+        (route) => false,
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -105,17 +100,18 @@ class ModeScreen extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  5, (index) => Container(
-                  width: 58,
-                  height: 7.5,
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    color: index != 4
-                        ? AppColors.ongiOrange
-                        : AppColors.ongiOrange.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(4),
+                  5,
+                  (index) => Container(
+                    width: 58,
+                    height: 7.5,
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      color: index != 4
+                          ? AppColors.ongiOrange
+                          : AppColors.ongiOrange.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
-                ),
                 ),
               ),
             ),
@@ -206,10 +202,10 @@ class ModeScreen extends StatelessWidget {
                     height: 1.2,
                     color: AppColors.ongiOrange,
                   ),
-                )
-              )
-            )
-          ]
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

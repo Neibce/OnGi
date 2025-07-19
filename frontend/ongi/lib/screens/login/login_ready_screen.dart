@@ -5,6 +5,7 @@ import 'package:ongi/screens/bottom_nav.dart';
 
 class LoginReadyScreen extends StatefulWidget {
   final String username;
+
   const LoginReadyScreen({required this.username, super.key});
 
   @override
@@ -20,8 +21,9 @@ class _LoginReadyScreenState extends State<LoginReadyScreen> {
 
     _timer = Timer(const Duration(seconds: 2), () {
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+        (Route<dynamic> route) => false,
       );
     });
   }
