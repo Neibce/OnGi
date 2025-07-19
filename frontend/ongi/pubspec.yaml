@@ -46,6 +46,7 @@ flutter:
     - assets/images/homebar_capsule.svg
     - assets/images/homebar_med.svg
     - assets/images/homebar_walk.svg
+    - assets/images/exercise_record_title_logo.png
     - assets/images/walk_icon.svg
     - assets/images/users/elderly_woman.png
 
