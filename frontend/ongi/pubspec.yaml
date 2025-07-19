@@ -24,6 +24,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.1
 
 flutter:
   uses-material-design: true
@@ -69,3 +70,9 @@ flutter:
           weight: 800
         - asset: assets/fonts/Pretendard-Black.ttf
           weight: 900
+
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/logo.png
+  color_dark: "#FFFFFF"
+  image_dark: assets/images/logo.png
