@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_light_background.dart';
+import 'package:ongi/screens/health/exercise_record_screen.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/health/family_step_tracker_screen.dart';
@@ -100,38 +101,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
   Widget _buildExerciseView() {
     return Stack(
       children: [
-        Container(
-          color: AppColors.ongiLigntgrey,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text(
-                  '운동 기록',
-                  style: TextStyle(
-                    fontSize: 40,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.ongiOrange,
-                  ),
-                ),
-                const SizedBox(height: 50),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  margin: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: const Text(
-                    '운동 기록 화면\n(추후 구현 예정)',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 18),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
+        const ExerciseRecordScreen(),
         _buildBackButton(),
       ],
     );
