@@ -1,15 +1,19 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:ongi/screens/login/login_pw_screen.dart';
 import 'package:ongi/screens/start_screen.dart';
 import 'package:ongi/screens/signup/password_screen.dart';
+import 'package:ongi/screens/bottom_nav.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   messaging.requestPermission(
     alert: true,
@@ -24,8 +28,31 @@ void main() async {
   runApp(const OngiApp());
 }
 
-class OngiApp extends StatelessWidget {
+class OngiApp extends StatefulWidget {
   const OngiApp({super.key});
+
+  @override
+  State<OngiApp> createState() => _OngiAppState();
+}
+
+class _OngiAppState extends State<OngiApp> {
+  Widget _homeWidget = const StartScreen();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeApp();
+  }
+
+  Future<void> _initializeApp() async {
+    final hasToken = await PrefsManager.hasAccessToken();
+    
+    setState(() {
+      _homeWidget = hasToken ? const BottomNavScreen() : const StartScreen();
+    });
+    
+    FlutterNativeSplash.remove();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +61,7 @@ class OngiApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, fontFamily: 'Pretendard'),
 
-      home: const StartScreen(),
+      home: _homeWidget,
 
       routes: {
         '/login': (context) => const LoginPwScreen(),
