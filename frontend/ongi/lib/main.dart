@@ -1,11 +1,26 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:ongi/screens/health/health_home_screen.dart';
 import 'package:ongi/screens/login/login_pw_screen.dart';
 import 'package:ongi/screens/start_screen.dart';
-import 'package:ongi/screens/bottom_nav.dart';
 import 'package:ongi/screens/signup/password_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
   runApp(const OngiApp());
 }
 
@@ -17,17 +32,14 @@ class OngiApp extends StatelessWidget {
     return MaterialApp(
       title: 'Ongi',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Pretendard',
-      ),
+      theme: ThemeData(useMaterial3: true, fontFamily: 'Pretendard'),
 
-      home: const BottomNavScreen(),
+      home: const StartScreen(),
 
       routes: {
         '/login': (context) => const LoginPwScreen(),
         '/signup': (context) => const PasswordScreen(),
-      }
+      },
     );
   }
 }
