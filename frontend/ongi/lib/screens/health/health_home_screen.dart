@@ -377,13 +377,15 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                     Positioned(
                       right: 0,
                       top: -20,
-                      child: Container(
-                        height: 150,
-                        clipBehavior: Clip.hardEdge,
-                        decoration: const BoxDecoration(),
-                        child: Image.asset(
-                          'assets/images/parent_exercise_icon.png',
-                          width: 170,
+                      child: IgnorePointer(
+                        child: Container(
+                          height: 150,
+                          clipBehavior: Clip.hardEdge,
+                          decoration: const BoxDecoration(),
+                          child: Image.asset(
+                            'assets/images/parent_exercise_icon.png',
+                            width: 170,
+                          ),
                         ),
                       ),
                     ),
