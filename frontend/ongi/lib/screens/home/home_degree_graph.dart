@@ -3,7 +3,6 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/screens/home/home_ourfamily_text_withoutUser.dart';
-import 'package:fl_chart/fl_chart.dart';
 
 final List<String> dates = ['6/11', '6/12', '6/13', '6/14', '6/15'];
 final List<double> temps = [36.2, 35.8, 37.2, 38.0, 38.6];
