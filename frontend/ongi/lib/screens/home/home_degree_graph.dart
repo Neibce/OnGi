@@ -8,7 +8,7 @@ final List<String> dates = ['6/11', '6/12', '6/13', '6/14', '6/15'];
 final List<double> temps = [36.2, 35.8, 37.2, 38.0, 38.6];
 final List<FlSpot> spots = List.generate(
   temps.length,
-  (i) => FlSpot(i.toDouble(), temps[i]),
+      (i) => FlSpot(i.toDouble(), temps[i]),
 );
 
 class HomeDegreeGraph extends StatefulWidget {
