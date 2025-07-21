@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/screens/home/home_ourfamily_text_withoutUser.dart';
-import 'package:flutter_charts/flutter_charts.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 final List<String> dates = ['6/11', '6/12', '6/13', '6/14', '6/15'];
 final List<double> temps = [36.2, 35.8, 37.2, 38.0, 38.6];
+final List<FlSpot> spots = List.generate(
+  temps.length,
+  (i) => FlSpot(i.toDouble(), temps[i]),
+);
 
-class HomeDegreeGraph extends StatefulWidget{
+class HomeDegreeGraph extends StatefulWidget {
   final VoidCallback? onBack;
   const HomeDegreeGraph({super.key, this.onBack});
 
@@ -16,14 +21,28 @@ class HomeDegreeGraph extends StatefulWidget{
 }
 
 class _HomeDegreeGraph extends State<HomeDegreeGraph> {
+  bool showHistory = false;
+
+  final List<Map<String, String>> history = [
+    {"name": "양금명님", "change": "+0.3°C", "date": "25.06.15 22:07"},
+    {"name": "양은명님", "change": "+0.1°C", "date": "25.06.14 20:55"},
+    {"name": "양관식님", "change": "+0.2°C", "date": "25.06.14 17:14"},
+    {"name": "양관식님", "change": "+0.2°C", "date": "25.06.13 17:14"},
+    {"name": "양관식님", "change": "+0.2°C", "date": "25.06.13 17:14"},
+    {"name": "양관식님", "change": "+0.1°C", "date": "25.06.13 17:14"},
+    {"name": "오애순님", "change": "+0.2°C", "date": "25.06.13 15:09"},
+    {"name": "오애순님", "change": "+0.2°C", "date": "25.06.13 15:08"},
+    {"name": "오애순님", "change": "+0.2°C", "date": "25.06.13 15:08"},
+    {"name": "오애순님", "change": "+0.1°C", "date": "25.06.13 15:07"},
+    {"name": "양금명님", "change": "+0.1°C", "date": "25.06.13 12:28"},
+  ];
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: AppColors.ongiLigntgrey,
       body: AppLightBackground(
         child: SafeArea(
-          
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -40,7 +59,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
               ),
               // 타이틀
               const HomeOngiTextWithoutUser(),
-              // 그래프 카드
+              // 카드
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Container(
@@ -49,27 +68,9 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     borderRadius: BorderRadius.circular(24),
                   ),
                   padding: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: 180,
-                        child: CustomPaint(
-                          size: const Size(double.infinity, 180),
-                          painter: FamilyTempGraphPainter(dates, temps),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      const Text(
-                        '최근 양금명 님이 +0.3°C 상승 시켰어요!',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.grey,
-                          fontFamily: 'Pretendard',
-                        ),
-                      ),
-                      const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
-                    ],
-                  ),
+                  child: showHistory
+                      ? _buildHistoryList()
+                      : _buildGraphCard(),
                 ),
               ),
             ],
@@ -78,120 +79,183 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
       ),
     );
   }
-}
-//
-// class LineChart extends StatelessWidget {
-//   const LineChart({
-//     super.key,
-//     required this.dataList,
-//     required this.markerColor,
-//     required this.baseValue,
-//   });
-//
-//   final List<LineChartData> dataList;
-//   final Color markerColor;
-//   final double baseValue;
-//
-//   @override
-//   Widget chartToRun() {
-//     LabelLayoutStrategy? xContainerLabelLayoutStrategy;
-//     ChartData chartData;
-//     ChartOptions chartOptions = const ChartOptions();
-//     // Example shows a demo-type data generated randomly in a range.
-//     chartData = RandomChartData.generated(chartOptions: chartOptions);
-//     var lineChartContainer = LineChartTopContainer(
-//       chartData: chartData,
-//       xContainerLabelLayoutStrategy: xContainerLabelLayoutStrategy,
-//     );
-//
-//     var lineChart = LineChart(
-//       painter: LineChartPainter(
-//         lineChartContainer: lineChartContainer,
-//       ),
-//     );
-//     return lineChart;
-//   }
-// }
-//
-// // 차트 데이터 클래스
-// class LineChartData {
-//   final String name;
-//   final double value;
-//
-//   LineChartData(this.name, this.value);
-// }
 
-// 간단한 CustomPainter 예시 (실제 앱에서는 fl_chart 등 패키지 사용 추천)
-class FamilyTempGraphPainter extends CustomPainter {
-  final List<String> dates;
-  final List<double> temps;
-  FamilyTempGraphPainter(this.dates, this.temps);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paintLine = Paint()
-      ..color = Colors.orange
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-    final paintDot = Paint()
-      ..color = Colors.orange
-      ..style = PaintingStyle.fill;
-
-    // 축 그리기
-    final double minY = 35.5, maxY = 40.0;
-    final double leftMargin = 32, bottomMargin = 32, topMargin = 16;
-    final double chartWidth = size.width - leftMargin;
-    final double chartHeight = size.height - bottomMargin - topMargin;
-
-    // y축 라벨 및 선
-    for (int i = 0; i <= 5; i++) {
-      double y = topMargin + chartHeight * i / 5;
-      double value = maxY - (maxY - minY) * i / 5;
-      final textSpan = TextSpan(
-        text: value.toStringAsFixed(1),
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
-      );
-      final tp = TextPainter(
-        text: textSpan,
-        textDirection: TextDirection.ltr,
-      )..layout();
-      tp.paint(canvas, Offset(0, y - 8));
-      canvas.drawLine(
-        Offset(leftMargin, y),
-        Offset(size.width, y),
-        Paint()..color = Colors.grey[300]!,
-      );
+  Widget _buildGraphCard() {
+    String latestName = '';
+    String latestChange = '';
+    if (history.isNotEmpty) {
+      latestName = history[0]['name'] ?? '';
+      latestChange = history[0]['change'] ?? '';
     }
-
-    // x축 라벨
-    for (int i = 0; i < dates.length; i++) {
-      double x = leftMargin + chartWidth * i / (dates.length - 1);
-      final textSpan = TextSpan(
-        text: dates[i],
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
-      );
-      final tp = TextPainter(
-        text: textSpan,
-        textDirection: TextDirection.ltr,
-      )..layout();
-      tp.paint(canvas, Offset(x - tp.width / 2, size.height - bottomMargin + 8));
-    }
-
-    // 그래프 선 및 점
-    Path path = Path();
-    for (int i = 0; i < temps.length; i++) {
-      double x = leftMargin + chartWidth * i / (temps.length - 1);
-      double y = topMargin + chartHeight * (maxY - temps[i]) / (maxY - minY);
-      if (i == 0) {
-        path.moveTo(x, y);
-      } else {
-        path.lineTo(x, y);
-      }
-      canvas.drawCircle(Offset(x, y), 4, paintDot);
-    }
-    canvas.drawPath(path, paintLine);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        SizedBox(
+          height: 270,
+          child: LineChart(
+            LineChartData(
+              minY: 35.2,
+              maxY: 40.5,
+              minX: 0,
+              maxX: (dates.length - 1).toDouble(),
+              gridData: FlGridData(
+                show: true,
+                drawVerticalLine: false,
+                horizontalInterval: 0.5,
+                getDrawingHorizontalLine: (value) => FlLine(
+                  color: Colors.grey[300],
+                  strokeWidth: 1,
+                ),
+              ),
+              titlesData: FlTitlesData(
+                leftTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    interval: 0.5,
+                    getTitlesWidget: (value, meta) {
+                      if (value == 35.2 || value == 40.5) return const SizedBox.shrink();
+                      return Text(
+                        value.toStringAsFixed(1),
+                        style: const TextStyle(
+                          color: Colors.grey,
+                          fontSize: 13,
+                          fontFamily: 'Pretendard',
+                        ),
+                      );
+                    },
+                    reservedSize: 36,
+                  ),
+                ),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: true,
+                    getTitlesWidget: (value, meta) {
+                      if (value % 1 != 0) return const SizedBox.shrink();
+                      int idx = value.toInt();
+                      if (idx < 0 || idx >= dates.length) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 8),
+                        child: Text(
+                          dates[idx],
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                            fontFamily: 'Pretendard',
+                          ),
+                        ),
+                      );
+                    },
+                    interval: 1,
+                  ),
+                ),
+                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+              ),
+              borderData: FlBorderData(
+                show: false,
+              ),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: spots,
+                  isCurved: false,
+                  color: Colors.orange,
+                  barWidth: 2.5,
+                  isStrokeCapRound: true,
+                  dotData: FlDotData(
+                    show: true,
+                    getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
+                      radius: 3,
+                      color: Colors.white,
+                      strokeWidth: 2.5,
+                      strokeColor: Colors.orange,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          latestName.isNotEmpty && latestChange.isNotEmpty
+              ? '최근 $latestName 님이 $latestChange 상승 시켰어요!'
+              : '최근 온도 변화 데이터가 없습니다.',
+          style: const TextStyle(
+            fontSize: 15,
+            color: Colors.grey,
+            fontFamily: 'Pretendard',
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+          onPressed: () => setState(() => showHistory = true),
+        ),
+      ],
+    );
   }
 
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  Widget _buildHistoryList() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton(
+          icon: const Icon(Icons.keyboard_arrow_up, color: Colors.grey),
+          onPressed: () => setState(() => showHistory = false),
+        ),
+        SizedBox(
+          height: 290,
+          child: ListView.builder(
+            itemCount: history.length,
+            itemBuilder: (context, idx) {
+              final item = history[idx];
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 왼쪽 선과 원
+                  Column(
+                    children: [
+                      Container(
+                        width: 9,
+                        height: 9,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.orange, width: 2),
+                          color: Colors.white,
+                        ),
+                      ),
+                      if (idx != history.length - 1)
+                        Container(
+                          width: 2,
+                          height: 24,
+                          color: Colors.orange,
+                        ),
+                    ],
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      "${item['name']}이 ${item['change']} 상승 시켰어요!",
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 15,
+                        fontFamily: 'Pretendard',
+                      ),
+                    ),
+                  ),
+                  Text(
+                    item['date'] ?? '',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 12,
+                      fontFamily: 'Pretendard',
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
 }
