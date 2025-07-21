@@ -19,6 +19,8 @@ dependencies:
   align_positioned: ^5.0.1
   firebase_core: ^3.15.1
   firebase_messaging: ^15.2.9
+  flutter_charts: ^0.5.2
+  fl_chart: ^1.0.0
 
 dev_dependencies:
   flutter_test:

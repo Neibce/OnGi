@@ -1,89 +1,94 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ongi/screens/home/home_degree_graph.dart';
 import 'package:ongi/widgets/custom_chart_painter.dart';
 
 class HomeCapsuleSection extends StatelessWidget {
-  const HomeCapsuleSection({super.key});
+  final VoidCallback? onGraphTap;
+  const HomeCapsuleSection({super.key, this.onGraphTap});
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Stack(
         children: [
-          // 도넛 차트 영역
-          Positioned(
-            left: 0,
-            bottom: MediaQuery.of(context).size.height * 0.05,
-            width: MediaQuery.of(context).size.width * 0.95,
-            height: MediaQuery.of(context).size.width * 0.95,
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Transform.translate(
-                    offset: Offset(
-                      -MediaQuery.of(context).size.width * 0.35,
-                      0,
-                    ),
-                    child: OverflowBox(
-                      maxWidth: double.infinity,
-                      maxHeight: double.infinity,
-                      child: CustomPaint(
-                        painter: CustomChartPainter(
-                          percentages: [15, 10, 20, 20],
-                        ),
-                        size: Size(
-                          MediaQuery.of(context).size.width * 0.95,
-                          MediaQuery.of(context).size.width * 0.95,
-                        ),
+        // 도넛 차트 영역
+        Positioned(
+        left: 0,
+        bottom: MediaQuery.of(context).size.height * 0.05,
+        width: MediaQuery.of(context).size.width * 0.95,
+        height: MediaQuery.of(context).size.width * 0.95,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: GestureDetector(
+                onTap: onGraphTap,
+                child: Transform.translate(
+                  offset: Offset(
+                    -MediaQuery.of(context).size.width * 0.35,
+                    0,
+                  ),
+                  child: OverflowBox(
+                    maxWidth: double.infinity,
+                    maxHeight: double.infinity,
+                    child: CustomPaint(
+                      painter: CustomChartPainter(
+                        percentages: [15, 10, 20, 20],
+                      ),
+                      size: Size(
+                        MediaQuery.of(context).size.width * 0.95,
+                        MediaQuery.of(context).size.width * 0.95,
                       ),
                     ),
                   ),
                 ),
-                // 텍스트 (화면 안에 있음)
-                Positioned(
-                  left:
-                      MediaQuery.of(context).size.width *
-                      0.04,
-                  top: 0,
-                  bottom: 0,
-                  child: Center(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          '36.5',
-                          style: TextStyle(
-                            fontSize: 43,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.ongiOrange,
-                            height: 1,
-                          ),
-                        ),
-                        Text(
-                          '℃',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.ongiOrange,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-          Positioned(
-            right: 0,
-            bottom: MediaQuery.of(context).size.height * 0.05,
-            child: ButtonColumn(),
-          ),
-        ],
-      ),
+            // 텍스트 (화면 안에 있음)
+            Positioned(
+              left:
+              MediaQuery.of(context).size.width *
+                  0.04,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      '36.5',
+                      style: TextStyle(
+                        fontSize: 43,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.ongiOrange,
+                        height: 1,
+                      ),
+                    ),
+                    Text(
+                      '℃',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.ongiOrange,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+    ),
+    Positioned(
+    right: 0,
+    bottom: MediaQuery.of(context).size.height * 0.05,
+    child: ButtonColumn(),
+    ),
+    ],
+    ),
     );
   }
 }
