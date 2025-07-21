@@ -1,27 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/screens/home/home_ourfamily_text_withoutUser.dart';
-import 'package:ongi/screens/bottom_nav.dart';
+import 'package:flutter_charts/flutter_charts.dart';
 
 final List<String> dates = ['6/11', '6/12', '6/13', '6/14', '6/15'];
 final List<double> temps = [36.2, 35.8, 37.2, 38.0, 38.6];
 
-class HomeDegreeGraph extends StatelessWidget {
-  const HomeDegreeGraph({super.key});
+class HomeDegreeGraph extends StatefulWidget{
+  final VoidCallback? onBack;
+  const HomeDegreeGraph({super.key, this.onBack});
 
   @override
+  State<HomeDegreeGraph> createState() => _HomeDegreeGraph();
+}
+
+class _HomeDegreeGraph extends State<HomeDegreeGraph> {
+  @override
   Widget build(BuildContext context) {
+
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.ongiLigntgrey,
       body: AppLightBackground(
         child: SafeArea(
+          
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 뒤로가기 버튼
-              Padding(
-                padding: const EdgeInsets.only(left: 16, top: 8),
-                child: Icon(Icons.arrow_back_ios, color: Colors.black, size: 28),
+              // 뒤로가기
+              GestureDetector(
+                onTap: widget.onBack ?? () => Navigator.of(context).pop(),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    left: 32,
+                    top: MediaQuery.of(context).size.height * 0.08,
+                  ),
+                  child: Icon(Icons.arrow_back_ios, color: Colors.black, size: 28),
+                ),
               ),
               // 타이틀
               const HomeOngiTextWithoutUser(),
@@ -64,6 +79,47 @@ class HomeDegreeGraph extends StatelessWidget {
     );
   }
 }
+//
+// class LineChart extends StatelessWidget {
+//   const LineChart({
+//     super.key,
+//     required this.dataList,
+//     required this.markerColor,
+//     required this.baseValue,
+//   });
+//
+//   final List<LineChartData> dataList;
+//   final Color markerColor;
+//   final double baseValue;
+//
+//   @override
+//   Widget chartToRun() {
+//     LabelLayoutStrategy? xContainerLabelLayoutStrategy;
+//     ChartData chartData;
+//     ChartOptions chartOptions = const ChartOptions();
+//     // Example shows a demo-type data generated randomly in a range.
+//     chartData = RandomChartData.generated(chartOptions: chartOptions);
+//     var lineChartContainer = LineChartTopContainer(
+//       chartData: chartData,
+//       xContainerLabelLayoutStrategy: xContainerLabelLayoutStrategy,
+//     );
+//
+//     var lineChart = LineChart(
+//       painter: LineChartPainter(
+//         lineChartContainer: lineChartContainer,
+//       ),
+//     );
+//     return lineChart;
+//   }
+// }
+//
+// // 차트 데이터 클래스
+// class LineChartData {
+//   final String name;
+//   final double value;
+//
+//   LineChartData(this.name, this.value);
+// }
 
 // 간단한 CustomPainter 예시 (실제 앱에서는 fl_chart 등 패키지 사용 추천)
 class FamilyTempGraphPainter extends CustomPainter {

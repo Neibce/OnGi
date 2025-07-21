@@ -5,7 +5,8 @@ import 'package:ongi/screens/home/home_degree_graph.dart';
 import 'package:ongi/widgets/custom_chart_painter.dart';
 
 class HomeCapsuleSection extends StatelessWidget {
-  const HomeCapsuleSection({super.key});
+  final VoidCallback? onGraphTap;
+  const HomeCapsuleSection({super.key, this.onGraphTap});
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +25,7 @@ class HomeCapsuleSection extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const HomeDegreeGraph(),
-                    ),
-                  );
-                },
+                onTap: onGraphTap,
                 child: Transform.translate(
                   offset: Offset(
                     -MediaQuery.of(context).size.width * 0.35,
