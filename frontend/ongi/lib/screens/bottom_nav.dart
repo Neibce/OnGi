@@ -135,17 +135,30 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         width: 56,
         height: 56,
         alignment: Alignment.center,
+        // 배경/그림자 없음
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            iconWidget,
+            Container(
+              decoration: isSelected
+                  ? BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.4),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    )
+                  : null,
+              child: iconWidget,
+            ),
             const SizedBox(height: 4),
             Text(
               text,
               style: TextStyle(
                 fontSize: 12,
-                color:isSelected? AppColors.ongiOrange
-                    : Colors.grey[300],
+                color: isSelected ? AppColors.ongiOrange : Colors.grey[300],
                 fontFamily: 'Pretendard',
                 fontWeight: FontWeight.w600,
               ),

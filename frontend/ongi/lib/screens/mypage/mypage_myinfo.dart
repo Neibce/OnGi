@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/services/user_service.dart';
 import 'package:ongi/core/app_colors.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class Myinfo extends StatefulWidget {
   const Myinfo({super.key});
@@ -13,6 +14,7 @@ class _MyinfoState extends State<Myinfo> {
   Map<String, dynamic>? userInfo;
   bool loading = true;
   String? error;
+  String? username;
 
   @override
   void initState() {
@@ -27,8 +29,10 @@ class _MyinfoState extends State<Myinfo> {
     });
     try {
       final data = await UserService().user();
+      final savedName = await PrefsManager.getUserName();
       setState(() {
         userInfo = data;
+        username = savedName ?? (data['username'] ?? '사용자님');
         loading = false;
       });
     } catch (e) {
@@ -53,9 +57,9 @@ class _MyinfoState extends State<Myinfo> {
 
     final String name = userInfo!['username'] ?? '사용자님';
     final String familyCode = userInfo!['familyCode'] ?? '가족코드';
-    final String birth = userInfo!['birth'] ?? '1960년 8월 10일';
+    final String birth = userInfo!['birth'] ?? '0000년 00월 00일';
     final String phone = userInfo!['phone'] ?? '010-0000-0000';
-    final String profileImage = userInfo!['profileImage'] ?? '';
+    final String profileImage = userInfo!['profileImage'] ?? ' ';
 
     return Stack(
       children: [
