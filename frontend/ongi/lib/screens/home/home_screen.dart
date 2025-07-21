@@ -75,7 +75,6 @@ class _HomeScreenState extends State<HomeScreen> {
         HomeDegreeGraph(
           onBack: _goBackToHome,
         ),
-        _buildBackButton(),
       ],
     );
   }
