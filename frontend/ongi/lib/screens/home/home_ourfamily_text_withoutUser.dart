@@ -11,7 +11,7 @@ class HomeOngiTextWithoutUser extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.only(
         left: 32,
-        right: 0, // 오른쪽 패딩 제거
+        right: 0,
         top: 16,
         bottom: 16,
       ),
