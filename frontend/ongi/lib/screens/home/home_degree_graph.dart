@@ -14,7 +14,6 @@ class HomeDegreeGraph extends StatelessWidget{
         const HomeOngiTextWithoutUser(),
       ],
     ),
-    bottomNavigationBar: const ButtonColumn(),
     );
 }
 }
