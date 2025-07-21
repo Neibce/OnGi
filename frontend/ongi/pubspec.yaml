@@ -51,6 +51,9 @@ flutter:
     - assets/images/exercise_record_title_logo.png
     - assets/images/walk_icon.svg
     - assets/images/users/elderly_woman.png
+    - assets/images/step_tracker_crown.svg
+    - assets/images/step_tracker_light_background.svg
+    - assets/images/step_tracker_rectangle.svg
 
   fonts:
     - family: Pretendard
