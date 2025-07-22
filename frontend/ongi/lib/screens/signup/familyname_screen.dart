@@ -35,6 +35,24 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
       return;
     }
 
+    if (familyName.length > 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '가족이름은 6자 이하여야 해요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('family_name', familyName);
@@ -42,14 +60,12 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
       if (!mounted) return;
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => FamilycodeCreateScreen(),
-        ),
+        MaterialPageRoute(builder: (context) => FamilycodeCreateScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('오류가 발생했습니다: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('오류가 발생했습니다: $e')));
     }
   }
 
@@ -122,8 +138,10 @@ class _FamilynameScreenState extends State<FamilynameScreen> {
                 decoration: InputDecoration(
                   hintText: 'FAMILYNAME',
                   hintStyle: const TextStyle(color: Colors.grey),
-                  contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 13,
+                  ),
                   filled: true,
                   fillColor: Colors.transparent,
                   enabledBorder: OutlineInputBorder(
