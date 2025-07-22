@@ -6,6 +6,7 @@ import 'package:ongi/screens/family_tempbar_screen.dart';
 import 'package:ongi/screens/photo_screen.dart';
 import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
+import 'dart:ui';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -84,16 +85,9 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [ AppColors.ongiBlue, AppColors.ongiOrange ],
+                  colors: [ AppColors.ongiBlue, AppColors.ongiOrange],
                 ),
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
-                  ),
-                ],
               ),
               child: const Icon(Icons.add, color: Colors.white, size: 36),
             ),
@@ -135,24 +129,14 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         width: 56,
         height: 56,
         alignment: Alignment.center,
-        // 배경/그림자 없음
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              decoration: isSelected
-                  ? BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.4),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    )
-                  : null,
-              child: iconWidget,
-            ),
+            isSelected
+                ? Container(
+                    child: iconWidget,
+                  )
+                : iconWidget,
             const SizedBox(height: 4),
             Text(
               text,
