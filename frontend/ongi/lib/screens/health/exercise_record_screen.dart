@@ -94,7 +94,7 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                     child: SizedBox(
                                       height: 100,
                                       child: Padding(
-                                        padding: const EdgeInsets.only(left: 45),
+                                        padding: const EdgeInsets.only(left: 40),
                                         child: DateCarousel(
                                           initialDate: selectedDate,
                                           controller: _dateCarouselController,

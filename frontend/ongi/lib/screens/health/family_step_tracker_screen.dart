@@ -104,7 +104,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                     ),
                     // 본문 내용
                     Padding(
-                      padding: const EdgeInsets.only(left: 40, right: 40, top: 40, bottom: 20),
+                      padding: const EdgeInsets.only(left: 40, right: 40, top: 25, bottom: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
