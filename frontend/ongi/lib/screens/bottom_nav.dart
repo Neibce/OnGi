@@ -3,9 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/add_record_screen.dart';
 import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/screens/health/health_home_screen.dart';
-import 'package:ongi/screens/family_tempbar_screen.dart';
+import 'package:ongi/screens/photo/photo_calendar_screen.dart';
 import 'package:ongi/screens/photo/photo_date_screen.dart';
-
 import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 
@@ -22,8 +21,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const HealthHomeScreen(),
-    const FamilyTempbarScreen(),
-    const PhotoDateScreen(),
+    const AddRecordScreen(),
+    const PhotoCalendarScreen(),
     const ProfileScreen(),
   ];
 
@@ -93,7 +92,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [ AppColors.ongiBlue, AppColors.ongiOrange ],
+                  colors: [AppColors.ongiBlue, AppColors.ongiOrange],
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
@@ -153,8 +152,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               text,
               style: TextStyle(
                 fontSize: 12,
-                color:isSelected? AppColors.ongiOrange
-                    : Colors.grey[300],
+                color: isSelected ? AppColors.ongiOrange : Colors.grey[300],
                 fontFamily: 'Pretendard',
                 fontWeight: FontWeight.w600,
               ),
