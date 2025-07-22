@@ -140,7 +140,7 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 150),
+          const SizedBox(height: 130),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
@@ -209,7 +209,7 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
                   } else {
                     _selectedDate = selectedDay;
                     _focusedDay = selectedDay;
-                    _currentView = 'photoDate'; // 날짜 선택 시 photo_date_screen으로 이동
+                    _currentView = 'photoDate';
                   }
                 });
               },
@@ -263,7 +263,7 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
                 height: 44,
                 child: Icon(
                   Icons.arrow_back_ios,
-                  color: Colors.white,
+                  color: AppColors.ongiOrange,
                   size: 30,
                 ),
               ),
