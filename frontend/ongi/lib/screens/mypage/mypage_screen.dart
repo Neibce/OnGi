@@ -8,7 +8,7 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   Widget buildMenuList(BuildContext context) {
-    const menuItems = [
+    final menuItems = [
       '개인정보 보호',
       '시스템 알림',
       '공지사항',
@@ -18,15 +18,36 @@ class ProfileScreen extends StatelessWidget {
     ];
 
     final double gap = MediaQuery.of(context).size.height * 0.02;
-
+    final screenWidth = MediaQuery.of(context).size.width;
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10),
+      margin: EdgeInsets.only(left: 0, right: screenWidth * 0.3),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           for (final item in menuItems) ...[
             SizedBox(height: gap),
-            Text(item, style: const TextStyle(fontSize: 24)),
+            item == '로그아웃'
+                ? GestureDetector(
+                    onTap: () async {
+                      await PrefsManager.logout();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('로그아웃되었습니다.')),
+                      );
+                      await Future.delayed(const Duration(milliseconds: 500));
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(builder: (context) => const StartScreen()),
+                        (route) => false,
+                      );
+                    },
+                    child: const Text(
+                      '로그아웃',
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.black,
+                      ),
+                    ),
+                  )
+                : Text(item, style: const TextStyle(fontSize: 24)),
           ]
         ],
       ),

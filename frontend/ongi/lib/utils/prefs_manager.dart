@@ -5,6 +5,7 @@ class PrefsManager {
   static const _userNameKey = 'userName';
   static const _userFamilyCodeKey = 'userFamilyCode';
   static const _userFamilyNameKey = 'userFamilyName';
+  static const _isParent = 'isParent';
   static const _userProfileImageKey = 'userProfileImage';
   
   static SharedPreferences? _instance;
@@ -57,6 +58,7 @@ class PrefsManager {
       'familycode': prefs.getString(_userFamilyCodeKey),
       'familyname': prefs.getString(_userFamilyNameKey),
       'profileImage': prefs.getString(_userProfileImageKey),
+      'isParent': prefs.getBool(_isParent) == true ? 'true' : 'false',
     };
   }
 }

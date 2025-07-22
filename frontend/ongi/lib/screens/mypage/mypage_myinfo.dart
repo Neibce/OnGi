@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/utils/prefs_manager.dart';
+import 'package:flutter/services.dart';
+import 'package:ongi/screens/start_screen.dart';
 
 class Myinfo extends StatelessWidget {
   const Myinfo({Key? key}) : super(key: key);
@@ -22,8 +24,10 @@ class Myinfo extends StatelessWidget {
         final userInfo = snapshot.data ?? {};
         final name = userInfo['name'] ?? '사용자님';
         final familycode = userInfo['familycode'] ?? '33HYF6';
-        final familyName = userInfo['familyName'] ?? '우리가족이얌';
+        final familyName = userInfo['familyName'] ?? '가족이름';
         final profileImage = userInfo['profileImage'] ?? 'assets/images/users/elderly_woman.png';
+        final isParent = userInfo['isParent'] == 'true';
+        final roleText = isParent ? '부모' : '자녀';
 
         return Padding(
           padding: EdgeInsets.symmetric(
@@ -42,7 +46,7 @@ class Myinfo extends StatelessWidget {
                   fit: BoxFit.contain,
                 ),
               ),
-              SizedBox(width: screenWidth * 0.0053), // 2/375
+              SizedBox(width: screenWidth * 0.0053),
               // 오른쪽 정보들
               Expanded(
                 child: Column(
@@ -63,15 +67,15 @@ class Myinfo extends StatelessWidget {
                         SizedBox(width: screenWidth * 0.015),
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: screenWidth * 0.025, // 4/375
-                            vertical: screenHeight * 0.001, // 1/812
+                            horizontal: screenWidth * 0.01,
+                            vertical: screenHeight * 0.001,
                           ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
-                            '부모 1',
+                            roleText,
                             style: TextStyle(
                               color: AppColors.ongiOrange,
                               fontSize: screenWidth * 0.019,
@@ -82,7 +86,6 @@ class Myinfo extends StatelessWidget {
                         ),
                       ],
                     ),
-                    // 오른쪽 여백
                     Padding(
                       padding: EdgeInsets.only(left: screenWidth * 0.021), // 8/375
                       child: Column(
@@ -92,8 +95,8 @@ class Myinfo extends StatelessWidget {
                           Row(
                             children: [
                               Text(
-                                '$familyName',
-                                style: const TextStyle(
+                                familyName,
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w700,
@@ -102,8 +105,8 @@ class Myinfo extends StatelessWidget {
                               ),
                               SizedBox(width: screenWidth * 0.011), // 4/375
                               Text(
-                                '$familycode',
-                                style: const TextStyle(
+                                familycode,
+                                style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
                                   fontWeight: FontWeight.w600,
@@ -111,22 +114,35 @@ class Myinfo extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: screenWidth * 0.021), // 8/375
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth * 0.011, // 4/375
-                                  vertical: screenHeight * 0.0012, // 1/812
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: const Text(
-                                  '가족코드공유',
-                                  style: TextStyle(
-                                    color: AppColors.ongiOrange,
-                                    fontSize: 7,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: 'Pretendard',
+                              Builder(
+                                builder: (context) => OutlinedButton(
+                                  onPressed: () async {
+                                    await Clipboard.setData(ClipboardData(text: familycode));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(content: Text('가족코드가 복사되었습니다.')),
+                                    );
+                                  },
+                                  style: OutlinedButton.styleFrom(
+                                    side: const BorderSide(color: AppColors.ongiOrange, width: 1),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    minimumSize: Size.zero,
+                                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                    backgroundColor: Colors.white,
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: screenWidth * 0.01,
+                                      vertical: screenHeight * 0.001,
+                                    ),
+                                  ),
+                                  child: Text(
+                                    '가족코드 공유',
+                                    style: TextStyle(
+                                      color: AppColors.ongiOrange,
+                                      fontSize: screenWidth * 0.019,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: 'Pretendard',
+                                    ),
                                   ),
                                 ),
                               ),
