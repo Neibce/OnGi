@@ -196,7 +196,9 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                           ),
                                           const SizedBox(height: 8),
                                           // 위치 버튼 스타일
-                                          Container(
+                                          Align(
+                                            alignment: Alignment.center,
+                                          child: Container(
                                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                             decoration: BoxDecoration(
                                               color: Colors.white,
@@ -218,6 +220,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                                 ),
                                               ],
                                             ),
+                                          ),
                                           ),
                                         ],
                                       ),
