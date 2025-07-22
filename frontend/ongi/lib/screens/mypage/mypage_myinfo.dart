@@ -1,9 +1,7 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:flutter/services.dart';
-import 'package:ongi/screens/start_screen.dart';
 
 class Myinfo extends StatelessWidget {
   const Myinfo({Key? key}) : super(key: key);

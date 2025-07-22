@@ -5,7 +5,6 @@ import 'package:ongi/screens/home/home_logo.dart';
 import 'package:ongi/screens/home/home_ourfamily_text.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/screens/home/home_donutCapsule.dart';
-import 'package:ongi/core/app_light_background.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
