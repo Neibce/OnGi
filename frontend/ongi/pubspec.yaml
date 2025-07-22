@@ -62,6 +62,10 @@ flutter:
     - assets/images/step_tracker_light_background.svg
     - assets/images/step_tracker_rectangle.svg
     - assets/images/sample_family_photo.png
+    - assets/images/body_front.png
+    - assets/images/body_front_btn.png
+    - assets/images/body_back.png
+    - assets/images/body_back_btn.png
 
   fonts:
     - family: Pretendard
