@@ -341,7 +341,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
             top: 80,
             right: 30,
             child: IconButton(
-              icon: SvgPicture.asset('assets/images/close_icon.svg', width: 28),
+              icon: SvgPicture.asset('assets/images/close_icon_black.svg', width: 28),
               onPressed: () {
                 Navigator.of(context).pop();
               },
