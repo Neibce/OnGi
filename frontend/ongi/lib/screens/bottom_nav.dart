@@ -4,9 +4,8 @@ import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/screens/health/health_home_screen.dart';
 import 'package:ongi/screens/family_tempbar_screen.dart';
 import 'package:ongi/screens/photo_screen.dart';
-import 'package:ongi/screens/mypage/mypage_screen.dart';
+import 'package:ongi/screens/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
-import 'dart:ui';
 
 class BottomNavScreen extends StatefulWidget {
   const BottomNavScreen({super.key});
@@ -85,9 +84,16 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [ AppColors.ongiBlue, AppColors.ongiOrange],
+                  colors: [ AppColors.ongiBlue, AppColors.ongiOrange ],
                 ),
                 shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black12,
+                    blurRadius: 8,
+                    offset: Offset(0, 4),
+                  ),
+                ],
               ),
               child: const Icon(Icons.add, color: Colors.white, size: 36),
             ),
@@ -132,18 +138,14 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            isSelected
-                ? Container(
-                    child: iconWidget,
-                  //그림자가 위치했을 곳...
-                  )
-                : iconWidget,
+            iconWidget,
             const SizedBox(height: 4),
             Text(
               text,
               style: TextStyle(
                 fontSize: 12,
-                color: isSelected ? AppColors.ongiOrange : Colors.grey[300],
+                color:isSelected? AppColors.ongiOrange
+                    : Colors.grey[300],
                 fontFamily: 'Pretendard',
                 fontWeight: FontWeight.w600,
               ),
