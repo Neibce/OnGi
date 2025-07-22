@@ -3,6 +3,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PrefsManager {
   static const _accessTokenKey = 'accessToken';
   static const _userNameKey = 'userName';
+  static const _userFamilyCodeKey = 'userFamilyCode';
+  static const _userFamilyNameKey = 'userFamilyName';
+  static const _isParent = 'isParent';
+  static const _userProfileImageKey = 'userProfileImage';
   
   static SharedPreferences? _instance;
   
@@ -45,5 +49,16 @@ class PrefsManager {
     final prefs = await _prefs;
     await prefs.remove(_accessTokenKey);
     await prefs.remove(_userNameKey);
+  }
+
+  static Future<Map<String, String?>> getUserInfo() async {
+    final prefs = await _prefs;
+    return {
+      'name': prefs.getString(_userNameKey),
+      'familycode': prefs.getString(_userFamilyCodeKey),
+      'familyname': prefs.getString(_userFamilyNameKey),
+      'profileImage': prefs.getString(_userProfileImageKey),
+      'isParent': prefs.getBool(_isParent) == true ? 'true' : 'false',
+    };
   }
 }
