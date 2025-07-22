@@ -12,6 +12,7 @@ class HealthStatusInputScreen extends StatefulWidget {
 
 class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Map<int, int> selectedDosages = {};
+  bool isFront = true;
 
   @override
   Widget build(BuildContext context) {
@@ -65,12 +66,12 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                               Container(
                                 margin: EdgeInsets.symmetric(
                                   horizontal: 0,
-                                  vertical: 0,
+                                  vertical: 6,
                                 ),
                                 child: Image.asset(
-                                  'assets/images/health_status_check_hands.png',
-                                  width: 99,
-                                  height: 99,
+                                  'assets/images/sitting_mom_icon.png',
+                                  width: 110,
+                                  height: 110,
                                 ),
                               ),
                             ],
@@ -94,14 +95,41 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                   Expanded(
                     child: Container(
                       width: double.infinity,
-                      margin: const EdgeInsets.only(left: 60, right: 60, bottom: 20),
+                      margin: const EdgeInsets.only(left: 80, right: 80, bottom: 20),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text("여기부터 본문을 생성 ㅇ.ㅇ"),
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Image.asset(
+                              isFront
+                                ? 'assets/images/body_front.png'
+                                : 'assets/images/body_back.png',
+                              height: 400, // 필요시 반응형으로 조정
+                              fit: BoxFit.contain,
+                            ),
+                          ),
+                          Positioned(
+                            right: 16,
+                            bottom: 16,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  isFront = !isFront;
+                                });
+                              },
+                              child: Image.asset(
+                                isFront
+                                  ? 'assets/images/body_front_btn.png'
+                                  : 'assets/images/body_back_btn.png',
+                                width: 60,
+                                height: 60,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

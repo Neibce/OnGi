@@ -83,10 +83,6 @@ class ExerciseRecordDetailScreen extends StatelessWidget {
               left: 0,
               right: 0,
               child: Center(
-                child: Text(
-                  '${date.year}-${date.month}-${date.day} : $hours시간 $minutes분',
-                  style: const TextStyle(fontSize: 24),
-                ),
               ),
             ),
             // Back button
