@@ -4,7 +4,6 @@ import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/screens/health/health_home_screen.dart';
 import 'package:ongi/screens/family_tempbar_screen.dart';
 import 'package:ongi/screens/photo/photo_date_screen.dart';
-import 'package:ongi/screens/photo/photo_date_screen.dart';
 import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 
@@ -21,8 +20,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const HealthHomeScreen(),
-    const PhotoDateScreen(),
     const FamilyTempbarScreen(),
+    const PhotoDateScreen(),
     const ProfileScreen(),
   ];
 
