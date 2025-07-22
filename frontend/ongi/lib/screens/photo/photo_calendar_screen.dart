@@ -209,6 +209,7 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
                   } else {
                     _selectedDate = selectedDay;
                     _focusedDay = selectedDay;
+                    _currentView = 'photoDate'; // 날짜 선택 시 photo_date_screen으로 이동
                   }
                 });
               },
