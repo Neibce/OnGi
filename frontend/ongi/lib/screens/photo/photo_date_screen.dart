@@ -49,7 +49,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 125),
+            const SizedBox(height: 130),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -75,7 +75,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                         color: AppColors.ongiOrange,
                       ),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 45),
                     // 사진 카드 PageView
                     Center(
                       child: SizedBox(
@@ -83,8 +83,12 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                         height: cardHeight,
                         child: PageView.builder(
                           itemCount: _photos.length,
-                          controller: PageController(viewportFraction: 0.78, initialPage: _currentPage),
-                          onPageChanged: (idx) => setState(() => _currentPage = idx),
+                          controller: PageController(
+                            viewportFraction: 0.78,
+                            initialPage: _currentPage,
+                          ),
+                          onPageChanged: (idx) =>
+                              setState(() => _currentPage = idx),
                           itemBuilder: (context, idx) {
                             final photo = _photos[idx];
                             final isActive = idx == _currentPage;
@@ -109,7 +113,10 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                             fit: BoxFit.cover,
                                           )
                                         : ImageFiltered(
-                                            imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                                            imageFilter: ImageFilter.blur(
+                                              sigmaX: 8,
+                                              sigmaY: 8,
+                                            ),
                                             child: Opacity(
                                               opacity: 0.7,
                                               child: Image.asset(
@@ -129,7 +136,10 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                       width: 88,
                                       height: 100,
                                       decoration: BoxDecoration(
-                                        border: Border.all(color: AppColors.ongiOrange, width: 3),
+                                        border: Border.all(
+                                          color: AppColors.ongiOrange,
+                                          width: 3,
+                                        ),
                                         borderRadius: BorderRadius.circular(15),
                                       ),
                                       child: ClipRRect(
@@ -147,7 +157,12 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                     right: 0,
                                     bottom: 0,
                                     child: Container(
-                                      padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                                      padding: const EdgeInsets.fromLTRB(
+                                        20,
+                                        16,
+                                        20,
+                                        24,
+                                      ),
                                       decoration: BoxDecoration(
                                         borderRadius: const BorderRadius.only(
                                           bottomLeft: Radius.circular(32),
@@ -163,7 +178,8 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                         ),
                                       ),
                                       child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Row(
@@ -171,7 +187,9 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                               // 원형 프로필
                                               CircleAvatar(
                                                 radius: 16,
-                                                backgroundImage: AssetImage(photo['profile']!),
+                                                backgroundImage: AssetImage(
+                                                  photo['profile']!,
+                                                ),
                                               ),
                                               const SizedBox(width: 8),
                                               Expanded(
@@ -198,29 +216,40 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                           // 위치 버튼 스타일
                                           Align(
                                             alignment: Alignment.center,
-                                          child: Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              borderRadius: BorderRadius.circular(20),
-                                            ),
-                                            child: Row(
-                                              mainAxisSize: MainAxisSize.min,
-                                              children: [
-                                                Icon(Icons.place, color: AppColors.ongiOrange, size: 16),
-                                                const SizedBox(width: 4),
-                                                Text(
-                                                  photo['location']!,
-                                                  style: TextStyle(
-                                                    color: AppColors.ongiOrange,
-                                                    fontSize: 11,
-                                                    fontWeight: FontWeight.w500,
-                                                    fontFamily: 'Pretendard',
+                                            child: Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 2,
                                                   ),
-                                                ),
-                                              ],
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.place,
+                                                    color: AppColors.ongiOrange,
+                                                    size: 16,
+                                                  ),
+                                                  const SizedBox(width: 4),
+                                                  Text(
+                                                    photo['location']!,
+                                                    style: TextStyle(
+                                                      color:
+                                                          AppColors.ongiOrange,
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      fontFamily: 'Pretendard',
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                             ),
-                                          ),
                                           ),
                                         ],
                                       ),
@@ -252,7 +281,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                         for (int i = 0; i < _photos.length; i++) ...[
                           _buildIndicator(i == _currentPage),
                           if (i != _photos.length - 1) const SizedBox(width: 6),
-                        ]
+                        ],
                       ],
                     ),
                   ],
@@ -270,9 +299,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
       onPressed: () {},
       style: OutlinedButton.styleFrom(
         side: BorderSide(color: color, width: 1.5),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: AppColors.ongiOrange,
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 15),
         minimumSize: Size.zero,
