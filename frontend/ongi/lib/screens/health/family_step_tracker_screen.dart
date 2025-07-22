@@ -94,6 +94,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                     Positioned.fill(
                       child: Padding(
                         padding: const EdgeInsets.only(left: 15, right: 15, bottom: 20),
+
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,

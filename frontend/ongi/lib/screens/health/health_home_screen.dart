@@ -70,11 +70,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
         child: Container(
           width: 44,
           height: 44,
-          child: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-            size: 30,
-          ),
+          child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 30),
         ),
       ),
     );
@@ -82,37 +78,21 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   Widget _buildPainInputView() {
     return Stack(
-      children: [
-        const HealthStatusInputScreen(),
-        _buildBackButton(),
-      ],
+      children: [const HealthStatusInputScreen(), _buildBackButton()],
     );
   }
 
   Widget _buildPillHistoryView() {
-    return Stack(
-      children: [
-        const PillHistoryScreen(),
-        _buildBackButton(),
-      ],
-    );
+    return Stack(children: [const PillHistoryScreen(), _buildBackButton()]);
   }
 
   Widget _buildExerciseView() {
-    return Stack(
-      children: [
-        const ExerciseRecordScreen(),
-        _buildBackButton(),
-      ],
-    );
+    return Stack(children: [const ExerciseRecordScreen(), _buildBackButton()]);
   }
 
   Widget _buildStepTrackerView() {
     return Stack(
-      children: [
-        const FamilyStepTrackerScreen(),
-        _buildBackButton(),
-      ],
+      children: [const FamilyStepTrackerScreen(), _buildBackButton()],
     );
   }
 
@@ -122,7 +102,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 150),
+          const SizedBox(height: 130),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: Column(
@@ -208,7 +188,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                           ),
                         ),
                         Positioned(
-                          left: 165,
+                          left: 160,
                           top: 40,
                           child: Image.asset(
                             'assets/images/sitting_mom_icon.png',
@@ -444,9 +424,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: AppLightBackground(
-        child: _buildCurrentView(),
-      ),
+      body: AppLightBackground(child: _buildCurrentView()),
     );
   }
 }
