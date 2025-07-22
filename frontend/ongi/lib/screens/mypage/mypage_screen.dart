@@ -2,54 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/screens/start_screen.dart';
 import 'package:ongi/core/app_colors.dart';
-import 'package:ongi/services/user_service.dart';
 import 'package:ongi/screens/mypage/mypage_myinfo.dart';
 
-class ProfileScreen extends StatefulWidget{
-  const ProfileScreen({super.key});
-  @override
-  State<ProfileScreen> createState() => _ProfileScreen();
-}
-
-class _ProfileScreen extends State<ProfileScreen> {
-  String? _username;
-  bool _loading = true;
-  String? _error;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchUser();
-  }
-
-  Future<void> _fetchUser() async {
-    setState(() {
-      _loading = true;
-      _error = null;
-    });
-    try {
-      final userInfo = await UserService().user();
-      setState(() {
-        _username = userInfo['username'] ?? '';
-        _loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _error = e.toString();
-        _loading = false;
-      });
-    }
-  }
-
-  Future<void> _logout(BuildContext context) async {
-    await PrefsManager.logout();
-    if (context.mounted) {
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const StartScreen()),
-        (route) => false,
-      );
-    }
-  }
+class ProfileScreen extends StatelessWidget {
+  const ProfileScreen({Key? key}) : super(key: key);
 
   Widget buildMenuList(BuildContext context) {
     const menuItems = [
@@ -122,8 +78,8 @@ class _ProfileScreen extends State<ProfileScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
+                const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Myinfo(),
                 ),
                 const SizedBox(height: 24),

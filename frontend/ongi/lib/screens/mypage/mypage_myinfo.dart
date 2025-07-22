@@ -1,81 +1,49 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:ongi/services/user_service.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
-class Myinfo extends StatefulWidget {
-  const Myinfo({super.key});
-
-  @override
-  State<Myinfo> createState() => _MyinfoState();
-}
-
-class _MyinfoState extends State<Myinfo> {
-  Map<String, dynamic>? userInfo;
-  bool loading = true;
-  String? error;
-  String? username;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchUser();
-  }
-
-  Future<void> _fetchUser() async {
-    setState(() {
-      loading = true;
-      error = null;
-    });
-    try {
-      final data = await UserService().user();
-      final savedName = await PrefsManager.getUserName();
-      setState(() {
-        userInfo = data;
-        username = savedName ?? (data['username'] ?? '사용자님');
-        loading = false;
-      });
-    } catch (e) {
-      setState(() {
-        error = e.toString();
-        loading = false;
-      });
-    }
-  }
+class Myinfo extends StatelessWidget {
+  const Myinfo({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-    if (error != null) {
-      return Center(child: Text('에러: $error', style: const TextStyle(color: Colors.red)));
-    }
-    if (userInfo == null) {
-      return const Center(child: Text('유저 정보를 불러올 수 없습니다.'));
-    }
+    return FutureBuilder<Map<String, String?>> (
+      future: PrefsManager.getUserInfo(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('에러: \\${snapshot.error}', style: TextStyle(color: Colors.red)));
+        }
+        final userInfo = snapshot.data ?? {};
+        final name = userInfo['name'] ?? '사용자님';
+        final familycode = userInfo['familycode'] ?? '1234567890';
+        final familyName = userInfo['familyName'] ?? '우리가좍';
+        final profileImage = userInfo['profileImage'] ?? 'assets/images/users/elderly_woman.png';
 
-    final String name = userInfo!['username'] ?? '사용자님';
-    final String familyCode = userInfo!['familyCode'] ?? '가족코드';
-    final String birth = userInfo!['birth'] ?? '0000년 00월 00일';
-    final String phone = userInfo!['phone'] ?? '010-0000-0000';
-    final String profileImage = userInfo!['profileImage'] ?? ' ';
-
-    return Stack(
-      children: [
-        // 내용
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 8),
-          child: Column(
+        return Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+          child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 이름, 가족코드, 가족코드 공유
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      name,
+              // 프로필 이미지
+              ClipOval(
+                child: Image.asset(
+                  profileImage,
+                  width: 112,
+                  height: 160,
+                ),
+              ),
+              const SizedBox(width: 4),
+              // 오른쪽 정보들
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '$name님',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 24,
@@ -83,121 +51,84 @@ class _MyinfoState extends State<Myinfo> {
                         fontFamily: 'Pretendard',
                       ),
                     ),
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Row(
+                    // 나머지 정보에만 오른쪽 여백
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8), // 원하는 만큼 조절
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            '가족코드 : $familyCode',
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              fontFamily: 'Pretendard',
-                            ),
+                          const SizedBox(height: 4),
+                          Row(
+                            children: [
+                              Text(
+                                '$familyName',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Pretendard',
+                                ),
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                '$familycode',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Pretendard',
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Text(
+                                  '가족코드공유',
+                                  style: TextStyle(
+                                    color: AppColors.ongiOrange,
+                                    fontSize: 7,
+                                    fontWeight: FontWeight.w600,
+                                    fontFamily: 'Pretendard',
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 8),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
+                          const SizedBox(height: 4),
+                          OutlinedButton(
+                            onPressed: () {},
+                            style: OutlinedButton.styleFrom(
+                              side: const BorderSide(color: AppColors.ongiOrange, width: 2),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 1),
                             ),
                             child: const Text(
-                              '가족코드공유',
+                              '프로필 수정',
                               style: TextStyle(
                                 color: AppColors.ongiOrange,
+                                fontWeight: FontWeight.w700,
                                 fontSize: 13,
-                                fontWeight: FontWeight.w600,
                                 fontFamily: 'Pretendard',
                               ),
                             ),
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 프로필 이미지
-                  CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.white,
-                    backgroundImage: profileImage.isNotEmpty
-                        ? NetworkImage(profileImage)
-                        : const AssetImage('assets/images/default_profile.png') as ImageProvider,
-                  ),
-                  const SizedBox(width: 8),
-                  // 정보
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // 부모 태그
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: AppColors.ongiOrange, width: 1.5),
-                          ),
-                          child: const Text(
-                            '부모 1',
-                            style: TextStyle(
-                              color: AppColors.ongiOrange,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 6,
-                              fontFamily: 'Pretendard',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          birth,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            fontFamily: 'Pretendard',
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // 프로필 수정 버튼
-                        OutlinedButton(
-                          onPressed: () {},
-                          style: OutlinedButton.styleFrom(
-                            side: const BorderSide(color: AppColors.ongiOrange, width: 2),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30),
-                            ),
-                            backgroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                          ),
-                          child: const Text(
-                            '프로필 수정',
-                            style: TextStyle(
-                              color: AppColors.ongiOrange,
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              fontFamily: 'Pretendard',
-                            ),
-                          ),
-                        ),
-                      ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
-        ),
-      ],
+        );
+      },
     );
   }
 }
