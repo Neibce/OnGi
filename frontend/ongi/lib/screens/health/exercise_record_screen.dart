@@ -21,7 +21,7 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
   // Get exercise time for a specific date (placeholder: returns 0)
   Map<String, int> getExerciseTime(DateTime date) {
     // TODO: Replace with real backend call
-    return {'hours': 1, 'minutes': 50};
+    return {'hours': 1, 'minutes': 30};
   }
 
   // Convert page index to date for exercise PageView
