@@ -83,9 +83,9 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
               bottom: 0,
               child: ListView.builder(
                 padding: EdgeInsets.all(10),
-                itemCount: 10,
+                itemCount: 3,
                 itemBuilder: (context, index) {
-                  if (index == 9) {
+                  if (index == 2) {
                     return GestureDetector(
                       onTap: () {
                         Navigator.push(
