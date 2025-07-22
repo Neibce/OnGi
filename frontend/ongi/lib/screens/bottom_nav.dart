@@ -21,7 +21,6 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const HealthHomeScreen(),
-    const AddRecordScreen(),
     const PhotoCalendarScreen(),
     const ProfileScreen(),
   ];
