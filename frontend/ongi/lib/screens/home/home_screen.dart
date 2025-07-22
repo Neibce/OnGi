@@ -5,7 +5,6 @@ import 'package:ongi/screens/home/home_logo.dart';
 import 'package:ongi/screens/home/home_ourfamily_text.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/screens/home/home_donutCapsule.dart';
-import 'package:ongi/core/app_light_background.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -43,24 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentView = 'home';
     });
   }
-  Widget _buildBackButton() {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      left: 20,
-      child: GestureDetector(
-        onTap: _goBackToHome,
-        child: Container(
-          width: 44,
-          height: 44,
-          child: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-            size: 30,
-          ),
-        ),
-      ),
-    );
-  }
   Widget _buildCurrentView(){
     switch(_currentView){
       case 'graph':
@@ -75,7 +56,6 @@ class _HomeScreenState extends State<HomeScreen> {
         HomeDegreeGraph(
           onBack: _goBackToHome,
         ),
-        _buildBackButton(),
       ],
     );
   }
