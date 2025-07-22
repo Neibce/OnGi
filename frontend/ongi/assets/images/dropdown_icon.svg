@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1080" height="1080"
+    viewBox="0 0 1080 1080" xml:space="preserve">
+<g transform="matrix(1 0 0 1 540 540)" id="58459c88-79b6-4df2-862f-4991d3e98a03">
+<rect
+    style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1; visibility: hidden;"
+    vector-effect="non-scaling-stroke" x="-540" y="-540" rx="0" ry="0" width="1080" height="1080" />
+</g>
+    <g transform="matrix(28.42 0 0 28.42 540 540)">
+<path
+    style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(162,162,162); fill-rule: nonzero; opacity: 1;"
+    transform=" translate(-19, -25.72)"
+    d="M 19.0002 31.1982 L 5.18243 17.7526 C 5.07108 17.6419 4.93887 17.5544 4.79347 17.4951 C 4.64807 17.4358 4.49236 17.406 4.33535 17.4073 C 4.17834 17.4086 4.02314 17.441 3.87875 17.5027 C 3.73435 17.5644 3.60362 17.6541 3.49412 17.7666 C 3.38463 17.8791 3.29853 18.0123 3.24082 18.1583 C 3.18312 18.3043 3.15494 18.4603 3.15793 18.6173 C 3.16092 18.7743 3.19501 18.9292 3.25824 19.0729 C 3.32146 19.2166 3.41256 19.3464 3.52626 19.4547 L 18.1721 33.7047 C 18.3938 33.9203 18.6909 34.041 19.0002 34.041 C 19.3095 34.041 19.6066 33.9203 19.8283 33.7047 L 34.4741 19.4547 C 34.5878 19.3464 34.6789 19.2166 34.7421 19.0729 C 34.8053 18.9292 34.8394 18.7743 34.8424 18.6173 C 34.8454 18.4603 34.8172 18.3043 34.7595 18.1583 C 34.7018 18.0123 34.6157 17.8791 34.5062 17.7666 C 34.3967 17.6541 34.266 17.5644 34.1216 17.5027 C 33.9772 17.441 33.822 17.4086 33.665 17.4073 C 33.508 17.406 33.3523 17.4358 33.2069 17.4951 C 33.0615 17.5544 32.9293 17.6419 32.8179 17.7526 L 19.0002 31.1982 Z"
+    stroke-linecap="round" />
+</g>
+</svg>
