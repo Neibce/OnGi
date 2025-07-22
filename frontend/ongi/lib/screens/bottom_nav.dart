@@ -135,6 +135,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             isSelected
                 ? Container(
                     child: iconWidget,
+                  //그림자가 위치했을 곳...
                   )
                 : iconWidget,
             const SizedBox(height: 4),
