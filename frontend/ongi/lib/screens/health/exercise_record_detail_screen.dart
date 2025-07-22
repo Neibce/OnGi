@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import '../../widgets/date_carousel.dart';
 
-class HealthStatusInputScreen extends StatefulWidget {
-  const HealthStatusInputScreen({super.key});
+class ExerciseRecordDetailScreen extends StatelessWidget {
+  final DateTime date;
+  final int hours;
+  final int minutes;
 
-  @override
-  State<HealthStatusInputScreen> createState() => _HealthStatusInputScreenState();
-}
-
-class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
-  Map<int, int> selectedDosages = {};
+  const ExerciseRecordDetailScreen({
+    super.key,
+    required this.date,
+    required this.hours,
+    required this.minutes,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +40,13 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                     ),
                     child: Center(
                       child: Padding(
-                        padding: EdgeInsets.only(top: circleSize * 0.86),
+                        padding: EdgeInsets.only(top: circleSize),
                         child: OverflowBox(
                           maxHeight: double.infinity,
                           child: Column(
                             children: [
                               const Text(
-                                '어느 곳이',
+                                '오늘 목표 운동 시간,',
                                 style: TextStyle(
                                   fontSize: 25,
                                   color: Colors.white,
@@ -55,7 +55,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                 ),
                               ),
                               const Text(
-                                '불편하세요?',
+                                '다 채우셨나요?',
                                 style: TextStyle(
                                   fontSize: 40,
                                   color: Colors.white,
@@ -63,14 +63,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                 ),
                               ),
                               Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: 0,
-                                  vertical: 0,
-                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 6),
                                 child: Image.asset(
-                                  'assets/images/health_status_check_hands.png',
-                                  width: 99,
-                                  height: 99,
+                                  'assets/images/exercise_record_title_logo.png',
+                                  width: circleSize * 0.3,
                                 ),
                               ),
                             ],
@@ -83,29 +79,23 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
               ),
             ),
             Positioned(
-              top: circleSize * 0.3 + 99,
+              top: circleSize * 0.5,
               left: 0,
               right: 0,
-              bottom: 0,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(child: DateCarousel()),
-                  Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(left: 60, right: 60, bottom: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Text("여기부터 본문을 생성 ㅇ.ㅇ"),
-                      ),
-                    ),
-                  ),
-                ],
+              child: Center(
+                child: Text(
+                  '${date.year}-${date.month}-${date.day} : $hours시간 $minutes분',
+                  style: const TextStyle(fontSize: 24),
+                ),
+              ),
+            ),
+            // Back button
+            Positioned(
+              top: 16,
+              left: 16,
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
               ),
             ),
           ],
@@ -113,4 +103,4 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       ),
     );
   }
-}
+} 

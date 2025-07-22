@@ -91,10 +91,10 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                 height: double.infinity,
                 child: Stack(
                   children: [
-                    // 배경 SVG
                     Positioned.fill(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 17),
+                        padding: const EdgeInsets.only(left: 15, right: 15, bottom: 20),
+
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -105,7 +105,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                     ),
                     // 본문 내용
                     Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20),
+                      padding: const EdgeInsets.only(left: 40, right: 40, top: 25, bottom: 20),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -152,50 +152,41 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                               ],
                             ),
                           ),
-                          SizedBox(height:50),
-                          // 가족별 걸음수 리스트만 스크롤
+                          const SizedBox(height: 30),
+                          // 가족별 걸음수 리스트 스크롤
                           Expanded(
-                            child: LayoutBuilder(
-                              builder: (context, constraints) {
-                                final pillWidth = constraints.maxWidth;
-                                return SingleChildScrollView(
-                                  clipBehavior: Clip.none,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                                      _buildStepMember(
-                                        context: context,
-                                        name: '양은명',
-                                        steps: 28301,
-                                        image: 'assets/images/users/elderly_woman.png',
-                                        isTop: true,
-                                        pillWidth: pillWidth,
-                                      ),
-                                      _buildStepMember(
-                                        context: context,
-                                        name: '오애순',
-                                        steps: 20315,
-                                        image: 'assets/images/users/elderly_woman.png',
-                                        pillWidth: pillWidth,
-                                      ),
-                                      _buildStepMember(
-                                        context: context,
-                                        name: '양관식',
-                                        steps: 17336,
-                                        image: 'assets/images/users/elderly_woman.png',
-                                        pillWidth: pillWidth,
-                                      ),
-                                      _buildStepMember(
-                                        context: context,
-                                        name: '양금명',
-                                        steps: 11852,
-                                        image: 'assets/images/users/elderly_woman.png',
-                                        pillWidth: pillWidth,
-                                      ),
-                                    ],
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(bottom: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  _buildStepMember(
+                                    context: context,
+                                    name: '양은명',
+                                    steps: 28301,
+                                    image: 'assets/images/users/elderly_woman.png',
+                                    isTop: true,
                                   ),
-                                );
-                              },
+                                  _buildStepMember(
+                                    context: context,
+                                    name: '오애순',
+                                    steps: 20315,
+                                    image: 'assets/images/users/elderly_woman.png',
+                                  ),
+                                  _buildStepMember(
+                                    context: context,
+                                    name: '양관식',
+                                    steps: 17336,
+                                    image: 'assets/images/users/elderly_woman.png',
+                                  ),
+                                  _buildStepMember(
+                                    context: context,
+                                    name: '양금명',
+                                    steps: 11852,
+                                    image: 'assets/images/users/elderly_woman.png',
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ],
@@ -213,7 +204,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
 }
 
 
-Widget _buildStepMember({required BuildContext context, required String name, required int steps, required String image, bool isTop = false, required double pillWidth}) {
+Widget _buildStepMember({required BuildContext context, required String name, required int steps, required String image, bool isTop = false}) {
   return Container(
     margin: const EdgeInsets.only(bottom: 12),
     child: Row(
