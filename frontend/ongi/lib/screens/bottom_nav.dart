@@ -3,8 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/screens/health/health_home_screen.dart';
 import 'package:ongi/screens/family_tempbar_screen.dart';
-import 'package:ongi/screens/photo_screen.dart';
-import 'package:ongi/screens/mypage_screen.dart';
+import 'package:ongi/screens/photo/photo_date_screen.dart';
+import 'package:ongi/screens/photo/photo_date_screen.dart';
+import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 
 class BottomNavScreen extends StatefulWidget {
@@ -20,7 +21,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const HealthHomeScreen(),
-    const AddRecordScreen(),
+    const PhotoDateScreen(),
     const FamilyTempbarScreen(),
     const ProfileScreen(),
   ];
