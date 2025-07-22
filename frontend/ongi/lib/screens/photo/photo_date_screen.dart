@@ -88,12 +88,6 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                           itemBuilder: (context, idx) {
                             final photo = _photos[idx];
                             final isActive = idx == _currentPage;
-                            Alignment imageAlign = Alignment.center;
-                            if (idx < _currentPage) {
-                              imageAlign = Alignment.centerLeft;
-                            } else if (idx > _currentPage) {
-                              imageAlign = Alignment.centerRight;
-                            }
                             return AnimatedContainer(
                               duration: const Duration(milliseconds: 200),
                               margin: EdgeInsets.symmetric(
@@ -113,7 +107,6 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                             width: cardWidth,
                                             height: cardHeight,
                                             fit: BoxFit.cover,
-                                            alignment: imageAlign,
                                           )
                                         : ImageFiltered(
                                             imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
@@ -124,7 +117,6 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                                 width: cardWidth,
                                                 height: cardHeight,
                                                 fit: BoxFit.cover,
-                                                alignment: imageAlign,
                                               ),
                                             ),
                                           ),
