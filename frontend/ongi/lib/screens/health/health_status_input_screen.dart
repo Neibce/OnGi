@@ -7,7 +7,8 @@ class HealthStatusInputScreen extends StatefulWidget {
   const HealthStatusInputScreen({super.key});
 
   @override
-  State<HealthStatusInputScreen> createState() => _HealthStatusInputScreenState();
+  State<HealthStatusInputScreen> createState() =>
+      _HealthStatusInputScreenState();
 }
 
 class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
@@ -84,7 +85,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
               ),
             ),
             Positioned(
-              top: circleSize * 0.3 + 99,
+              top: circleSize * 0.3 + 65,
               left: 0,
               right: 0,
               bottom: 0,
@@ -93,43 +94,50 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                 children: [
                   Center(child: DateCarousel()),
                   Expanded(
-                    child: Container(
-                      width: double.infinity,
-                      margin: const EdgeInsets.only(left: 80, right: 80, bottom: 20),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Stack(
-                        children: [
-                          Center(
-                            child: Image.asset(
-                              isFront
-                                ? 'assets/images/body_front.png'
-                                : 'assets/images/body_back.png',
-                              height: 400, // 필요시 반응형으로 조정
-                              fit: BoxFit.contain,
-                            ),
-                          ),
-                          Positioned(
-                            right: 16,
-                            bottom: 16,
-                            child: GestureDetector(
-                              onTap: () {
-                                setState(() {
-                                  isFront = !isFront;
-                                });
-                              },
+                    child: Transform.translate(
+                      offset: const Offset(0, -10),
+                      child: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(
+                          left: 80,
+                          right: 80,
+                          bottom: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Stack(
+                          children: [
+                            Center(
                               child: Image.asset(
                                 isFront
-                                  ? 'assets/images/body_front_btn.png'
-                                  : 'assets/images/body_back_btn.png',
-                                width: 60,
-                                height: 60,
+                                    ? 'assets/images/body_front.png'
+                                    : 'assets/images/body_back.png',
+                                height: 400, // 필요시 반응형으로 조정
+                                fit: BoxFit.contain,
                               ),
                             ),
-                          ),
-                        ],
+                            Positioned(
+                              right: 16,
+                              bottom: 16,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    isFront = !isFront;
+                                  });
+                                },
+                                child: Image.asset(
+                                  isFront
+                                      ? 'assets/images/body_front_btn.png'
+                                      : 'assets/images/body_back_btn.png',
+                                  width: 60,
+                                  height: 60,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
