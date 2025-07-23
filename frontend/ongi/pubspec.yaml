@@ -56,6 +56,7 @@ flutter:
     - assets/images/users/elderly_woman.png
     - assets/images/close_icon_orange.svg
     - assets/images/close_icon_black.svg
+    - assets/images/back_icon_black.svg
     - assets/images/dropdown_icon.svg
     - assets/images/camera_button.svg
     - assets/images/step_tracker_crown.svg

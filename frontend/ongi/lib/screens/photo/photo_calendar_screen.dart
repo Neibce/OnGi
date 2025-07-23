@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/core/app_colors.dart';
@@ -254,18 +255,14 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
         children: [
           const PhotoDateScreen(),
           Positioned(
-            top: MediaQuery.of(context).padding.top + 16,
-            left: 20,
+            top: MediaQuery.of(context).padding.top - 10,
+            left: 40,
             child: GestureDetector(
               onTap: _goBackToCalendar,
-              child: const SizedBox(
-                width: 44,
-                height: 44,
-                child: Icon(
-                  Icons.arrow_back_ios,
-                  color: AppColors.ongiOrange,
-                  size: 30,
-                ),
+              child: SizedBox(
+                width: 36,
+                height: 36,
+                child: SvgPicture.asset('assets/images/back_icon_black.svg'),
               ),
             ),
           ),
