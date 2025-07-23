@@ -167,7 +167,7 @@ class ModeScreen extends StatelessWidget {
                     ),
                     child: const Text("부모"),
                   ),
-                  const SizedBox(width: 25),
+                  const SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: () => _setModeAndRegister(context, 'child'),
                     style: ElevatedButton.styleFrom(
