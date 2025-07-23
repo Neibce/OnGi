@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/screens/home/home_ourfamily_text_withoutUser.dart';
@@ -50,26 +51,34 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                 onTap: widget.onBack ?? () => Navigator.of(context).pop(),
                 child: Padding(
                   padding: EdgeInsets.only(
-                    left: 32,
-                    top: MediaQuery.of(context).size.height * 0.08,
+                    left: 40,
+                    top: MediaQuery.of(context).size.height * 0.06,
                   ),
-                  child: Icon(Icons.arrow_back_ios, color: Colors.black, size: 28),
+                  child: SizedBox(
+                    width: 36,
+                    height: 36,
+                    child: SvgPicture.asset(
+                      'assets/images/back_icon_black.svg',
+                    ),
+                  ),
                 ),
               ),
+              SizedBox(height: MediaQuery.of(context).size.height * 0.025),
               // 타이틀
               const HomeOngiTextWithoutUser(),
               // 카드
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                   ),
                   padding: const EdgeInsets.all(20),
-                  child: showHistory
-                      ? _buildHistoryList()
-                      : _buildGraphCard(),
+                  child: showHistory ? _buildHistoryList() : _buildGraphCard(),
                 ),
               ),
             ],
@@ -101,10 +110,8 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                 show: true,
                 drawVerticalLine: false,
                 horizontalInterval: 0.5,
-                getDrawingHorizontalLine: (value) => FlLine(
-                  color: Colors.grey[300],
-                  strokeWidth: 1,
-                ),
+                getDrawingHorizontalLine: (value) =>
+                    FlLine(color: Colors.grey[300], strokeWidth: 1),
               ),
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
@@ -112,7 +119,8 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     showTitles: true,
                     interval: 0.5,
                     getTitlesWidget: (value, meta) {
-                      if (value == 35.2 || value == 40.5) return const SizedBox.shrink();
+                      if (value == 35.2 || value == 40.5)
+                        return const SizedBox.shrink();
                       return Text(
                         value.toStringAsFixed(1),
                         style: const TextStyle(
@@ -131,7 +139,8 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     getTitlesWidget: (value, meta) {
                       if (value % 1 != 0) return const SizedBox.shrink();
                       int idx = value.toInt();
-                      if (idx < 0 || idx >= dates.length) return const SizedBox.shrink();
+                      if (idx < 0 || idx >= dates.length)
+                        return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
@@ -147,12 +156,14 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     interval: 1,
                   ),
                 ),
-                rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
+                topTitles: AxisTitles(
+                  sideTitles: SideTitles(showTitles: false),
+                ),
               ),
-              borderData: FlBorderData(
-                show: false,
-              ),
+              borderData: FlBorderData(show: false),
               lineBarsData: [
                 LineChartBarData(
                   spots: spots,
@@ -162,12 +173,13 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   isStrokeCapRound: true,
                   dotData: FlDotData(
                     show: true,
-                    getDotPainter: (spot, percent, bar, index) => FlDotCirclePainter(
-                      radius: 3,
-                      color: Colors.white,
-                      strokeWidth: 2.5,
-                      strokeColor: Colors.orange,
-                    ),
+                    getDotPainter: (spot, percent, bar, index) =>
+                        FlDotCirclePainter(
+                          radius: 3,
+                          color: Colors.white,
+                          strokeWidth: 2.5,
+                          strokeColor: Colors.orange,
+                        ),
                   ),
                 ),
               ],
@@ -223,11 +235,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                         ),
                       ),
                       if (idx != history.length - 1)
-                        Container(
-                          width: 2,
-                          height: 24,
-                          color: Colors.orange,
-                        ),
+                        Container(width: 2, height: 24, color: Colors.orange),
                     ],
                   ),
                   const SizedBox(width: 8),
