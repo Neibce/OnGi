@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/widgets/custom_drop_down.dart';
+import 'package:ongi/screens/health/pill_update_popup.dart';
 
 class AddPillScreen extends StatefulWidget {
   const AddPillScreen({super.key});
@@ -14,12 +15,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
   Set<String> selectedDays = <String>{};
   final List<String> days = ['일', '월', '화', '수', '목', '금', '토'];
   String selectedFrequency = '하루 세 번';
-  final List<String> frequencies = [
-    '하루 한 번',
-    '하루 두 번',
-    '하루 세 번',
-    '하루 네 번',
-  ];
+  final List<String> frequencies = ['하루 한 번', '하루 두 번', '하루 세 번', '하루 네 번'];
   String selectedTime = '08:00';
   final List<String> times = [
     '00:00',
@@ -96,7 +92,11 @@ class _AddPillScreenState extends State<AddPillScreen> {
                     children: [
                       const SizedBox(height: 150),
                       Padding(
-                        padding: const EdgeInsets.only(left: 40, right: 40, top: 10),
+                        padding: const EdgeInsets.only(
+                          left: 40,
+                          right: 40,
+                          top: 10,
+                        ),
                         child: TextField(
                           //controller: _passwordCtrl,
                           keyboardType: TextInputType.visiblePassword,
@@ -155,7 +155,9 @@ class _AddPillScreenState extends State<AddPillScreen> {
                                   final isSelected = selectedDays.contains(day);
                                   final isLastItem = index == days.length - 1;
                                   return Padding(
-                                    padding: EdgeInsets.only(right: isLastItem ? 40 : 12),
+                                    padding: EdgeInsets.only(
+                                      right: isLastItem ? 40 : 12,
+                                    ),
                                     child: GestureDetector(
                                       onTap: () {
                                         setState(() {
@@ -239,9 +241,12 @@ class _AddPillScreenState extends State<AddPillScreen> {
                             itemCount: selectedTimes.length,
                             itemBuilder: (context, index) {
                               final time = selectedTimes[index];
-                              final isLastItem = index == selectedTimes.length - 1;
+                              final isLastItem =
+                                  index == selectedTimes.length - 1;
                               return Padding(
-                                padding: EdgeInsets.only(right: isLastItem ? 40 : 12),
+                                padding: EdgeInsets.only(
+                                  right: isLastItem ? 40 : 12,
+                                ),
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16,
@@ -308,14 +313,25 @@ class _AddPillScreenState extends State<AddPillScreen> {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40, top: 20),
+                padding: const EdgeInsets.only(
+                  left: 20,
+                  right: 20,
+                  bottom: 40,
+                  top: 20,
+                ),
                 child: SizedBox(
                   width: double.infinity,
                   height: 72,
                   child: ElevatedButton(
                     onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => PillUpdatePopup(),
+                        ),
+                      );
                       print('약 정보 등록');
-                      Navigator.of(context).pop();
+                      // Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.ongiOrange,
@@ -341,7 +357,10 @@ class _AddPillScreenState extends State<AddPillScreen> {
             top: 80,
             right: 30,
             child: IconButton(
-              icon: SvgPicture.asset('assets/images/close_icon_black.svg', width: 28),
+              icon: SvgPicture.asset(
+                'assets/images/close_icon_black.svg',
+                width: 28,
+              ),
               onPressed: () {
                 Navigator.of(context).pop();
               },

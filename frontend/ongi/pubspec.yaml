@@ -37,6 +37,7 @@ flutter:
   assets:
     - assets/images/logo.svg
     - assets/images/logo.png
+    - assets/images/logo_white.svg
     - assets/images/nav_Home.svg
     - assets/images/nav_Health.svg
     - assets/images/nav_Commun.svg
@@ -56,6 +57,7 @@ flutter:
     - assets/images/users/elderly_woman.png
     - assets/images/close_icon_orange.svg
     - assets/images/close_icon_black.svg
+    - assets/images/close_icon_white.svg
     - assets/images/back_icon_black.svg
     - assets/images/dropdown_icon.svg
     - assets/images/camera_button.svg
