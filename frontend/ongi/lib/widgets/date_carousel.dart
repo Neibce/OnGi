@@ -27,12 +27,14 @@ class _DateCarouselState extends State<DateCarousel> {
   int _currentIndex = _kInitialPage;
   bool _isUpdating = false;
   int? _lastUpdateTime;
-  static const int _debounceMs = 100; // Reduced to 100ms for better responsiveness
+  static const int _debounceMs =
+      100; // Reduced to 100ms for better responsiveness
 
   @override
   void initState() {
     super.initState();
-    _controller = widget.controller ?? PageController(initialPage: _kInitialPage);
+    _controller =
+        widget.controller ?? PageController(initialPage: _kInitialPage);
   }
 
   @override
@@ -51,15 +53,7 @@ class _DateCarouselState extends State<DateCarousel> {
 
   // Korean weekday string.
   String _weekdayKor(DateTime date) {
-    const weekdays = [
-      '월요일',
-      '화요일',
-      '수요일',
-      '목요일',
-      '금요일',
-      '토요일',
-      '일요일',
-    ];
+    const weekdays = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
     return weekdays[date.weekday - 1];
   }
 
@@ -71,16 +65,18 @@ class _DateCarouselState extends State<DateCarousel> {
     if (_isUpdating || page == _currentIndex) return;
     if (!_controller.hasClients) return; // attach 안됐으면 무시
     _isUpdating = true;
-      _controller.animateToPage(
-        page,
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.ease,
-      ).then((_) {
-        Future.delayed(const Duration(milliseconds: 50), () {
-          _isUpdating = false;
+    _controller
+        .animateToPage(
+          page,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.ease,
+        )
+        .then((_) {
+          Future.delayed(const Duration(milliseconds: 50), () {
+            _isUpdating = false;
+          });
         });
-      });
-    }
+  }
 
   void _goPrevious() {
     _goToPage(_currentIndex - 1);
@@ -100,33 +96,40 @@ class _DateCarouselState extends State<DateCarousel> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             IconButton(
-              icon: const Icon(Icons.chevron_left),
+              icon: const Icon(Icons.chevron_left, size: 28),
+              iconSize: 28,
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               onPressed: _goPrevious,
             ),
             Column(
               mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _formatDate(currentDate),
-                    style: Theme.of(context).textTheme.titleMedium,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    softWrap: false,
+              children: [
+                Text(
+                  _formatDate(currentDate),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
                   ),
-                  Text(
-                    _weekdayKor(currentDate),
-                    style: Theme.of(context)
-                        .textTheme
-                        .displaySmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    softWrap: false,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+                Text(
+                  _weekdayKor(currentDate),
+                  style: const TextStyle(
+                    fontSize: 33,
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  softWrap: false,
+                ),
+              ],
             ),
             IconButton(
-              icon: const Icon(Icons.chevron_right),
+              icon: const Icon(Icons.chevron_right, size: 28),
+              iconSize: 28,
+              constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
               onPressed: _goNext,
             ),
           ],
@@ -160,4 +163,4 @@ class _DateCarouselState extends State<DateCarousel> {
       ],
     );
   }
-} 
+}
