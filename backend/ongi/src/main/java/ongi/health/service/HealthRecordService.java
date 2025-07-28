@@ -30,13 +30,6 @@ public class HealthRecordService {
         return painRecordRepository.save(record);
     }
 
-    // 최근 7일간 통증 기록 조회
-    public List<PainRecord> getPainRecordsForLast7Days(UUID parentId) {
-        LocalDate endDate = LocalDate.now();
-        LocalDate startDate = endDate.minusDays(6); // 오늘 포함 7일
-        return painRecordRepository.findByParentIdAndDateBetweenOrderByDateDesc(parentId, startDate, endDate);
-    }
-
     // 운동 기록 추가
     @Transactional
     public ExerciseRecord addExerciseRecord(UUID parentId, LocalDate date, int duration) {
@@ -48,8 +41,15 @@ public class HealthRecordService {
         return exerciseRecordRepository.save(record);
     }
 
+    // 최근 7일간 통증 기록 조회
+    public List<PainRecord> getParentPainRecordsForLast7Days(UUID parentId) {
+        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = endDate.minusDays(6); // 오늘 포함 7일
+        return painRecordRepository.findByParentIdAndDateBetweenOrderByDateDesc(parentId, startDate, endDate);
+    }
+
     // 최근 7일간 운동 기록 조회
-    public List<ExerciseRecord> getExerciseRecordsForLast7Days(UUID parentId) {
+    public List<ExerciseRecord> getParentExerciseRecordsForLast7Days(UUID parentId) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(6); // 오늘 포함 7일
         return exerciseRecordRepository.findByParentIdAndDateBetweenOrderByDateDesc(parentId, startDate, endDate);
