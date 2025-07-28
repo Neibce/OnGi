@@ -20,10 +20,21 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
   bool _isSwipeTriggered =
       false; // Prevent button callback when triggered by swipe
 
-  // Get exercise time for a specific date (placeholder: returns 0)
+  // Store exercise times for different dates
+  Map<String, Map<String, int>> exerciseTimes = {};
+
+  // Get exercise time for a specific date
   Map<String, int> getExerciseTime(DateTime date) {
-    // TODO: Replace with real backend call
-    return {'hours': 1, 'minutes': 30};
+    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    return exerciseTimes[dateKey] ?? {'hours': 0, 'minutes': 0};
+  }
+
+  // Save exercise time for a specific date
+  void saveExerciseTime(DateTime date, int hours, int minutes) {
+    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    setState(() {
+      exerciseTimes[dateKey] = {'hours': hours, 'minutes': minutes};
+    });
   }
 
   // Convert page index to date for exercise PageView
@@ -149,8 +160,8 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                   getExerciseTime(date);
 
                                               return GestureDetector(
-                                                onTap: () {
-                                                  Navigator.push(
+                                                onTap: () async {
+                                                  final result = await Navigator.push(
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (_) =>
@@ -165,6 +176,13 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                           ),
                                                     ),
                                                   );
+                                                  
+                                                  // Handle returned exercise time data
+                                                  if (result != null && result is Map<String, dynamic>) {
+                                                    final returnedHours = result['hours'] as int;
+                                                    final returnedMinutes = result['minutes'] as int;
+                                                    saveExerciseTime(date, returnedHours, returnedMinutes);
+                                                  }
                                                 },
                                                 child: Padding(
                                                   padding:
