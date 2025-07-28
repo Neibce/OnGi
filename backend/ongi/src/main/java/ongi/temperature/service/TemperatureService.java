@@ -12,6 +12,7 @@ import ongi.user.entity.User;
 import ongi.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -161,27 +162,6 @@ public class TemperatureService {
         }
     }
 
-    // 가족 모두 감정기록 업로드 시 온도 추가 상승
-    public void increaseTemperatureForAllEmotionUpload(String familyId) {
-        var family = familyRepository.findById(familyId)
-                .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
-        var members = family.getMembers();
-        java.time.LocalDate today = getToday();
-        boolean allUploaded = members.stream().allMatch(
-                userId -> temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(userId, familyId, REASON_EMOTION_UPLOAD, today)
-        );
-        boolean alreadyIncreased = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_ALL_EMOTION_UPLOAD, today);
-        if (allUploaded && !alreadyIncreased) {
-            Temperature temp = Temperature.builder()
-                    .userId(null)
-                    .familyId(familyId)
-                    .temperature(0.5)
-                    .reason(REASON_ALL_EMOTION_UPLOAD)
-                    .build();
-            temperatureRepository.save(temp);
-        }
-    }
-
     // 부모 통증 부위 입력 오늘 1회만 온도 상승
     public void increaseTemperatureForParentPainInput(UUID userId, String familyId) {
         java.time.LocalDate today = getToday();
@@ -267,38 +247,103 @@ public class TemperatureService {
         }
     }
 
-    // 가족 만보기 걸음수 충족 시 온도 상승
-    // 메서드 적용 시 가족 만보기 총 걸음수가 하루 {(부모 수) x 7,000 + (자녀 수) x 10,000}보 이상인지 검사 필요
-    public void increaseTemperatureForStepGoal(String familyId) {
-        java.time.LocalDate today = getToday();
-        boolean alreadyIncreased = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_STEP_GOAL, today);
-        if (!alreadyIncreased) {
-            Temperature temp = Temperature.builder()
-                    .userId(null)
-                    .familyId(familyId)
-                    .temperature(0.2)
-                    .reason(REASON_STEP_GOAL)
-                    .build();
-            temperatureRepository.save(temp);
+
+    // 매일 23:59:59에 당일의 가족별 보너스 온도 상승 처리
+    @Scheduled(cron = "59 59 23 * * *")
+    @Transactional
+    public void processFamilyBonusTemperature() {
+        var families = familyRepository.findAll();
+        java.time.LocalDate targetDate = getToday(); // 오늘 날짜
+        for (var family : families) {
+            String familyId = family.getCode();
+            var members = family.getMembers();
+            
+            // 전체 가족 구성원이 감정기록 업로드 시 보너스
+            boolean allEmotionUploaded = members.stream().allMatch(
+                userId -> temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(userId, familyId, REASON_EMOTION_UPLOAD, targetDate)
+            );
+            boolean alreadyEmotionBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_ALL_EMOTION_UPLOAD, targetDate);
+            if (allEmotionUploaded && !alreadyEmotionBonus) {
+                Temperature temp = Temperature.builder()
+                        .userId(null)
+                        .familyId(familyId)
+                        .temperature(0.5)
+                        .reason(REASON_ALL_EMOTION_UPLOAD)
+                        .build();
+                temperatureRepository.save(temp);
+            }
+            // 만보기 걸음 수 충족 시 보너스
+            boolean alreadyStepBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_STEP_GOAL, targetDate);
+            // TODO: 가족 만보기 총 걸음수가 하루 {(부모 수) x 7,000 + (자녀 수) x 10,000}보 이상인지 검사 필요
+            boolean stepGoalMet = false; // 실제 조건으로 대체 필요
+            if (stepGoalMet && !alreadyStepBonus) {
+                Temperature temp = Temperature.builder()
+                        .userId(null)
+                        .familyId(familyId)
+                        .temperature(0.2)
+                        .reason(REASON_STEP_GOAL)
+                        .build();
+                temperatureRepository.save(temp);
+            }
         }
     }
 
 
+    // 매일 23:59:59에 당일의 가족별 온도 하락 처리
+    @Scheduled(cron = "59 59 23 * * *")
+    @Transactional
+    public void processFamilyTemperatureDecrease() {
+        var families = familyRepository.findAll();
+        for (var family : families) {
+            String familyId = family.getCode();
+            decreaseTemperatureForInactiveParent(familyId);
+            decreaseTemperatureForInactiveChild(familyId);
+            decreaseTemperatureForNoLogin(familyId);
+        }
+    }
 
-
-    // 온도 하락 메서드
     // 부모 1명 이상 일주일 미접속 시 온도 하락
     public void decreaseTemperatureForInactiveParent(String familyId) {
-        // TODO: 부모 미접속 시 온도 하락(-15도) 로직 구현
+        // TODO: 부모 미접속 판별 로직 필요
+        boolean parentInactive = false; // 실제 판별로 대체
+        if (parentInactive) {
+            Temperature temp = Temperature.builder()
+                .userId(null)
+                .familyId(familyId)
+                .temperature(-15.0)
+                .reason("INACTIVE_PARENT")
+                .build();
+            temperatureRepository.save(temp);
+        }
     }
 
     // 자녀 1명 이상 일주일 미접속 시 온도 하락
     public void decreaseTemperatureForInactiveChild(String familyId) {
-        // TODO: 자녀 미접속 시 온도 하락(-15도) 로직 구현
+        // TODO: 자녀 미접속 판별 로직 필요
+        boolean childInactive = false; // 실제 판별로 대체
+        if (childInactive) {
+            Temperature temp = Temperature.builder()
+                .userId(null)
+                .familyId(familyId)
+                .temperature(-15.0)
+                .reason("INACTIVE_CHILD")
+                .build();
+            temperatureRepository.save(temp);
+        }
     }
 
     // 하루 동안 아무도 미접속 시 온도 하락
     public void decreaseTemperatureForNoLogin(String familyId) {
-        // TODO: 하루 미접속 시 온도 하락(-1도) 로직 구현
+        // TODO: 전체 미접속 판별 로직 필요
+        boolean noLogin = false; // 실제 판별로 대체
+        if (noLogin) {
+            Temperature temp = Temperature.builder()
+                .userId(null)
+                .familyId(familyId)
+                .temperature(-1.0)
+                .reason("NO_LOGIN")
+                .build();
+            temperatureRepository.save(temp);
+        }
     }
 }
