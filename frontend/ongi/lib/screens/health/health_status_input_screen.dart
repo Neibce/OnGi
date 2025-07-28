@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import '../../widgets/date_carousel.dart';
 
 class HealthStatusInputScreen extends StatefulWidget {
   const HealthStatusInputScreen({super.key});
 
   @override
-  State<HealthStatusInputScreen> createState() => _HealthStatusInputScreenState();
+  State<HealthStatusInputScreen> createState() =>
+      _HealthStatusInputScreenState();
 }
 
 class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Map<int, int> selectedDosages = {};
+  bool isFront = true;
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                     ),
                     child: Center(
                       child: Padding(
-                        padding: EdgeInsets.only(top: circleSize * 0.65),
+                        padding: EdgeInsets.only(top: circleSize * 0.86),
                         child: OverflowBox(
                           maxHeight: double.infinity,
                           child: Column(
@@ -60,6 +64,17 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
+                              Container(
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: 0,
+                                  vertical: 6,
+                                ),
+                                child: Image.asset(
+                                  'assets/images/sitting_mom_icon.png',
+                                  width: 110,
+                                  height: 110,
+                                ),
+                              ),
                             ],
                           ),
                         ),
@@ -70,11 +85,64 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
               ),
             ),
             Positioned(
-              top: circleSize * 0.3 + 40,
+              top: circleSize * 0.3 + 65,
               left: 0,
               right: 0,
               bottom: 0,
-              child: Text("여기부터 본문을 생성 ㅇ.ㅇ"),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Center(child: DateCarousel()),
+                  Expanded(
+                    child: Transform.translate(
+                      offset: const Offset(0, -10),
+                      child: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.only(
+                          left: 80,
+                          right: 80,
+                          bottom: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Stack(
+                          children: [
+                            Center(
+                              child: Image.asset(
+                                isFront
+                                    ? 'assets/images/body_front.png'
+                                    : 'assets/images/body_back.png',
+                                height: 400, // 필요시 반응형으로 조정
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            Positioned(
+                              right: 16,
+                              bottom: 16,
+                              child: GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    isFront = !isFront;
+                                  });
+                                },
+                                child: Image.asset(
+                                  isFront
+                                      ? 'assets/images/body_front_btn.png'
+                                      : 'assets/images/body_back_btn.png',
+                                  width: 60,
+                                  height: 60,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

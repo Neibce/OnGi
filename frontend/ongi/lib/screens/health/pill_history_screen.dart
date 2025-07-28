@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../core/app_colors.dart';
+import 'package:ongi/core/app_colors.dart';
+import 'add_pill_screen.dart';
 
 class PillHistoryScreen extends StatefulWidget {
   const PillHistoryScreen({super.key});
@@ -82,12 +83,17 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
               bottom: 0,
               child: ListView.builder(
                 padding: EdgeInsets.all(10),
-                itemCount: 10,
+                itemCount: 3,
                 itemBuilder: (context, index) {
-                  if (index == 9) {
+                  if (index == 2) {
                     return GestureDetector(
                       onTap: () {
-                        print("ee");
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const AddPillScreen(),
+                          ),
+                        );
                       },
                       child: Container(
                         margin: EdgeInsets.symmetric(horizontal: 0, vertical: 6),

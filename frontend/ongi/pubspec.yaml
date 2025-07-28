@@ -21,6 +21,9 @@ dependencies:
   firebase_messaging: ^15.2.9
   flutter_charts: ^0.5.2
   fl_chart: ^1.0.0
+  table_calendar: ^3.2.0
+  intl: ^0.20.2
+  camera: ^0.11.2
 
 dev_dependencies:
   flutter_test:
@@ -34,6 +37,7 @@ flutter:
   assets:
     - assets/images/logo.svg
     - assets/images/logo.png
+    - assets/images/logo_white.svg
     - assets/images/nav_Home.svg
     - assets/images/nav_Health.svg
     - assets/images/nav_Commun.svg
@@ -51,6 +55,20 @@ flutter:
     - assets/images/exercise_record_title_logo.png
     - assets/images/walk_icon.svg
     - assets/images/users/elderly_woman.png
+    - assets/images/close_icon_orange.svg
+    - assets/images/close_icon_black.svg
+    - assets/images/close_icon_white.svg
+    - assets/images/back_icon_black.svg
+    - assets/images/dropdown_icon.svg
+    - assets/images/camera_button.svg
+    - assets/images/step_tracker_crown.svg
+    - assets/images/step_tracker_light_background.svg
+    - assets/images/step_tracker_rectangle.svg
+    - assets/images/sample_family_photo.png
+    - assets/images/body_front.png
+    - assets/images/body_front_btn.png
+    - assets/images/body_back.png
+    - assets/images/body_back_btn.png
 
   fonts:
     - family: Pretendard

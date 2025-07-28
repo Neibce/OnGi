@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:ongi/screens/add_record_screen.dart';
 import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/screens/health/health_home_screen.dart';
-import 'package:ongi/screens/family_tempbar_screen.dart';
-import 'package:ongi/screens/photo_screen.dart';
+import 'package:ongi/screens/photo/photo_calendar_screen.dart';
+import 'package:ongi/screens/photo/photo_date_screen.dart';
 import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 
@@ -20,8 +21,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const HealthHomeScreen(),
-    const AddRecordScreen(),
-    const FamilyTempbarScreen(),
+    const PhotoCalendarScreen(),
     const ProfileScreen(),
   ];
 
@@ -76,7 +76,14 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             '건강 기록',
           ),
           GestureDetector(
-            onTap: () => _onTabTapped(2),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AddRecordScreen(),
+                ),
+              );
+            },
             child: Container(
               width: 56,
               height: 56,
@@ -84,7 +91,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [ AppColors.ongiBlue, AppColors.ongiOrange ],
+                  colors: [AppColors.ongiBlue, AppColors.ongiOrange],
                 ),
                 shape: BoxShape.circle,
                 boxShadow: [
@@ -99,10 +106,10 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             ),
           ),
           _buildNavItem(
-            3,
+            2,
             SvgPicture.asset(
               'assets/images/nav_Commun.svg',
-              color: _currentIndex == 3
+              color: _currentIndex == 2
                   ? AppColors.ongiOrange
                   : Colors.grey[300]!,
               width: 24,
@@ -111,10 +118,10 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             '앨범',
           ),
           _buildNavItem(
-            4,
+            3,
             SvgPicture.asset(
               'assets/images/nav_Mypage.svg',
-              color: _currentIndex == 4
+              color: _currentIndex == 3
                   ? AppColors.ongiOrange
                   : Colors.grey[300]!,
               width: 24,
@@ -144,8 +151,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               text,
               style: TextStyle(
                 fontSize: 12,
-                color:isSelected? AppColors.ongiOrange
-                    : Colors.grey[300],
+                color: isSelected ? AppColors.ongiOrange : Colors.grey[300],
                 fontFamily: 'Pretendard',
                 fontWeight: FontWeight.w600,
               ),

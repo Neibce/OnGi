@@ -42,24 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentView = 'home';
     });
   }
-  Widget _buildBackButton() {
-    return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      left: 20,
-      child: GestureDetector(
-        onTap: _goBackToHome,
-        child: Container(
-          width: 44,
-          height: 44,
-          child: Icon(
-            Icons.arrow_back_ios,
-            color: Colors.white,
-            size: 30,
-          ),
-        ),
-      ),
-    );
-  }
   Widget _buildCurrentView(){
     switch(_currentView){
       case 'graph':

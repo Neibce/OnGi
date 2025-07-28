@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
+import '../../widgets/date_carousel.dart';
+import 'exercise_record_detail_screen.dart';
 
 class ExerciseRecordScreen extends StatefulWidget {
   const ExerciseRecordScreen({super.key});
@@ -9,6 +11,52 @@ class ExerciseRecordScreen extends StatefulWidget {
 }
 
 class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
+  DateTime selectedDate = DateTime.now();
+  late PageController _exercisePageController;
+  int _currentExercisePage = 5000; // Start from middle for infinite scroll
+  late PageController _dateCarouselController;
+  bool _isButtonTriggered =
+      false; // Prevent exercise onPageChanged when triggered by button
+  bool _isSwipeTriggered =
+      false; // Prevent button callback when triggered by swipe
+
+  // Store exercise times for different dates
+  Map<String, Map<String, int>> exerciseTimes = {};
+
+  // Get exercise time for a specific date
+  Map<String, int> getExerciseTime(DateTime date) {
+    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    return exerciseTimes[dateKey] ?? {'hours': 0, 'minutes': 0};
+  }
+
+  // Save exercise time for a specific date
+  void saveExerciseTime(DateTime date, int hours, int minutes) {
+    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    setState(() {
+      exerciseTimes[dateKey] = {'hours': hours, 'minutes': minutes};
+    });
+  }
+
+  // Convert page index to date for exercise PageView
+  DateTime _dateFromExercisePage(int page) {
+    final offset = page - 5000;
+    return DateTime.now().add(Duration(days: offset));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _exercisePageController = PageController(initialPage: _currentExercisePage);
+    _dateCarouselController = PageController(initialPage: 5000);
+  }
+
+  @override
+  void dispose() {
+    _exercisePageController.dispose();
+    _dateCarouselController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
@@ -20,6 +68,336 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
         child: Stack(
           clipBehavior: Clip.none,
           children: [
+            Positioned(
+              top: circleSize * 0.45,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                          left: 15,
+                          right: 15,
+                          bottom: 20,
+                        ),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Content inside white container
+                    Builder(
+                      builder: (context) {
+                        final exerciseTime = getExerciseTime(selectedDate);
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 20, right: 20),
+                          child: Column(
+                            children: [
+                              const SizedBox(height: 130),
+                              Row(
+                                children: [
+                                  Spacer(),
+                                  Expanded(
+                                    flex: 2,
+                                    child: SizedBox(
+                                      height: 100,
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 40,
+                                        ),
+                                        child: DateCarousel(
+                                          initialDate: selectedDate,
+                                          controller: _dateCarouselController,
+                                          onDateChanged: (date) {
+                                            if (_isSwipeTriggered)
+                                              return; // Ignore if triggered by swipe
+                                            _updateFromButton(date);
+                                          },
+                                          builder: (context, date) {
+                                            return const SizedBox.shrink();
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Expanded(
+                                child: SingleChildScrollView(
+                                  child: Padding(
+                                    padding: EdgeInsets.only(
+                                      left: 10,
+                                      right: 10,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        // Exercise time section
+                                        SizedBox(
+                                          height: 200,
+                                          child: PageView.builder(
+                                            controller: _exercisePageController,
+                                            pageSnapping: true,
+                                            physics:
+                                                const ClampingScrollPhysics(),
+                                            onPageChanged: (index) {
+                                              if (_isButtonTriggered)
+                                                return; // Ignore if triggered by button
+                                              _updateFromSwipe(index);
+                                            },
+                                            itemCount: 10000,
+                                            itemBuilder: (context, index) {
+                                              final date =
+                                                  _dateFromExercisePage(index);
+                                              final exerciseTimeForDate =
+                                                  getExerciseTime(date);
+
+                                              return GestureDetector(
+                                                onTap: () async {
+                                                  final result = await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          ExerciseRecordDetailScreen(
+                                                            date: date,
+                                                            hours:
+                                                                exerciseTimeForDate['hours'] ??
+                                                                0,
+                                                            minutes:
+                                                                exerciseTimeForDate['minutes'] ??
+                                                                0,
+                                                          ),
+                                                    ),
+                                                  );
+                                                  
+                                                  // Handle returned exercise time data
+                                                  if (result != null && result is Map<String, dynamic>) {
+                                                    final returnedHours = result['hours'] as int;
+                                                    final returnedMinutes = result['minutes'] as int;
+                                                    saveExerciseTime(date, returnedHours, returnedMinutes);
+                                                  }
+                                                },
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        left: 15,
+                                                        right: 15,
+                                                      ),
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment
+                                                            .center,
+                                                    children: [
+                                                      Align(
+                                                        alignment: Alignment.centerLeft,
+                                                        child: const Text(
+                                                          '오늘은',
+                                                          style: TextStyle(
+                                                            fontSize: 20,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: AppColors
+                                                                .ongiOrange,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 20,
+                                                      ),
+                                                      // Exercise time display
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        children: [
+                                                          // Hours container
+                                                          Container(
+                                                            width: 95,
+                                                            height: 95,
+                                                            decoration: BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    19,
+                                                                  ),
+                                                              boxShadow: [
+                                                                BoxShadow(
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                        0.1,
+                                                                      ),
+                                                                  blurRadius:
+                                                                      16,
+                                                                  spreadRadius:
+                                                                      4,
+                                                                  offset:
+                                                                      const Offset(
+                                                                        0,
+                                                                        2,
+                                                                      ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Text(
+                                                                  exerciseTimeForDate['hours']
+                                                                      .toString()
+                                                                      .padLeft(
+                                                                        2,
+                                                                        '0',
+                                                                      ),
+                                                                  style: const TextStyle(
+                                                                    fontSize:
+                                                                        60,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: Colors
+                                                                        .black,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 9,
+                                                          ),
+                                                          const Text(
+                                                            '시간',
+                                                            style: TextStyle(
+                                                              fontSize: 30,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color:
+                                                                  Colors.black,
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 13,
+                                                          ),
+                                                          // Minutes container
+                                                          Container(
+                                                            width: 95,
+                                                            height: 95,
+                                                            decoration: BoxDecoration(
+                                                              color:
+                                                                  Colors.white,
+                                                              borderRadius:
+                                                                  BorderRadius.circular(
+                                                                    19,
+                                                                  ),
+                                                              boxShadow: [
+                                                                BoxShadow(
+                                                                  color: Colors
+                                                                      .black
+                                                                      .withOpacity(
+                                                                        0.1,
+                                                                      ),
+                                                                  blurRadius:
+                                                                      16,
+                                                                  spreadRadius:
+                                                                      4,
+                                                                  offset:
+                                                                      const Offset(
+                                                                        0,
+                                                                        4,
+                                                                      ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                Text(
+                                                                  exerciseTimeForDate['minutes']
+                                                                      .toString()
+                                                                      .padLeft(
+                                                                        2,
+                                                                        '0',
+                                                                      ),
+                                                                  style: const TextStyle(
+                                                                    fontSize:
+                                                                        60,
+                                                                    fontWeight:
+                                                                        FontWeight
+                                                                            .bold,
+                                                                    color: Colors
+                                                                        .black,
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 9,
+                                                          ),
+                                                          const Text(
+                                                            '분',
+                                                            style: TextStyle(
+                                                              fontSize: 30,
+                                                              fontWeight:
+                                                                  FontWeight
+                                                                      .w600,
+                                                              color:
+                                                                  Colors.black,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 20,
+                                                      ),
+                                                      // "운동했어요!" text
+                                                      const Align(
+                                                        alignment: Alignment
+                                                            .centerRight,
+                                                        child: Text(
+                                                          '운동했어요!',
+                                                          style: TextStyle(
+                                                            fontSize: 20,
+                                                            fontWeight:
+                                                                FontWeight.w600,
+                                                            color: AppColors
+                                                                .ongiOrange,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // Circle with logo on top of white background
             Align(
               alignment: Alignment.topCenter,
               child: Transform.translate(
@@ -59,10 +437,7 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                 ),
                               ),
                               Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: 0,
-                                  vertical: 6,
-                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 5),
                                 child: Image.asset(
                                   'assets/images/exercise_record_title_logo.png',
                                   width: circleSize * 0.3,
@@ -77,16 +452,61 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                 ),
               ),
             ),
-            Positioned(
-              top: circleSize * 0.3 + 60,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Text("여기부터 본문을 생성 ㅇ.ㅇ"),
-            ),
           ],
         ),
       ),
     );
+  }
+
+  // When button is clicked -> animate exercise area
+  void _updateFromButton(DateTime date) {
+    _isButtonTriggered = true;
+
+    final daysDiff = date.difference(DateTime.now()).inDays;
+    final targetPage = 5000 + daysDiff;
+
+    setState(() {
+      selectedDate = date;
+      _currentExercisePage = targetPage;
+    });
+
+    // Animate exercise PageView
+    if (_exercisePageController.hasClients) {
+      _exercisePageController
+          .animateToPage(
+            targetPage,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.ease,
+          )
+          .then((_) {
+            _isButtonTriggered = false;
+          });
+    } else {
+      _isButtonTriggered = false;
+    }
+  }
+
+  // When exercise area is swiped -> update date carousel
+  void _updateFromSwipe(int index) {
+    _isSwipeTriggered = true;
+
+    final newDate = _dateFromExercisePage(index);
+    final daysDiff = newDate.difference(DateTime.now()).inDays;
+    final targetPage = 5000 + daysDiff;
+
+    setState(() {
+      _currentExercisePage = index;
+      selectedDate = newDate;
+    });
+
+    // Update DateCarousel (no animation needed, just sync the display)
+    if (_dateCarouselController.hasClients) {
+      _dateCarouselController.jumpToPage(targetPage);
+    }
+
+    // Reset flag after a short delay
+    Future.delayed(const Duration(milliseconds: 100), () {
+      _isSwipeTriggered = false;
+    });
   }
 }
