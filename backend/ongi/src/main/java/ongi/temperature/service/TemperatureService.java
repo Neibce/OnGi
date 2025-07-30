@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class TemperatureService {
     private final TemperatureRepository temperatureRepository;
     private final FamilyRepository familyRepository;
@@ -170,7 +170,7 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(userId)
                 .familyId(familyId)
-                .temperature(0.2)
+                .temperature(0.1)
                 .reason(REASON_PARENT_PAIN_INPUT)
                 .build();
             temperatureRepository.save(temp);
@@ -184,7 +184,7 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(userId)
                 .familyId(familyId)
-                .temperature(0.2)
+                .temperature(0.1)
                 .reason(REASON_PARENT_MED_INPUT)
                 .build();
             temperatureRepository.save(temp);
@@ -198,7 +198,7 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(userId)
                 .familyId(familyId)
-                .temperature(0.2)
+                .temperature(0.1)
                 .reason(REASON_PARENT_EXERCISE_INPUT)
                 .build();
             temperatureRepository.save(temp);
@@ -212,7 +212,7 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(userId)
                 .familyId(familyId)
-                .temperature(0.3)
+                .temperature(0.1)
                 .reason(REASON_CHILD_PAIN_VIEW)
                 .build();
             temperatureRepository.save(temp);
@@ -226,7 +226,7 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(userId)
                 .familyId(familyId)
-                .temperature(0.3)
+                .temperature(0.1)
                 .reason(REASON_CHILD_MED_VIEW)
                 .build();
             temperatureRepository.save(temp);
@@ -240,7 +240,7 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(userId)
                 .familyId(familyId)
-                .temperature(0.3)
+                .temperature(0.1)
                 .reason(REASON_CHILD_EXERCISE_VIEW)
                 .build();
             temperatureRepository.save(temp);
@@ -267,11 +267,12 @@ public class TemperatureService {
                 Temperature temp = Temperature.builder()
                         .userId(null)
                         .familyId(familyId)
-                        .temperature(0.5)
+                        .temperature(0.1)
                         .reason(REASON_ALL_EMOTION_UPLOAD)
                         .build();
                 temperatureRepository.save(temp);
             }
+
             // 만보기 걸음 수 충족 시 보너스
             boolean alreadyStepBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_STEP_GOAL, targetDate);
             // TODO: 가족 만보기 총 걸음수가 하루 {(부모 수) x 7,000 + (자녀 수) x 10,000}보 이상인지 검사 필요
@@ -288,6 +289,11 @@ public class TemperatureService {
         }
     }
 
+    // 매주 일요일 23:59:59 에 만보기 경쟁 결과 보너스 온도 상승 처리 (후순위! 일단 안만들어도 됨)
+    // TODO: 만보기 전체 경쟁 상위 10% -> +3도
+    // TODO: 만보기 전체 경쟁 상위 20% -> +1도
+
+
 
     // 매일 23:59:59에 당일의 가족별 온도 하락 처리
     @Scheduled(cron = "59 59 23 * * *")
@@ -302,7 +308,7 @@ public class TemperatureService {
         }
     }
 
-    // 부모 1명 이상 일주일 미접속 시 온도 하락
+    // 부모 1명 이상 일주일 아무 활동 없을 시 온도 하락
     public void decreaseTemperatureForInactiveParent(String familyId) {
         // TODO: 부모 미접속 판별 로직 필요
         boolean parentInactive = false; // 실제 판별로 대체
@@ -310,14 +316,14 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(null)
                 .familyId(familyId)
-                .temperature(-15.0)
+                .temperature(-10.0)
                 .reason("INACTIVE_PARENT")
                 .build();
             temperatureRepository.save(temp);
         }
     }
 
-    // 자녀 1명 이상 일주일 미접속 시 온도 하락
+    // 자녀 1명 이상 일주일 아무 활동 없을 시 온도 하락
     public void decreaseTemperatureForInactiveChild(String familyId) {
         // TODO: 자녀 미접속 판별 로직 필요
         boolean childInactive = false; // 실제 판별로 대체
@@ -325,14 +331,14 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(null)
                 .familyId(familyId)
-                .temperature(-15.0)
+                .temperature(-10.0)
                 .reason("INACTIVE_CHILD")
                 .build();
             temperatureRepository.save(temp);
         }
     }
 
-    // 하루 동안 아무도 미접속 시 온도 하락
+    // 하루 동안 아무도 활동 없을 시 시 온도 하락
     public void decreaseTemperatureForNoLogin(String familyId) {
         // TODO: 전체 미접속 판별 로직 필요
         boolean noLogin = false; // 실제 판별로 대체
@@ -340,7 +346,7 @@ public class TemperatureService {
             Temperature temp = Temperature.builder()
                 .userId(null)
                 .familyId(familyId)
-                .temperature(-1.0)
+                .temperature(-0.5)
                 .reason("NO_LOGIN")
                 .build();
             temperatureRepository.save(temp);
