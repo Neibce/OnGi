@@ -25,13 +25,15 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
 
   // Get exercise time for a specific date
   Map<String, int> getExerciseTime(DateTime date) {
-    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    final dateKey =
+        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     return exerciseTimes[dateKey] ?? {'hours': 0, 'minutes': 0};
   }
 
   // Save exercise time for a specific date
   void saveExerciseTime(DateTime date, int hours, int minutes) {
-    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    final dateKey =
+        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
     setState(() {
       exerciseTimes[dateKey] = {'hours': hours, 'minutes': minutes};
     });
@@ -101,14 +103,14 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                           padding: const EdgeInsets.only(left: 20, right: 20),
                           child: Column(
                             children: [
-                              const SizedBox(height: 130),
+                              const SizedBox(height: 90),
                               Row(
                                 children: [
                                   Spacer(),
                                   Expanded(
                                     flex: 2,
                                     child: SizedBox(
-                                      height: 100,
+                                      height: 85,
                                       child: Padding(
                                         padding: const EdgeInsets.only(
                                           left: 40,
@@ -176,12 +178,24 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                           ),
                                                     ),
                                                   );
-                                                  
+
                                                   // Handle returned exercise time data
-                                                  if (result != null && result is Map<String, dynamic>) {
-                                                    final returnedHours = result['hours'] as int;
-                                                    final returnedMinutes = result['minutes'] as int;
-                                                    saveExerciseTime(date, returnedHours, returnedMinutes);
+                                                  if (result != null &&
+                                                      result
+                                                          is Map<
+                                                            String,
+                                                            dynamic
+                                                          >) {
+                                                    final returnedHours =
+                                                        result['hours'] as int;
+                                                    final returnedMinutes =
+                                                        result['minutes']
+                                                            as int;
+                                                    saveExerciseTime(
+                                                      date,
+                                                      returnedHours,
+                                                      returnedMinutes,
+                                                    );
                                                   }
                                                 },
                                                 child: Padding(
@@ -196,7 +210,8 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                             .center,
                                                     children: [
                                                       Align(
-                                                        alignment: Alignment.centerLeft,
+                                                        alignment: Alignment
+                                                            .centerLeft,
                                                         child: const Text(
                                                           '오늘은',
                                                           style: TextStyle(
@@ -213,7 +228,9 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                       ),
                                                       // Exercise time display
                                                       Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
                                                         children: [
                                                           // Hours container
                                                           Container(
