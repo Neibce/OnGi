@@ -15,7 +15,7 @@ public class FamilyTemperatureContributionResponse {
     @AllArgsConstructor
     public static class Contribution {
         private LocalDate date;
-        private UUID userId;
+        private String userName; 
         private Double contributed;
     }
 } 

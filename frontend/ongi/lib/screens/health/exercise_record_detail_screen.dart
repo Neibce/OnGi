@@ -77,6 +77,7 @@ class _ExerciseRecordDetailScreenState
               Align(
                 alignment: Alignment.topCenter,
                 child: Transform.translate(
+
                   offset: Offset(0, -circleSize * 0.81),
                   child: OverflowBox(
                     maxWidth: double.infinity,
@@ -124,6 +125,7 @@ class _ExerciseRecordDetailScreenState
 
               Positioned(
                 top: circleSize * 0.45,
+
                 left: 0,
                 right: 0,
                 bottom: 0,

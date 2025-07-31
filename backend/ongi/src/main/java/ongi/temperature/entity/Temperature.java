@@ -36,6 +36,9 @@ Temperature {
     @Column(nullable = false)
     private Double temperature;
     
+    @Column(nullable = false, length = 30)
+    private String reason;
+    
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
