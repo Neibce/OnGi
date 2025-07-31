@@ -64,14 +64,15 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
   Widget _buildBackButton() {
     return Positioned(
       top: MediaQuery.of(context).padding.top + 16,
-      left: 20,
+      left: 30,
       child: GestureDetector(
         onTap: _goBackToHome,
-        child: Container(
-          width: 44,
-          height: 44,
-          child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 30),
-        ),
+        // child: Container(
+        //   width: 44,
+        //   height: 44,
+        //   child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 30),
+        // ),
+        child: SvgPicture.asset('assets/images/back_icon_white.svg'),
       ),
     );
   }
