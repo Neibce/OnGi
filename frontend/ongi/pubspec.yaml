@@ -59,6 +59,7 @@ flutter:
     - assets/images/close_icon_black.svg
     - assets/images/close_icon_white.svg
     - assets/images/back_icon_black.svg
+    - assets/images/back_icon_white.svg
     - assets/images/dropdown_icon.svg
     - assets/images/camera_button.svg
     - assets/images/step_tracker_crown.svg

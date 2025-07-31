@@ -255,7 +255,7 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
         children: [
           const PhotoDateScreen(),
           Positioned(
-            top: MediaQuery.of(context).padding.top - 10,
+            top: MediaQuery.of(context).padding.top + 15,
             left: 40,
             child: GestureDetector(
               onTap: _goBackToCalendar,
