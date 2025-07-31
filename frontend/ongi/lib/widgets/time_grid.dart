@@ -85,11 +85,11 @@ class _TimeGridState extends State<TimeGrid> {
                     },
                     child: Container(
                       margin: const EdgeInsets.symmetric(
-                        horizontal: 1.0,
+                        horizontal: 2.0,
                         vertical: 1.0,
                       ),
-                      width: 40,
-                      height: 30,
+                      width: 38,
+                      height: 29,
                       decoration: BoxDecoration(
                         color: _selected.contains(hour * 6 + seg)
                             ? widget.cellSelectedColor

@@ -101,14 +101,14 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                           padding: const EdgeInsets.only(left: 20, right: 20),
                           child: Column(
                             children: [
-                              const SizedBox(height: 130),
+                              const SizedBox(height: 90),
                               Row(
                                 children: [
                                   Spacer(),
                                   Expanded(
                                     flex: 2,
                                     child: SizedBox(
-                                      height: 100,
+                                      height: 85,
                                       child: Padding(
                                         padding: const EdgeInsets.only(
                                           left: 40,
@@ -196,7 +196,8 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                             .center,
                                                     children: [
                                                       Align(
-                                                        alignment: Alignment.centerLeft,
+                                                        alignment: Alignment
+                                                            .centerLeft,
                                                         child: const Text(
                                                           '오늘은',
                                                           style: TextStyle(
@@ -213,7 +214,9 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                       ),
                                                       // Exercise time display
                                                       Row(
-                                                        mainAxisAlignment: MainAxisAlignment.center,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .center,
                                                         children: [
                                                           // Hours container
                                                           Container(

@@ -44,7 +44,6 @@ class _ExerciseRecordDetailScreenState
     return result;
   }
 
-  // Calculate hours and minutes from selected cells
   Map<String, int> _calculateHoursAndMinutes(List<int> selectedCells) {
     final totalMinutes = selectedCells.length * 10;
     final hours = totalMinutes ~/ 60;
@@ -52,7 +51,6 @@ class _ExerciseRecordDetailScreenState
     return {'hours': hours, 'minutes': minutes};
   }
 
-  // Handle back navigation with exercise time data
   void _handleBack() {
     final timeData = _calculateHoursAndMinutes(selected);
     Navigator.pop(context, timeData);
@@ -79,7 +77,8 @@ class _ExerciseRecordDetailScreenState
               Align(
                 alignment: Alignment.topCenter,
                 child: Transform.translate(
-                  offset: Offset(0, -circleSize * 0.76),
+
+                  offset: Offset(0, -circleSize * 0.81),
                   child: OverflowBox(
                     maxWidth: double.infinity,
                     maxHeight: double.infinity,
@@ -125,7 +124,8 @@ class _ExerciseRecordDetailScreenState
               ),
 
               Positioned(
-                top: circleSize * 0.5,
+                top: circleSize * 0.45,
+
                 left: 0,
                 right: 0,
                 bottom: 0,
@@ -133,7 +133,7 @@ class _ExerciseRecordDetailScreenState
                   padding: const EdgeInsets.only(
                     left: 15,
                     right: 15,
-                    bottom: 20,
+                    bottom: 0,
                   ),
                   child: Container(
                     decoration: BoxDecoration(
@@ -191,7 +191,7 @@ class _ExerciseRecordDetailScreenState
                           ),
                         ),
                         Positioned(
-                          top: 160,
+                          top: 155,
                           left: 7,
                           right: 7,
                           bottom: 20,
@@ -213,7 +213,7 @@ class _ExerciseRecordDetailScreenState
                 ),
               ),
               Positioned(
-                top: circleSize * 0.23,
+                top: circleSize * 0.18,
                 left: 0,
                 right: 0,
                 child: Center(
