@@ -56,6 +56,13 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse(ErrorStatus.VALIDATION_ERROR.getCode(), message));
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument() {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse(ErrorStatus.VALIDATION_ERROR.getCode(),
+                        ErrorStatus.VALIDATION_ERROR.getDefaultMessage()));
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleBodyMissing() {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
