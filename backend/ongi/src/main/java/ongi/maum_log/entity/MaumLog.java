@@ -1,6 +1,7 @@
 package ongi.maum_log.entity;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,12 +11,14 @@ import jakarta.persistence.Id;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import ongi.common.entity.BaseEntity;
 import ongi.maum_log.enums.Emotion;
 
 @Entity
 @Builder
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class MaumLog extends BaseEntity {
@@ -33,7 +36,8 @@ public class MaumLog extends BaseEntity {
 
     private String comment;
 
-    @Column(nullable = false)
+    @ElementCollection(targetClass = Emotion.class)
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private List<Emotion> emotions;
 }
