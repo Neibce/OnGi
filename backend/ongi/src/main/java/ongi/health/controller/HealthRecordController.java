@@ -84,7 +84,7 @@ public class HealthRecordController {
         ExerciseRecord record = healthRecordService.addOrUpdateExerciseRecord(
                 userDetails.getUser().getUuid(),
                 request.date(),
-                request.grid()
+                request.grid() // 2차원 배열로 전달
         );
         temperatureService.increaseTemperatureForParentExerciseInput(userDetails.getUser().getUuid(), familyId);
         ExerciseRecordResponse response = new ExerciseRecordResponse(record);

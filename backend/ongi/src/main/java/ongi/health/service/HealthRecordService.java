@@ -41,10 +41,10 @@ public class HealthRecordService {
 
     // 운동 기록 추가/수정 (grid 기반)
     @Transactional
-    public ExerciseRecord addOrUpdateExerciseRecord(UUID parentId, LocalDate date, String grid) {
+    public ExerciseRecord addOrUpdateExerciseRecord(UUID parentId, LocalDate date, int[][] grid) {
         ExerciseRecord record = exerciseRecordRepository.findByParentIdAndDate(parentId, date)
                 .orElse(ExerciseRecord.builder().parentId(parentId).date(date).build());
-        record.setGrid(grid); // grid 저장 시 duration 자동 계산
+        record.setGrid(grid); // 2차원 배열로 저장
         return exerciseRecordRepository.save(record);
     }
 

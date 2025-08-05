@@ -6,7 +6,7 @@ import ongi.health.entity.ExerciseRecord;
 public record ExerciseRecordResponse(
     Long id,
     LocalDate date,
-    String grid, // 10분 단위 144칸, "010001..."
+    int[][] grid, // 2차원 배열
     String duration // "01:50" 등
 ) {
     public ExerciseRecordResponse(ExerciseRecord entity) {
