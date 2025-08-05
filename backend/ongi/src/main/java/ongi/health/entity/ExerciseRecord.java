@@ -22,19 +22,23 @@ public class ExerciseRecord {
     @Column(nullable = false)
     private LocalDate date;
 
-    @Column(nullable = false, length = 144)
-    private String grid; // 10분 단위 운동 구간, 144칸(24시간*6)
+    @Column(columnDefinition = "json", nullable = false)
+    @Convert(converter = Int2DArrayToJsonConverter.class)
+    private int[][] grid;
 
     @Column(nullable = false, length = 5)
     private String duration; // 시:분 포맷("00:00")
 
-    public void setGrid(String grid) {
+    public void setGrid(int[][] grid) {
         this.grid = grid;
         this.duration = calculateDurationFromGrid(grid);
     }
-    private String calculateDurationFromGrid(String grid) {
+    private String calculateDurationFromGrid(int[][] grid) {
         if (grid == null) return "00:00";
-        int count = (int) grid.chars().filter(c -> c == '1').count();
+        int count = 0;
+        for (int i = 0; i < 24; i++)
+            for (int j = 0; j < 6; j++)
+                if (grid[i][j] == 1) count++;
         int totalMin = count * 10;
         int hour = totalMin / 60;
         int min = totalMin % 60;
