@@ -4,5 +4,5 @@ import java.time.LocalDate;
 
 public record ExerciseRecordRequest(
     LocalDate date,
-    int duration
+    String grid // 길이 144, "010001..."
 ) {} 

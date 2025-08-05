@@ -30,17 +30,6 @@ public class HealthRecordService {
         return painRecordRepository.save(record);
     }
 
-    // 운동 기록 추가
-    @Transactional
-    public ExerciseRecord addExerciseRecord(UUID parentId, LocalDate date, int duration) {
-        ExerciseRecord record = ExerciseRecord.builder()
-                .parentId(parentId)
-                .date(date)
-                .duration(duration)
-                .build();
-        return exerciseRecordRepository.save(record);
-    }
-
     // 최근 7일간 통증 기록 조회
     public List<PainRecord> getParentPainRecordsForLast7Days(UUID parentId) {
         LocalDate endDate = LocalDate.now();
@@ -48,10 +37,27 @@ public class HealthRecordService {
         return painRecordRepository.findByParentIdAndDateBetweenOrderByDateDesc(parentId, startDate, endDate);
     }
 
-    // 최근 7일간 운동 기록 조회
-    public List<ExerciseRecord> getParentExerciseRecordsForLast7Days(UUID parentId) {
+
+
+    // 운동 기록 추가/수정 (grid 기반)
+    @Transactional
+    public ExerciseRecord addOrUpdateExerciseRecord(UUID parentId, LocalDate date, String grid) {
+        ExerciseRecord record = exerciseRecordRepository.findByParentIdAndDate(parentId, date)
+                .orElse(ExerciseRecord.builder().parentId(parentId).date(date).build());
+        record.setGrid(grid); // grid 저장 시 duration 자동 계산
+        return exerciseRecordRepository.save(record);
+    }
+
+    // 최근 7일간 운동 기록 요약 조회 (duration만)
+    public List<ExerciseRecord> getParentExerciseRecordsSummaryForLast7Days(UUID parentId) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusDays(6); // 오늘 포함 7일
         return exerciseRecordRepository.findByParentIdAndDateBetweenOrderByDateDesc(parentId, startDate, endDate);
+    }
+
+    // 특정 날짜 운동 기록 상세 조회 (grid+duration)
+    public ExerciseRecord getParentExerciseRecordDetail(UUID parentId, LocalDate date) {
+        return exerciseRecordRepository.findByParentIdAndDate(parentId, date)
+                .orElse(null);
     }
 } 
