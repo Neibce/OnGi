@@ -57,10 +57,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgument() {
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(ErrorStatus.VALIDATION_ERROR.getCode(),
-                        ErrorStatus.VALIDATION_ERROR.getDefaultMessage()));
+                .body(new ErrorResponse(ErrorStatus.VALIDATION_ERROR.getCode(), exception.getMessage()));
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -78,11 +77,5 @@ public class GlobalExceptionHandler {
                         ErrorStatus.METHOD_NOT_ALLOWED.getDefaultMessage()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleAll() {
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse(ErrorStatus.INTERNAL_SERVER_ERROR.getCode(),
-                        ErrorStatus.INTERNAL_SERVER_ERROR.getDefaultMessage()));
-    }
 }
 
