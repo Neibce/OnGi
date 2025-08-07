@@ -20,6 +20,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import ongi.step.entity.Step;
+import ongi.step.repository.StepRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +30,7 @@ public class TemperatureService {
     private final TemperatureRepository temperatureRepository;
     private final FamilyRepository familyRepository;
     private final UserRepository userRepository;
+    private final StepRepository stepRepository;
     private static final double BASE_TEMPERATURE = 36.5;
 
     // 소수점 1자리 반올림 유틸
@@ -95,7 +98,8 @@ public class TemperatureService {
     public FamilyTemperatureDailyResponse getFamilyTemperatureDaily(String familyId) {
         familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
-        java.time.LocalDateTime fromDate = java.time.LocalDate.now().minusDays(4).atStartOfDay(); // 최근 5일
+        LocalDate today = LocalDate.now();
+        java.time.LocalDateTime fromDate = today.minusDays(4).atStartOfDay(); // 최근 5일
         List<Object[]> rawList = temperatureRepository.getFamilyTemperatureDailyRaw(familyId, fromDate);
         // 날짜별 변화량 맵 (오름차순)
         Map<LocalDate, Double> dateToDelta = new TreeMap<>();
@@ -104,13 +108,19 @@ public class TemperatureService {
             Double delta = (Double) arr[1];
             dateToDelta.put(date, delta);
         }
-        // 누적 합산
-        double base = 36.5;
+        // fromDate 이전까지의 누적 변화량을 base에 더함
+        Double beforeDelta = temperatureRepository.getTotalTemperatureByFamilyIdAndBeforeDate(familyId, fromDate);
+        double base = 36.5 + (beforeDelta != null ? beforeDelta : 0.0);
         double sum = base;
         List<FamilyTemperatureDailyResponse.DailyTemperature> dailyList = new ArrayList<>();
-        for (Map.Entry<LocalDate, Double> entry : dateToDelta.entrySet()) {
-            sum += entry.getValue();
-            dailyList.add(new FamilyTemperatureDailyResponse.DailyTemperature(entry.getKey(), round(sum, 1)));
+        // 최근 5일(오늘 포함) 날짜 리스트 생성 (오름차순)
+        List<LocalDate> days = new ArrayList<>();
+        for (int i = 4; i >= 0; i--) {
+            days.add(today.minusDays(i));
+        }
+        for (LocalDate date : days) {
+            sum += dateToDelta.getOrDefault(date, 0.0);
+            dailyList.add(new FamilyTemperatureDailyResponse.DailyTemperature(date, round(sum, 1)));
         }
         return new FamilyTemperatureDailyResponse(dailyList);
     }
@@ -120,28 +130,22 @@ public class TemperatureService {
         familyRepository.findById(familyId)
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
         java.time.LocalDateTime fromDate = java.time.LocalDate.now().minusDays(4).atStartOfDay(); // 최근 5일
-        List<Object[]> rawList = temperatureRepository.getFamilyTemperatureContributionsRaw(familyId, fromDate);
-
-        Set<UUID> userIds = rawList.stream()
-                .map(arr -> (UUID) arr[1])
-                .collect(Collectors.toSet());
+        List<Temperature> temps = temperatureRepository.findAllByFamilyIdAndCreatedAtAfter(familyId, fromDate);
+        Set<UUID> userIds = temps.stream().map(Temperature::getUserId).collect(Collectors.toSet());
         Map<UUID, User> userMap = userRepository.findAllById(userIds).stream()
-                .collect(Collectors.toMap(User::getUuid, user -> user));
-
-        List<FamilyTemperatureContributionResponse.Contribution> contributions = rawList.stream()
-                .map(arr -> {
-                    LocalDate date = ((java.sql.Date) arr[0]).toLocalDate();
-                    UUID userId = (UUID) arr[1];
-                    Double contributed = (Double) arr[2];
-                    String userName;
-                    if (userId == null) {
-                        userName = "우리 가족";
-                    } else {
-                        userName = userMap.get(userId) != null ? userMap.get(userId).getName() : "";
-                    }
-                    return new FamilyTemperatureContributionResponse.Contribution(date, userName, round(contributed, 1));
-                })
-                .toList();
+            .collect(Collectors.toMap(User::getUuid, user -> user));
+        List<FamilyTemperatureContributionResponse.Contribution> contributions = temps.stream()
+            .map(t -> {
+                User user = userMap.get(t.getUserId());
+                String userName = user != null ? user.getName() : "우리 가족";
+                return new FamilyTemperatureContributionResponse.Contribution(
+                    t.getCreatedAt(),
+                    userName,
+                    t.getReason(),
+                    round(t.getTemperature(), 1)
+                );
+            })
+            .toList();
         return new FamilyTemperatureContributionResponse(contributions);
     }
 
@@ -274,36 +278,48 @@ public class TemperatureService {
         java.time.LocalDate targetDate = getToday(); // 오늘 날짜
         for (var family : families) {
             String familyId = family.getCode();
-            var members = family.getMembers();
+            processEmotionBonus(family, familyId, targetDate);
+            processStepGoalBonus(family, familyId, targetDate);
+        }
+    }
 
-            // 전체 가족 구성원이 감정기록 업로드 시 보너스
-            boolean allEmotionUploaded = members.stream().allMatch(
-                    userId -> temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(userId, familyId, REASON_EMOTION_UPLOAD, targetDate)
-            );
-            boolean alreadyEmotionBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_ALL_EMOTION_UPLOAD, targetDate);
-            if (allEmotionUploaded && !alreadyEmotionBonus) {
-                Temperature temp = Temperature.builder()
-                        .userId(null)
-                        .familyId(familyId)
-                        .temperature(0.1)
-                        .reason(REASON_ALL_EMOTION_UPLOAD)
-                        .build();
-                temperatureRepository.save(temp);
-            }
+    // 모든 구성원이 감정기록 업로드 시 보너스 지급
+    private void processEmotionBonus(ongi.family.entity.Family family, String familyId, LocalDate targetDate) {
+        var memberIds = family.getMembers();
+        boolean alreadyEmotionBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_ALL_EMOTION_UPLOAD, targetDate);
+        boolean allEmotionUploaded = memberIds.stream().allMatch(
+                userId -> temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(userId, familyId, REASON_EMOTION_UPLOAD, targetDate)
+        );
+        if (allEmotionUploaded && !alreadyEmotionBonus) {
+            Temperature temp = Temperature.builder()
+                    .userId(null)
+                    .familyId(familyId)
+                    .temperature(0.1)
+                    .reason(REASON_ALL_EMOTION_UPLOAD)
+                    .build();
+            temperatureRepository.save(temp);
+        }
+    }
 
-            // 만보기 걸음 수 충족 시 보너스
-            boolean alreadyStepBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_STEP_GOAL, targetDate);
-            // TODO: 가족 만보기 총 걸음수가 하루 {(부모 수) x 7,000 + (자녀 수) x 10,000}보 이상인지 검사 필요
-            boolean stepGoalMet = false; // 실제 조건으로 대체 필요
-            if (stepGoalMet && !alreadyStepBonus) {
-                Temperature temp = Temperature.builder()
-                        .userId(null)
-                        .familyId(familyId)
-                        .temperature(0.2)
-                        .reason(REASON_STEP_GOAL)
-                        .build();
-                temperatureRepository.save(temp);
-            }
+    // 만보기 목표 달성 보너스 지급
+    private void processStepGoalBonus(ongi.family.entity.Family family, String familyId, LocalDate targetDate) {
+        var memberIds = family.getMembers();
+        var users = userRepository.findAllById(memberIds);
+        long parentCount = users.stream().filter(User::getIsParent).count();
+        long childCount = users.size() - parentCount;
+        int goal = (int)(parentCount * 7000 + childCount * 10000);
+        List<Step> steps = stepRepository.findByFamilyAndDate(family, targetDate);
+        int totalSteps = steps.stream().mapToInt(Step::getSteps).sum();
+        boolean alreadyStepBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_STEP_GOAL, targetDate);
+        boolean stepGoalMet = totalSteps >= goal;
+        if (stepGoalMet && !alreadyStepBonus) {
+            Temperature temp = Temperature.builder()
+                    .userId(null)
+                    .familyId(familyId)
+                    .temperature(0.2)
+                    .reason(REASON_STEP_GOAL)
+                    .build();
+            temperatureRepository.save(temp);
         }
     }
 
@@ -329,7 +345,7 @@ public class TemperatureService {
 
     // 부모 1명 이상 일주일 동안안 아무 활동 없을 시 온도 하락
     public void decreaseTemperatureForInactiveParent(String familyId) {
-        // 부모 1명 이상 일주일 동안 아무 활동 없을 시 온도 하락
+
         List<UUID> memberIds = familyRepository.findById(familyId).get().getMembers();
         List<User> users = userRepository.findAllById(memberIds);
         List<User> parents = users.stream()
@@ -338,6 +354,7 @@ public class TemperatureService {
         LocalDateTime since = LocalDateTime.now().minusDays(6);
         boolean parentInactive = parents.stream()
                 .anyMatch(parent -> !temperatureRepository.existsByUserIdAndFamilyIdAndCreatedAtAfter(parent.getUuid(), familyId, since));
+
         if (parentInactive) {
             Temperature temp = Temperature.builder()
                     .userId(null)
@@ -349,9 +366,9 @@ public class TemperatureService {
         }
     }
 
-    // 자녀 1명 이상 일주일 동안안 아무 활동 없을 시 온도 하락
+    // 자녀 1명 이상 일주일 동안 아무 활동 없을 시 온도 하락
     public void decreaseTemperatureForInactiveChild(String familyId) {
-        // 자녀 1명 이상 일주일 동안 아무 활동 없을 시 온도 하락
+
         List<UUID> memberIds = familyRepository.findById(familyId).get().getMembers();
         List<User> users = userRepository.findAllById(memberIds);
         List<User> children = users.stream()
@@ -373,7 +390,7 @@ public class TemperatureService {
 
     // 하루 동안 아무도 활동 없을 시 시 온도 하락
     public void decreaseTemperatureForNoLogin(String familyId) {
-        // 하루 동안 아무도 활동 없을 시 온도 하락
+
         LocalDateTime since = LocalDate.now().atStartOfDay(); // 오늘 00:00~
         boolean noLogin = !temperatureRepository.existsByFamilyIdAndCreatedAtAfter(familyId, since);
         if (noLogin) {

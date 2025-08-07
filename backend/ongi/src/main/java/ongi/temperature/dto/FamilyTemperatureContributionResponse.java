@@ -14,8 +14,9 @@ public class FamilyTemperatureContributionResponse {
     @Getter
     @AllArgsConstructor
     public static class Contribution {
-        private LocalDate date;
-        private String userName; 
+        private java.time.LocalDateTime dateTime;
+        private String userName;
+        private String reason;
         private Double contributed;
     }
 } 
