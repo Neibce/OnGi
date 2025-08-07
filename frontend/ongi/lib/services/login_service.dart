@@ -4,7 +4,8 @@ import 'package:http/http.dart' as http;
 import '../utils/prefs_manager.dart';
 
 class LoginService {
-  static const String baseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
+  static const String baseUrl =
+      'https://ongi-1049536928483.asia-northeast3.run.app';
 
   Future<Map<String, dynamic>> login({
     required String email,
@@ -14,19 +15,15 @@ class LoginService {
 
     final response = await http.post(
       url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'password': password}),
     );
 
     if (response.statusCode == 200) {
       final responseJson = jsonDecode(response.body);
       await PrefsManager.saveAccessToken(responseJson["accessToken"]);
       await PrefsManager.saveUserName(responseJson["userInfo"]["name"]);
+      await PrefsManager.saveUuid(responseJson["userInfo"]["uuid"]);
       return responseJson;
     } else {
       throw Exception('로그인 실패: ${response.statusCode} ${response.body}');
