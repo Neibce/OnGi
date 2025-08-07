@@ -37,14 +37,14 @@ public class HealthRecordController {
 
         FamilyInfo familyInfo = familyService.getFamily(userDetails.getUser());
         String familyId = familyInfo.code();
-        
+
         PainRecord record = healthRecordService.addPainRecord(
                 userDetails.getUser().getUuid(),
                 request.date(),
                 PainRecord.PainArea.valueOf(request.painArea()),
                 PainRecord.PainLevel.valueOf(request.painLevel())
         );
-        
+
         // 온도 상승
         temperatureService.increaseTemperatureForParentPainInput(userDetails.getUser().getUuid(), familyId);
 
@@ -62,8 +62,10 @@ public class HealthRecordController {
         FamilyInfo familyInfo = familyService.getFamily(userDetails.getUser());
         String familyId = familyInfo.code();
 
-        // 온도 상승
-        temperatureService.increaseTemperatureForChildPainView(userDetails.getUser().getUuid(), familyId);
+        // 온도 상승: 자녀가 부모 정보를 조회할 때만
+        if (!userDetails.getUser().getUuid().equals(parentId) && !userDetails.getUser().getIsParent()) {
+            temperatureService.increaseTemperatureForChildPainView(userDetails.getUser().getUuid(), familyId);
+        }
 
         List<PainRecordResponse> response = healthRecordService.getParentPainRecordsForLast7Days(parentId).stream()
                 .map(PainRecordResponse::new)
@@ -99,11 +101,15 @@ public class HealthRecordController {
     ) {
         FamilyInfo familyInfo = familyService.getFamily(userDetails.getUser());
         String familyId = familyInfo.code();
-        temperatureService.increaseTemperatureForChildExerciseView(userDetails.getUser().getUuid(), familyId);
+
+        // 온도 상승: 자녀가 부모 정보를 조회할 때만
+        if (!userDetails.getUser().getUuid().equals(parentId) && !userDetails.getUser().getIsParent()) {
+            temperatureService.increaseTemperatureForChildExerciseView(userDetails.getUser().getUuid(), familyId);
+        }
 
         List<ExerciseRecordSummaryResponse> response = healthRecordService.getParentExerciseRecordsSummaryForLast7Days(parentId).stream()
-            .map(ExerciseRecordSummaryResponse::new)
-            .toList();
+                .map(ExerciseRecordSummaryResponse::new)
+                .toList();
         return ResponseEntity.ok(response);
     }
 
@@ -120,4 +126,4 @@ public class HealthRecordController {
         return ResponseEntity.ok(response);
     }
 
-} 
+}

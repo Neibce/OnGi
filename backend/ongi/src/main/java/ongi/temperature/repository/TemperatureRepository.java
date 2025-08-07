@@ -31,4 +31,12 @@ public interface TemperatureRepository extends JpaRepository<Temperature, Long> 
     // 오늘 해당 유저가 특정 활동(reason)으로 온도 기록을 남겼는지 확인 (날짜 기준)
     @Query("SELECT COUNT(t) > 0 FROM Temperature t WHERE t.userId = :userId AND t.familyId = :familyId AND t.reason = :reason AND FUNCTION('DATE', t.createdAt) = :date")
     boolean existsByUserIdAndFamilyIdAndReasonAndDate(@Param("userId") java.util.UUID userId, @Param("familyId") String familyId, @Param("reason") String reason, @Param("date") java.time.LocalDate date);
-} 
+
+    // 최근 N일간 해당 유저가 가족 내에서 활동(온도 변화)이 있었는지
+    @Query("SELECT COUNT(t) > 0 FROM Temperature t WHERE t.userId = :userId AND t.familyId = :familyId AND t.createdAt >= :since")
+    boolean existsByUserIdAndFamilyIdAndCreatedAtAfter(@Param("userId") java.util.UUID userId, @Param("familyId") String familyId, @Param("since") java.time.LocalDateTime since);
+
+    // 최근 N일간 가족 내에서 아무나 활동(온도 변화)이 있었는지
+    @Query("SELECT COUNT(t) > 0 FROM Temperature t WHERE t.familyId = :familyId AND t.createdAt >= :since")
+    boolean existsByFamilyIdAndCreatedAtAfter(@Param("familyId") String familyId, @Param("since") java.time.LocalDateTime since);
+}
