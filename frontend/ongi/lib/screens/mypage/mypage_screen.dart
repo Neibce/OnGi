@@ -8,14 +8,7 @@ class ProfileScreen extends StatelessWidget {
   const ProfileScreen({Key? key}) : super(key: key);
 
   Widget buildMenuList(BuildContext context) {
-    final menuItems = [
-      '개인정보 보호',
-      '시스템 알림',
-      '공지사항',
-      '정보',
-      '문의하기',
-      '로그아웃',
-    ];
+    final menuItems = ['개인정보 보호', '시스템 알림', '공지사항', '정보', '문의하기', '로그아웃'];
 
     final double gap = MediaQuery.of(context).size.height * 0.02;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -31,24 +24,34 @@ class ProfileScreen extends StatelessWidget {
                     onTap: () async {
                       await PrefsManager.logout();
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('로그아웃되었습니다.')),
+                        SnackBar(
+                          content: Text(
+                            '로그아웃되었습니다.',
+                            style: TextStyle(color: AppColors.ongiOrange),
+                          ),
+                          backgroundColor: Colors.white,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
                       );
                       await Future.delayed(const Duration(milliseconds: 500));
                       Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(builder: (context) => const StartScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const StartScreen(),
+                        ),
                         (route) => false,
                       );
                     },
                     child: const Text(
                       '로그아웃',
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.black,
-                      ),
+                      style: TextStyle(fontSize: 24, color: Colors.black),
                     ),
                   )
                 : Text(item, style: const TextStyle(fontSize: 24)),
-          ]
+          ],
         ],
       ),
     );
@@ -113,4 +116,3 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 }
-
