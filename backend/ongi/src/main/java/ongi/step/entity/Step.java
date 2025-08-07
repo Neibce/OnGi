@@ -2,49 +2,36 @@ package ongi.step.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import ongi.common.entity.BaseEntity;
+import ongi.family.entity.Family;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Table(uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"family_id", "user_id", "date"})
+    @UniqueConstraint(columnNames = {"family_code", "created_by_uuid", "date"})
 })
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-public class Step {
+public class Step extends BaseEntity {
     
     @Id
     @GeneratedValue
     @Column(nullable = false, updatable = false)
     private Long id;
-    
-    @Column(nullable = false)
-    private String familyId;
-    
-    @Column(nullable = false)
-    private UUID userId;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    private Family family;
     
     @Column(nullable = false)
     private Integer steps;
     
     @Column(nullable = false)
     private LocalDate date;
-    
-    @CreatedDate
-    @Column(updatable = false, nullable = false)
-    private LocalDateTime createdAt;
-    
-    @LastModifiedDate
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 
     public void updateSteps(Integer newSteps) {
         this.steps = newSteps;
