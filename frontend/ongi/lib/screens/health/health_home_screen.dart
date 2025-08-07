@@ -7,6 +7,7 @@ import 'package:ongi/screens/health/family_step_tracker_screen.dart';
 import 'package:ongi/screens/health/pill_history_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/health/health_status_input_screen.dart';
+import 'package:ongi/services/exercise_service.dart';
 
 class HealthHomeScreen extends StatefulWidget {
   const HealthHomeScreen({super.key});
@@ -18,11 +19,15 @@ class HealthHomeScreen extends StatefulWidget {
 class _HealthHomeScreenState extends State<HealthHomeScreen> {
   String username = '사용자';
   String _currentView = 'home'; // 'home', 'pain', 'pills', 'exercise', 'steps'
+  int _todayExerciseHours = 0;
+  int _todayExerciseMinutes = 0;
+  bool _isLoadingExercise = true;
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
+    _loadTodayExerciseTime();
   }
 
   Future<void> _loadUserName() async {
@@ -34,16 +39,134 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     }
   }
 
+  Future<void> _loadTodayExerciseTime() async {
+    try {
+      final now = DateTime.now();
+      final dateKey =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      final exerciseService = ExerciseService();
+
+      final serverData = await exerciseService.getExerciseRecord(date: dateKey);
+
+      if (serverData != null && serverData['grid'] != null) {
+        final List<List<int>> serverGrid = (serverData['grid'] as List)
+            .map((row) => (row as List).cast<int>())
+            .toList();
+
+        int totalCells = 0;
+        for (var row in serverGrid) {
+          for (var cell in row) {
+            if (cell == 1) totalCells++;
+          }
+        }
+
+        final totalMinutes = totalCells * 10;
+        final hours = totalMinutes ~/ 60;
+        final minutes = totalMinutes % 60;
+
+        setState(() {
+          _todayExerciseHours = hours;
+          _todayExerciseMinutes = minutes;
+          _isLoadingExercise = false;
+        });
+      } else {
+        setState(() {
+          _todayExerciseHours = 0;
+          _todayExerciseMinutes = 0;
+          _isLoadingExercise = false;
+        });
+      }
+    } catch (e) {
+      print('오늘 운동 시간 조회 실패: $e');
+      setState(() {
+        _todayExerciseHours = 0;
+        _todayExerciseMinutes = 0;
+        _isLoadingExercise = false;
+      });
+    }
+  }
+
   void _changeView(String viewName) {
     setState(() {
       _currentView = viewName;
     });
   }
 
+  void _refreshExerciseTime() {
+    _loadTodayExerciseTime();
+  }
+
   void _goBackToHome() {
+    bool wasExerciseView = _currentView == 'exercise';
+
     setState(() {
       _currentView = 'home';
     });
+
+    if (wasExerciseView) {
+      _refreshExerciseTime();
+    }
+  }
+
+  Widget _buildExerciseTimeText() {
+    if (_todayExerciseHours == 0 && _todayExerciseMinutes == 0) {
+      return const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '아직 운동 기록이',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            '없어요!',
+            style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.w600,
+              height: 1.2,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      );
+    }
+
+    String timeText = '';
+    if (_todayExerciseHours > 0 && _todayExerciseMinutes > 0) {
+      timeText = '오늘은 ${_todayExerciseHours}시간 ${_todayExerciseMinutes}분';
+    } else if (_todayExerciseHours > 0) {
+      timeText = '오늘은 ${_todayExerciseHours}시간';
+    } else {
+      timeText = '오늘은 ${_todayExerciseMinutes}분';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          timeText,
+          style: const TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
+            height: 1.2,
+            color: Colors.white,
+          ),
+        ),
+        const Text(
+          '운동하셨네요!',
+          style: TextStyle(
+            fontSize: 25,
+            fontWeight: FontWeight.w600,
+            height: 1.2,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget _buildCurrentView() {
@@ -289,31 +412,33 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                           ),
                         ),
                         onPressed: () => _changeView('exercise'),
-                        child: const Align(
+                        child: Align(
                           alignment: Alignment.centerLeft,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '오늘은 1시간 30분',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.2,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              Text(
-                                '운동하셨네요!',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.2,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: _isLoadingExercise
+                              ? const Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '운동 시간을',
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                    Text(
+                                      '불러오는 중...',
+                                      style: TextStyle(
+                                        fontSize: 25,
+                                        fontWeight: FontWeight.w600,
+                                        height: 1.2,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : _buildExerciseTimeText(),
                         ),
                       ),
                     ),
