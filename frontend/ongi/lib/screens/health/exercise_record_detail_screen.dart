@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/widgets/date_carousel.dart';
 import 'package:ongi/widgets/time_grid.dart';
+import 'package:ongi/services/exercise_service.dart';
 
 class ExerciseRecordDetailScreen extends StatefulWidget {
   final DateTime date;
@@ -23,6 +24,53 @@ class ExerciseRecordDetailScreen extends StatefulWidget {
 class _ExerciseRecordDetailScreenState
     extends State<ExerciseRecordDetailScreen> {
   List<int> selected = [];
+  Map<String, String> _lastSentDurationPerDate = {}; // 날짜별 마지막 전송 기록 (중복 방지용)
+
+  static const int _centerPage = 5000;
+  late final DateTime referenceDate;
+  DateTime selectedDate = DateTime.now();
+  late final PageController _dateCarouselController;
+
+  @override
+  void initState() {
+    super.initState();
+    referenceDate = _dateOnly(DateTime.now());
+    selectedDate = _dateOnly(widget.date);
+
+    _dateCarouselController = PageController(
+      initialPage: _pageFromDate(selectedDate),
+    );
+
+    _loadExerciseFromServer(selectedDate);
+  }
+
+  @override
+  void dispose() {
+    _dateCarouselController.dispose();
+    super.dispose();
+  }
+
+  DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
+  int _pageFromDate(DateTime date) {
+    final normalized = _dateOnly(date);
+    final diff = normalized.difference(referenceDate).inDays;
+    return _centerPage + diff;
+  }
+
+  // DateTime _dateFromPage(int page) {
+  //   final offset = page - _centerPage;
+  //   return referenceDate.add(Duration(days: offset));
+  // }
+
+  void _updateFromDateCarousel(DateTime date) async {
+    final normalizedDate = _dateOnly(date);
+    setState(() {
+      selectedDate = normalizedDate;
+    });
+
+    await _loadExerciseFromServer(normalizedDate);
+  }
 
   String _calExTime(List<int> selectedCells) {
     final totalMinutes = selectedCells.length * 10;
@@ -44,6 +92,128 @@ class _ExerciseRecordDetailScreenState
     return result;
   }
 
+  List<List<int>> _convertToGrid(List<int> selectedCells) {
+    List<List<int>> grid = List.generate(24, (i) => List.filled(6, 0));
+
+    for (int index in selectedCells) {
+      if (index >= 0 && index < 144) {
+        int hour = index ~/ 6;
+        int tenMinute = index % 6;
+        grid[hour][tenMinute] = 1;
+      }
+    }
+
+    return grid;
+  }
+
+  List<int> _convertFromGrid(List<List<int>> grid) {
+    List<int> selectedCells = [];
+
+    for (int hour = 0; hour < 24; hour++) {
+      if (hour < grid.length) {
+        for (int tenMinute = 0; tenMinute < 6; tenMinute++) {
+          if (tenMinute < grid[hour].length && grid[hour][tenMinute] == 1) {
+            int index = hour * 6 + tenMinute;
+            selectedCells.add(index);
+          }
+        }
+      }
+    }
+
+    return selectedCells;
+  }
+
+  // 서버에서 운동 기록 조회
+  Future<bool> _loadExerciseFromServer(DateTime date) async {
+    try {
+      final dateKey =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      final exerciseService = ExerciseService();
+
+      final serverData = await exerciseService.getExerciseRecord(date: dateKey);
+
+      if (serverData != null && serverData['grid'] != null) {
+        final List<List<int>> serverGrid = (serverData['grid'] as List)
+            .map((row) => (row as List).cast<int>())
+            .toList();
+
+        final selectedCells = _convertFromGrid(serverGrid);
+
+        final normalizedDate = _dateOnly(date);
+        final normalizedSelectedDate = _dateOnly(selectedDate);
+        if (normalizedDate.isAtSameMomentAs(normalizedSelectedDate)) {
+          setState(() {
+            selected = selectedCells;
+          });
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) {
+              setState(() {});
+            }
+          });
+        }
+
+        return true;
+      }
+
+      final normalizedDate = _dateOnly(date);
+      final normalizedSelectedDate = _dateOnly(selectedDate);
+      if (normalizedDate.isAtSameMomentAs(normalizedSelectedDate)) {
+        setState(() {
+          selected = [];
+        });
+      }
+
+      return false;
+    } catch (e) {
+      print('서버에서 운동 기록 조회 실패: $e');
+
+      final normalizedDate = _dateOnly(date);
+      final normalizedSelectedDate = _dateOnly(selectedDate);
+      if (normalizedDate.isAtSameMomentAs(normalizedSelectedDate)) {
+        setState(() {
+          selected = [];
+        });
+      }
+
+      return false;
+    }
+  }
+
+  Future<void> _autoSendToServer(List<int> selectedCells) async {
+    final dateKey =
+        "${selectedDate.year}-${selectedDate.month.toString().padLeft(2, '0')}-${selectedDate.day.toString().padLeft(2, '0')}";
+    final grid = _convertToGrid(selectedCells);
+    final gridHash = selectedCells.toString();
+
+    if (_lastSentDurationPerDate[dateKey] == gridHash) return;
+
+    try {
+      final exerciseService = ExerciseService();
+      await exerciseService.exerciseRecord(date: dateKey, grid: grid);
+
+      _lastSentDurationPerDate[dateKey] = gridHash;
+
+      if (mounted) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '운동 기록 전송 실패: $e',
+              style: TextStyle(color: AppColors.ongiOrange),
+            ),
+            backgroundColor: Colors.white,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
   Map<String, int> _calculateHoursAndMinutes(List<int> selectedCells) {
     final totalMinutes = selectedCells.length * 10;
     final hours = totalMinutes ~/ 60;
@@ -51,9 +221,14 @@ class _ExerciseRecordDetailScreenState
     return {'hours': hours, 'minutes': minutes};
   }
 
-  void _handleBack() {
+  void _handleBack() async {
     final timeData = _calculateHoursAndMinutes(selected);
-    Navigator.pop(context, timeData);
+
+    await _autoSendToServer(selected);
+
+    if (mounted) {
+      Navigator.pop(context, timeData);
+    }
   }
 
   @override
@@ -77,7 +252,6 @@ class _ExerciseRecordDetailScreenState
               Align(
                 alignment: Alignment.topCenter,
                 child: Transform.translate(
-
                   offset: Offset(0, -circleSize * 0.81),
                   child: OverflowBox(
                     maxWidth: double.infinity,
@@ -125,7 +299,6 @@ class _ExerciseRecordDetailScreenState
 
               Positioned(
                 top: circleSize * 0.45,
-
                 left: 0,
                 right: 0,
                 bottom: 0,
@@ -149,8 +322,11 @@ class _ExerciseRecordDetailScreenState
                             width: 200,
                             height: 100,
                             child: DateCarousel(
-                              initialDate: widget.date,
-                              onDateChanged: (selectedDate) {},
+                              initialDate: selectedDate,
+                              controller: _dateCarouselController,
+                              onDateChanged: (date) {
+                                _updateFromDateCarousel(date);
+                              },
                             ),
                           ),
                         ),
@@ -197,6 +373,9 @@ class _ExerciseRecordDetailScreenState
                           bottom: 20,
                           child: Center(
                             child: TimeGrid(
+                              key: ValueKey(
+                                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}-${selected.length}-${selected.hashCode}",
+                              ),
                               initialSelected: selected,
                               cellColor: Colors.white,
                               cellSelectedColor: AppColors.ongiOrange,

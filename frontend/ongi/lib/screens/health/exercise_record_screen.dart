@@ -1,7 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import '../../core/app_colors.dart';
-import '../../widgets/date_carousel.dart';
-import 'exercise_record_detail_screen.dart';
+import 'package:ongi/core/app_colors.dart';
+import 'package:ongi/widgets/date_carousel.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:ongi/screens/health/exercise_record_detail_screen.dart';
+import 'package:ongi/services/exercise_service.dart';
+
+enum _TriggerSource { none, button, swipe }
 
 class ExerciseRecordScreen extends StatefulWidget {
   const ExerciseRecordScreen({super.key});
@@ -11,43 +17,218 @@ class ExerciseRecordScreen extends StatefulWidget {
 }
 
 class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
-  DateTime selectedDate = DateTime.now();
-  late PageController _exercisePageController;
-  int _currentExercisePage = 5000; // Start from middle for infinite scroll
-  late PageController _dateCarouselController;
-  bool _isButtonTriggered =
-      false; // Prevent exercise onPageChanged when triggered by button
-  bool _isSwipeTriggered =
-      false; // Prevent button callback when triggered by swipe
+  static const int _centerPage = 5000;
 
-  // Store exercise times for different dates
+  late final DateTime referenceDate; // normalized "today" at midnight
+  DateTime selectedDate = DateTime.now();
+
+  late final PageController _exercisePageController;
+  late final PageController _dateCarouselController;
+
+  _TriggerSource _triggerSource = _TriggerSource.none;
+
+  // Store exercise times for different dates; key is yyyy-MM-dd
   Map<String, Map<String, int>> exerciseTimes = {};
 
-  // Get exercise time for a specific date
-  Map<String, int> getExerciseTime(DateTime date) {
-    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-    return exerciseTimes[dateKey] ?? {'hours': 0, 'minutes': 0};
-  }
-
-  // Save exercise time for a specific date
-  void saveExerciseTime(DateTime date, int hours, int minutes) {
-    final dateKey = "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
-    setState(() {
-      exerciseTimes[dateKey] = {'hours': hours, 'minutes': minutes};
-    });
-  }
-
-  // Convert page index to date for exercise PageView
-  DateTime _dateFromExercisePage(int page) {
-    final offset = page - 5000;
-    return DateTime.now().add(Duration(days: offset));
-  }
+  // SharedPreferences key
+  static const String _exerciseTimesKey = 'exercise_times';
 
   @override
   void initState() {
     super.initState();
-    _exercisePageController = PageController(initialPage: _currentExercisePage);
-    _dateCarouselController = PageController(initialPage: 5000);
+    referenceDate = _dateOnly(DateTime.now());
+    selectedDate = referenceDate;
+
+    _exercisePageController = PageController(
+      initialPage: _pageFromDate(selectedDate),
+    );
+    _dateCarouselController = PageController(
+      initialPage: _pageFromDate(selectedDate),
+    );
+
+    _loadPersistedExerciseTimes();
+    _loadExerciseFromServer(selectedDate); // 초기 날짜의 서버 데이터 조회
+  }
+
+  Future<void> _loadPersistedExerciseTimes() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(_exerciseTimesKey);
+      if (raw != null && raw.isNotEmpty) {
+        final decoded = jsonDecode(raw);
+        if (decoded is Map<String, dynamic>) {
+          final Map<String, Map<String, int>> loaded = {};
+          decoded.forEach((key, value) {
+            if (value is Map<String, dynamic>) {
+              final hours = value['hours'] is int
+                  ? value['hours'] as int
+                  : int.tryParse(value['hours'].toString()) ?? 0;
+              final minutes = value['minutes'] is int
+                  ? value['minutes'] as int
+                  : int.tryParse(value['minutes'].toString()) ?? 0;
+              loaded[key] = {'hours': hours, 'minutes': minutes};
+            }
+          });
+          setState(() {
+            exerciseTimes = loaded;
+          });
+        }
+      }
+    } catch (_) {
+      // ignore corrupted prefs
+    }
+  }
+
+  Future<void> _persistExerciseTimes() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = jsonEncode(exerciseTimes);
+      await prefs.setString(_exerciseTimesKey, encoded);
+    } catch (_) {
+      // ignore persistence failure
+    }
+  }
+
+  // 서버에서 운동 기록 조회
+  Future<bool> _loadExerciseFromServer(DateTime date) async {
+    try {
+      final dateKey =
+          "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+      final exerciseService = ExerciseService();
+
+      final serverData = await exerciseService.getExerciseRecord(date: dateKey);
+
+      if (serverData != null && serverData['grid'] != null) {
+        final List<List<int>> serverGrid = (serverData['grid'] as List)
+            .map((row) => (row as List).cast<int>())
+            .toList();
+
+        // grid에서 총 운동 시간 계산
+        int totalCells = 0;
+        for (var row in serverGrid) {
+          for (var cell in row) {
+            if (cell == 1) totalCells++;
+          }
+        }
+
+        final totalMinutes = totalCells * 10;
+        final hours = totalMinutes ~/ 60;
+        final minutes = totalMinutes % 60;
+
+        // exerciseTimes 맵에 저장
+        setState(() {
+          exerciseTimes[dateKey] = {'hours': hours, 'minutes': minutes};
+        });
+
+        // SharedPreferences에도 저장
+        _persistExerciseTimes();
+
+        return true;
+      } else {
+        // 서버에 데이터가 없으면 로컬에서도 삭제
+        setState(() {
+          exerciseTimes.remove(dateKey);
+        });
+        _persistExerciseTimes();
+        return false;
+      }
+    } catch (e) {
+      print('서버에서 운동 기록 조회 실패: $e');
+      return false;
+    }
+  }
+
+  // Normalize to date-only (midnight)
+  DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+
+  // Convert date to page index
+  int _pageFromDate(DateTime date) {
+    final normalized = _dateOnly(date);
+    final diff = normalized.difference(referenceDate).inDays;
+    return _centerPage + diff;
+  }
+
+  // Convert page index to date
+  DateTime _dateFromPage(int page) {
+    final offset = page - _centerPage;
+    return referenceDate.add(Duration(days: offset));
+  }
+
+  // Get exercise time for a date safely
+  Map<String, int> getExerciseTime(DateTime date) {
+    final key =
+        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    return exerciseTimes[key] ?? {'hours': 0, 'minutes': 0};
+  }
+
+  // Save locally and persist
+  void saveExerciseTime(DateTime date, int hours, int minutes) {
+    final key =
+        "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+    setState(() {
+      exerciseTimes[key] = {'hours': hours, 'minutes': minutes};
+    });
+    _persistExerciseTimes();
+  }
+
+  void _updateFromButton(DateTime date) {
+    final normalizedDate = _dateOnly(date);
+    final targetPage = _pageFromDate(normalizedDate);
+
+    setState(() {
+      selectedDate = normalizedDate;
+      _triggerSource = _TriggerSource.button;
+    });
+
+    _loadExerciseFromServer(normalizedDate);
+
+    if (_exercisePageController.hasClients) {
+      _exercisePageController
+          .animateToPage(
+            targetPage,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.ease,
+          )
+          .then((_) {
+            setState(() {
+              _triggerSource = _TriggerSource.none;
+            });
+          });
+    } else {
+      setState(() {
+        _triggerSource = _TriggerSource.none;
+      });
+    }
+
+    if (_dateCarouselController.hasClients) {
+      _dateCarouselController.jumpToPage(targetPage);
+    }
+  }
+
+  void _updateFromSwipe(int index) {
+    final newDate = _dateFromPage(index);
+    final normalizedDate = _dateOnly(newDate);
+    final targetPage = _pageFromDate(normalizedDate);
+
+    setState(() {
+      selectedDate = normalizedDate;
+      _triggerSource = _TriggerSource.swipe;
+    });
+
+    if (_dateCarouselController.hasClients) {
+      _dateCarouselController.jumpToPage(targetPage);
+    }
+
+    // 새로운 날짜의 서버 데이터 조회
+    _loadExerciseFromServer(normalizedDate);
+
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          _triggerSource = _TriggerSource.none;
+        });
+      }
+    });
   }
 
   @override
@@ -61,6 +242,9 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final circleSize = screenWidth * 1.56;
+    final exerciseTime = getExerciseTime(selectedDate);
+    final hours = exerciseTime['hours'] ?? 0;
+    final minutes = exerciseTime['minutes'] ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.ongiLigntgrey,
@@ -93,10 +277,8 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                         ),
                       ),
                     ),
-                    // Content inside white container
                     Builder(
                       builder: (context) {
-                        final exerciseTime = getExerciseTime(selectedDate);
                         return Padding(
                           padding: const EdgeInsets.only(left: 20, right: 20),
                           child: Column(
@@ -104,7 +286,7 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                               const SizedBox(height: 90),
                               Row(
                                 children: [
-                                  Spacer(),
+                                  const Spacer(),
                                   Expanded(
                                     flex: 2,
                                     child: SizedBox(
@@ -117,8 +299,9 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                           initialDate: selectedDate,
                                           controller: _dateCarouselController,
                                           onDateChanged: (date) {
-                                            if (_isSwipeTriggered)
-                                              return; // Ignore if triggered by swipe
+                                            if (_triggerSource ==
+                                                _TriggerSource.swipe)
+                                              return;
                                             _updateFromButton(date);
                                           },
                                           builder: (context, date) {
@@ -133,13 +316,12 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                               Expanded(
                                 child: SingleChildScrollView(
                                   child: Padding(
-                                    padding: EdgeInsets.only(
+                                    padding: const EdgeInsets.only(
                                       left: 10,
                                       right: 10,
                                     ),
                                     child: Column(
                                       children: [
-                                        // Exercise time section
                                         SizedBox(
                                           height: 200,
                                           child: PageView.builder(
@@ -148,40 +330,58 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                             physics:
                                                 const ClampingScrollPhysics(),
                                             onPageChanged: (index) {
-                                              if (_isButtonTriggered)
-                                                return; // Ignore if triggered by button
+                                              if (_triggerSource ==
+                                                  _TriggerSource.button)
+                                                return;
                                               _updateFromSwipe(index);
                                             },
-                                            itemCount: 10000,
+                                            itemCount:
+                                                10000, // large buffer for infinite feel
                                             itemBuilder: (context, index) {
-                                              final date =
-                                                  _dateFromExercisePage(index);
+                                              final date = _dateFromPage(index);
                                               final exerciseTimeForDate =
                                                   getExerciseTime(date);
+                                              final h =
+                                                  exerciseTimeForDate['hours'] ??
+                                                  0;
+                                              final m =
+                                                  exerciseTimeForDate['minutes'] ??
+                                                  0;
 
                                               return GestureDetector(
                                                 onTap: () async {
-                                                  final result = await Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          ExerciseRecordDetailScreen(
-                                                            date: date,
-                                                            hours:
-                                                                exerciseTimeForDate['hours'] ??
-                                                                0,
-                                                            minutes:
-                                                                exerciseTimeForDate['minutes'] ??
-                                                                0,
-                                                          ),
-                                                    ),
-                                                  );
-                                                  
-                                                  // Handle returned exercise time data
-                                                  if (result != null && result is Map<String, dynamic>) {
-                                                    final returnedHours = result['hours'] as int;
-                                                    final returnedMinutes = result['minutes'] as int;
-                                                    saveExerciseTime(date, returnedHours, returnedMinutes);
+                                                  final result =
+                                                      await Navigator.push(
+                                                        context,
+                                                        MaterialPageRoute(
+                                                          builder: (_) =>
+                                                              ExerciseRecordDetailScreen(
+                                                                date: date,
+                                                                hours: h,
+                                                                minutes: m,
+                                                              ),
+                                                        ),
+                                                      );
+
+                                                  // detail 화면에서 돌아온 후 서버 데이터 다시 조회
+                                                  if (result != null &&
+                                                      result
+                                                          is Map<String, int>) {
+                                                    // detail 화면에서 변경된 데이터로 로컬 업데이트
+                                                    final hours =
+                                                        result['hours'] ?? 0;
+                                                    final minutes =
+                                                        result['minutes'] ?? 0;
+                                                    saveExerciseTime(
+                                                      date,
+                                                      hours,
+                                                      minutes,
+                                                    );
+
+                                                    // 서버에서도 최신 데이터 다시 조회 (동기화)
+                                                    await _loadExerciseFromServer(
+                                                      date,
+                                                    );
                                                   }
                                                 },
                                                 child: Padding(
@@ -212,13 +412,11 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                       const SizedBox(
                                                         height: 20,
                                                       ),
-                                                      // Exercise time display
                                                       Row(
                                                         mainAxisAlignment:
                                                             MainAxisAlignment
                                                                 .center,
                                                         children: [
-                                                          // Hours container
                                                           Container(
                                                             width: 95,
                                                             height: 95,
@@ -254,7 +452,7 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                                       .center,
                                                               children: [
                                                                 Text(
-                                                                  exerciseTimeForDate['hours']
+                                                                  h
                                                                       .toString()
                                                                       .padLeft(
                                                                         2,
@@ -290,7 +488,6 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                           const SizedBox(
                                                             width: 13,
                                                           ),
-                                                          // Minutes container
                                                           Container(
                                                             width: 95,
                                                             height: 95,
@@ -326,7 +523,7 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                                       .center,
                                                               children: [
                                                                 Text(
-                                                                  exerciseTimeForDate['minutes']
+                                                                  m
                                                                       .toString()
                                                                       .padLeft(
                                                                         2,
@@ -364,7 +561,6 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                       const SizedBox(
                                                         height: 20,
                                                       ),
-                                                      // "운동했어요!" text
                                                       const Align(
                                                         alignment: Alignment
                                                             .centerRight,
@@ -459,57 +655,5 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
         ),
       ),
     );
-  }
-
-  // When button is clicked -> animate exercise area
-  void _updateFromButton(DateTime date) {
-    _isButtonTriggered = true;
-
-    final daysDiff = date.difference(DateTime.now()).inDays;
-    final targetPage = 5000 + daysDiff;
-
-    setState(() {
-      selectedDate = date;
-      _currentExercisePage = targetPage;
-    });
-
-    // Animate exercise PageView
-    if (_exercisePageController.hasClients) {
-      _exercisePageController
-          .animateToPage(
-            targetPage,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.ease,
-          )
-          .then((_) {
-            _isButtonTriggered = false;
-          });
-    } else {
-      _isButtonTriggered = false;
-    }
-  }
-
-  // When exercise area is swiped -> update date carousel
-  void _updateFromSwipe(int index) {
-    _isSwipeTriggered = true;
-
-    final newDate = _dateFromExercisePage(index);
-    final daysDiff = newDate.difference(DateTime.now()).inDays;
-    final targetPage = 5000 + daysDiff;
-
-    setState(() {
-      _currentExercisePage = index;
-      selectedDate = newDate;
-    });
-
-    // Update DateCarousel (no animation needed, just sync the display)
-    if (_dateCarouselController.hasClients) {
-      _dateCarouselController.jumpToPage(targetPage);
-    }
-
-    // Reset flag after a short delay
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _isSwipeTriggered = false;
-    });
   }
 }

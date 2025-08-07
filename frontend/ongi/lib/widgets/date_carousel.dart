@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class DateCarousel extends StatefulWidget {
-  final DateTime initialDate; // defaults to DateTime.now()
+  final DateTime initialDate;
   final Widget Function(BuildContext context, DateTime date)? builder;
   final void Function(DateTime date)? onDateChanged;
   final PageController? controller;
@@ -19,20 +19,20 @@ class DateCarousel extends StatefulWidget {
 }
 
 class _DateCarouselState extends State<DateCarousel> {
-  // Start in the middle of a large range to allow "infinite" swiping.
   static const int _kInitialPage = 5000;
   late final PageController _controller;
-
-  // Current page index.
+  late final DateTime _anchorDate;
   int _currentIndex = _kInitialPage;
   bool _isUpdating = false;
-  int? _lastUpdateTime;
-  static const int _debounceMs =
-      100; // Reduced to 100ms for better responsiveness
 
   @override
   void initState() {
     super.initState();
+    _anchorDate = DateTime(
+      widget.initialDate.year,
+      widget.initialDate.month,
+      widget.initialDate.day,
+    );
     _controller =
         widget.controller ?? PageController(initialPage: _kInitialPage);
   }
@@ -45,25 +45,22 @@ class _DateCarouselState extends State<DateCarousel> {
     super.dispose();
   }
 
-  // Convert page index -> date.
   DateTime _dateFromIndex(int index) {
     final int offset = index - _kInitialPage;
-    return widget.initialDate.add(Duration(days: offset));
+    return _anchorDate.add(Duration(days: offset));
   }
 
-  // Korean weekday string.
   String _weekdayKor(DateTime date) {
     const weekdays = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
     return weekdays[date.weekday - 1];
   }
 
-  // Format: 2025년 6월 13일
   String _formatDate(DateTime date) =>
       '${date.year}년 ${date.month}월 ${date.day}일';
 
   void _goToPage(int page) {
     if (_isUpdating || page == _currentIndex) return;
-    if (!_controller.hasClients) return; // attach 안됐으면 무시
+    if (!_controller.hasClients) return;
     _isUpdating = true;
     _controller
         .animateToPage(
@@ -140,7 +137,6 @@ class _DateCarouselState extends State<DateCarousel> {
             controller: _controller,
             physics: const ClampingScrollPhysics(),
             onPageChanged: (index) {
-              print('[DateCarousel] onPageChanged: $index');
               setState(() {
                 _currentIndex = index;
               });
