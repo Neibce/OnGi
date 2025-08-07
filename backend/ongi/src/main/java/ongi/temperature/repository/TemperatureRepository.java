@@ -39,4 +39,10 @@ public interface TemperatureRepository extends JpaRepository<Temperature, Long> 
     // 최근 N일간 가족 내에서 아무나 활동(온도 변화)이 있었는지
     @Query("SELECT COUNT(t) > 0 FROM Temperature t WHERE t.familyId = :familyId AND t.createdAt >= :since")
     boolean existsByFamilyIdAndCreatedAtAfter(@Param("familyId") String familyId, @Param("since") java.time.LocalDateTime since);
+
+    @Query("SELECT SUM(t.temperature) FROM Temperature t WHERE t.familyId = :familyId AND t.createdAt < :fromDate")
+    Double getTotalTemperatureByFamilyIdAndBeforeDate(@Param("familyId") String familyId, @Param("fromDate") java.time.LocalDateTime fromDate);
+
+    @Query("SELECT t FROM Temperature t WHERE t.familyId = :familyId AND t.createdAt >= :fromDate ORDER BY t.createdAt DESC")
+    List<Temperature> findAllByFamilyIdAndCreatedAtAfter(@Param("familyId") String familyId, @Param("fromDate") java.time.LocalDateTime fromDate);
 }
