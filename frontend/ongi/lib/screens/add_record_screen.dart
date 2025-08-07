@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'dart:io';
+import 'package:ongi/screens/photo/check_record_screen.dart';
 
 class AddRecordScreen extends StatefulWidget {
   const AddRecordScreen({super.key});
@@ -21,6 +22,7 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
   CameraController? frontCameraController;
   bool showFrontCamera = false;
   String? backCapturedImagePath;
+  String? frontCapturedImagePath; // 실제 데이터 전달용
   bool _isPhotoTaken = false;
 
   late AnimationController _frontAnimationController;
@@ -309,6 +311,19 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
                                 setState(() {
                                   _isPhotoTaken = false;
                                 });
+                              }
+
+                              // 사진 확인 화면으로
+                              if (backCapturedImagePath != null) {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => CheckRecordScreen(
+                                      backImagePath: backCapturedImagePath!,
+                                      frontImagePath: frontCapturedImagePath,
+                                    ),
+                                  ),
+                                );
                               }
                             },
                     ),
