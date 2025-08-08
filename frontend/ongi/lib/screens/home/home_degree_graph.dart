@@ -7,13 +7,8 @@ import 'package:ongi/screens/home/home_ourfamily_text_withoutUser.dart';
 import 'package:ongi/services/temperature_service.dart';
 import 'package:ongi/models/temperature_contribution.dart';
 import 'package:ongi/utils/prefs_manager.dart';
-
-final List<String> dates = ['6/11', '6/12', '6/13', '6/14', '6/15'];
-final List<double> temps = [36.2, 35.8, 37.2, 38.0, 38.6];
-final List<FlSpot> spots = List.generate(
-  temps.length,
-      (i) => FlSpot(i.toDouble(), temps[i]),
-);
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomeDegreeGraph extends StatefulWidget {
   final VoidCallback? onBack;
@@ -29,35 +24,61 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   String? errorMsg;
   List<Contribution> contributions = [];
 
+  Future<void> ensureFamilyCode() async {
+    final userInfo = await PrefsManager.getUserInfo();
+    if (userInfo['familycode'] == null || userInfo['familycode']!.isEmpty) {
+      final token = await PrefsManager.getAccessToken();
+      if (token == null) return;
+      final url = Uri.parse('https://ongi-1049536928483.asia-northeast3.run.app/family');
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        await PrefsManager.saveFamilyCodeAndName(data['code'] ?? '', data['name'] ?? '');
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    fetchContributions();
+    ensureFamilyCode().then((_) => fetchContributions());
   }
 
   Future<void> fetchContributions() async {
+  setState(() {
+    isLoading = true;
+    errorMsg = null;
+  });
+  try {
+    final userInfo = await PrefsManager.getUserInfo();
+    final familyCode = userInfo['familycode'];
+    if (familyCode == null) throw Exception('가족 코드가 없습니다.');
+    final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
+    final resp = await service.fetchFamilyTemperatureContributions(familyCode);
+    if (!mounted) return;
     setState(() {
-      isLoading = true;
-      errorMsg = null;
+      contributions = resp;
+      isLoading = false;
     });
-    try {
-      final userInfo = await PrefsManager.getUserInfo();
-      final familyCode = userInfo['familycode'];
-      if (familyCode == null) throw Exception('가족 코드가 없습니다. ');
-      final service = TemperatureService(baseUrl: 'http://localhost:8080');
-      final resp = await service.fetchFamilyTemperatureContributions(familyCode);
-      if (!mounted) return;
-      setState(() {
-        contributions = resp.contributions;
-        isLoading = false;
-      });
-    } catch (e) {
-      if (!mounted) return;
-      setState(() {
-        errorMsg = e.toString();
-        isLoading = false;
-      });
-    }
+  } catch (e) {
+    if (!mounted) return;
+    setState(() {
+      errorMsg = e.toString();
+      isLoading = false;
+    });
+  }
+}
+  List<FlSpot> get spots {
+    return List.generate(
+      contributions.length,
+      (i) => FlSpot(i.toDouble(), contributions[i].temperature),
+    );
+  }
+  List<String> get dates {
+    return contributions.map((c) => c.formattedDate).toList();
   }
 
   @override
