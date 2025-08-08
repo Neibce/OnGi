@@ -41,47 +41,56 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     }
   }
 
+  // 5일간 온도 총합 데이터
+  List<Map<String, dynamic>> dailyTemperatures = [];
+
+  // 그래프 spots
+  List<FlSpot> get spots {
+    return List.generate(
+      dailyTemperatures.length,
+      (i) => FlSpot(i.toDouble(), dailyTemperatures[i]['totalTemperature'] ?? 36.5),
+    );
+  }
+
+  // 날짜 포맷
+  List<String> get dates {
+    return dailyTemperatures.map((e) {
+      final date = DateTime.parse(e['date']);
+      return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
+    }).toList();
+  }
+
+  Future<void> fetchAllTemperatureData() async {
+    setState(() {
+      isLoading = true;
+      errorMsg = null;
+    });
+    try {
+      final userInfo = await PrefsManager.getUserInfo();
+      final familyCode = userInfo['familycode'];
+      if (familyCode == null) throw Exception('가족 코드가 없습니다.');
+      final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
+      final dailyResp = await service.fetchFamilyTemperatureDaily(familyCode);
+      final contribResp = await service.fetchFamilyTemperatureContributions(familyCode);
+      if (!mounted) return;
+      setState(() {
+        dailyTemperatures = dailyResp;
+        contributions = contribResp;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        errorMsg = e.toString();
+        isLoading = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    ensureFamilyCode().then((_) => fetchContributions());
-  }
-
-  Future<void> fetchContributions() async {
-  setState(() {
-    isLoading = true;
-    errorMsg = null;
-  });
-  try {
-    final userInfo = await PrefsManager.getUserInfo();
-    final familyCode = userInfo['familycode'];
-    if (familyCode == null) throw Exception('가족 코드가 없습니다.');
-    final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
-    final resp = await service.fetchFamilyTemperatureContributions(familyCode);
-    if (!mounted) return;
-    setState(() {
-      contributions = resp;
-      isLoading = false;
-    });
-  } catch (e) {
-    if (!mounted) return;
-    setState(() {
-      errorMsg = e.toString();
-      isLoading = false;
-    });
-  }
-}
-  List<FlSpot> get spots {
-    return List.generate(
-      contributions.length,
-      (i) => FlSpot(i.toDouble(), contributions[i].temperature),
-    );
-  }
-  List<String> get dates {
-    return contributions.map((c) {
-      final dt = c.dateTime;
-      return '${dt.month.toString().padLeft(2, '0')}/${dt.day.toString().padLeft(2, '0')}';
-    }).toList();
+    ensureFamilyCode().then((_) => fetchAllTemperatureData());
   }
 
   @override
@@ -93,7 +102,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 뒤로가기
+              // 뒤로가기!
               GestureDetector(
                 onTap: widget.onBack ?? () => Navigator.of(context).pop(),
                 child: Padding(
@@ -157,8 +166,8 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
             LineChartData(
               minY: 35.2,
               maxY: 40.5,
-              minX: 0,
-              maxX: (dates.length - 1).toDouble(),
+              minX: -0.5,
+              maxX: (dates.length - 0.5),
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
@@ -190,10 +199,8 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   sideTitles: SideTitles(
                     showTitles: true,
                     getTitlesWidget: (value, meta) {
-                      if (value % 1 != 0) return const SizedBox.shrink();
-                      int idx = value.toInt();
-                      if (idx < 0 || idx >= dates.length)
-                        return const SizedBox.shrink();
+                      int idx = value.round();
+                      if (idx < 0 || idx >= dates.length) return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
@@ -318,3 +325,4 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     );
   }
 }
+
