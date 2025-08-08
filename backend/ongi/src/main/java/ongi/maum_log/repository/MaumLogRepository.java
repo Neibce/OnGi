@@ -11,7 +11,8 @@ import org.springframework.data.repository.query.Param;
 
 public interface MaumLogRepository extends JpaRepository<MaumLog, Long> {
 
-    boolean existsByFileName(String fileName);
+    boolean existsByFrontFileName(String fileName);
+    boolean existsByBackFileName(String fileName);
 
     @Query(value = """
             SELECT DATE(created_at) AS date, COUNT(*) AS count
