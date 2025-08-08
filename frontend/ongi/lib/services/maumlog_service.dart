@@ -39,6 +39,8 @@ class EmotionService {
       headers: {"Content-Type": "application/json"},
       body: body,
     );
+    print('업로드 statusCode: ${response.statusCode}');
+    print('업로드 body: ${response.body}');
 
     if (response.statusCode != 200 && response.statusCode != 201) {
       throw Exception('업로드 실패: ${response.body}');

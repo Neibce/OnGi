@@ -279,7 +279,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           final file = File(widget.imagePath);
                           final fileName = file.uri.pathSegments.last;
                           final fileExtension = fileName.split('.').last;
-                          final selectedEmotionCodes = _selectedEmotions.map((desc) => Emotion.descriptionToCode(desc)).toList();
+                          final selectedEmotionCodes = _selectedEmotions.toList().cast<String>();
                           final service = EmotionService(baseUrl: _emotionApiBaseUrl);
                           await service.uploadMaumLog(
                             fileName: fileName,
@@ -288,6 +288,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                             comment: _commentController.text,
                             emotions: selectedEmotionCodes,
                           );
+
                           if (!mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text('기록이 저장되었습니다!')),

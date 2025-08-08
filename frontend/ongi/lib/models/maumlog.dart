@@ -10,24 +10,6 @@ class Emotion {
       description: json['description'],
     );
   }
-
-  // description → code 변환
-  static String descriptionToCode(String description) {
-    final found = all.firstWhere(
-      (e) => e.description == description,
-      orElse: () => Emotion(code: description.toUpperCase(), description: description),
-    );
-    return found.code;
-  }
-
-  // code → description 변환
-  static String codeToDescription(String code) {
-    final found = all.firstWhere(
-      (e) => e.code == code,
-      orElse: () => Emotion(code: code, description: code),
-    );
-    return found.description;
-  }
 }
 
 class MaumLogRecord {
@@ -36,7 +18,7 @@ class MaumLogRecord {
   final String fileExtension;
   final String? location;
   final String? comment;
-  final List<String> emotions; // Emotion code 리스트
+  final List<String> emotions; // Emotion 리스트
 
   MaumLogRecord({
     required this.id,
