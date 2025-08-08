@@ -15,7 +15,7 @@ class DetailRecordScreen extends StatefulWidget {
 }
 
 class _DetailRecordScreenState extends State<DetailRecordScreen> {
-  static const String _emotionApiBaseUrl = 'http://10.0.2.2:8080';
+  static const String _emotionApiBaseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
   late Future<List<Emotion>> _emotionsFuture;
   final Set<String> _selectedEmotions = {};
   final TextEditingController _commentController = TextEditingController();

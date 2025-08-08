@@ -4,15 +4,17 @@ import '../models/maumlog.dart';
 
 class EmotionService {
   final String baseUrl;
-  EmotionService({required this.baseUrl});
+  EmotionService({this.baseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app'});
 
   Future<List<Emotion>> fetchEmotions() async {
     final response = await http.get(Uri.parse('$baseUrl/emotions'));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
+      print(response.body);
+      print(response.statusCode);
       return data.map((e) => Emotion.fromJson(e)).toList();
     } else {
-      throw Exception('감정 리스트를 불러오지 못했습니다');
+      throw Exception('감정 리스트를 불러오지 못했습니다, ${response.body}, ${response.statusCode}');
     }
   }
 
@@ -44,7 +46,7 @@ class EmotionService {
   }
 
   Future<List<MaumLogRecord>> fetchMaumLogs() async {
-    final response = await http.get(Uri.parse(' [baseUrl]/maum-log'));
+    final response = await http.get(Uri.parse('$baseUrl/maum-log'));
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return data.map((e) => MaumLogRecord.fromJson(e)).toList();

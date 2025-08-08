@@ -10,29 +10,6 @@ class Emotion {
       description: json['description'],
     );
   }
-  
-  // Emotion 목록
-  static const List<Emotion> all = [
-    Emotion(code: "JOYFUL", description: "즐거움"),
-    Emotion(code: "EXCITED", description: "설렘"),
-    Emotion(code: "RELIEVED", description: "마음이 놓임"),
-    Emotion(code: "SMIRK", description: "뿌듯함"),
-    Emotion(code: "SADNESS", description: "서글픔"),
-    Emotion(code: "STIFLED", description: "답답함"),
-    Emotion(code: "WARMHEARTED", description: "마음이 따뜻"),
-    Emotion(code: "EMPTY", description: "허전함"),
-    Emotion(code: "REFRESHING", description: "시원섭섭함"),
-    Emotion(code: "THRILL", description: "들뜸"),
-    Emotion(code: "ANNOYED", description: "짜증남"),
-    Emotion(code: "SORROWFUL", description: "서운함"),
-    Emotion(code: "WORRIED", description: "걱정스러움"),
-    Emotion(code: "MISSING", description: "그리움"),
-    Emotion(code: "DEPRESSED", description: "울적함"),
-    Emotion(code: "RELAXED", description: "여유로움"),
-    Emotion(code: "CONFUSED", description: "마음이 복잡함"),
-    Emotion(code: "CHEERFUL", description: "기운이 남"),
-    Emotion(code: "COZY", description: "포근함"),
-  ];
 
   // description → code 변환
   static String descriptionToCode(String description) {
