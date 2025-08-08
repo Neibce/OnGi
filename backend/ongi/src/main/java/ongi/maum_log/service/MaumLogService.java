@@ -1,6 +1,7 @@
 package ongi.maum_log.service;
 
 import java.net.URL;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import ongi.exception.EntityAlreadyExistException;
@@ -13,6 +14,7 @@ import ongi.security.CustomUserDetails;
 import ongi.temperature.service.TemperatureService;
 import ongi.user.entity.User;
 import ongi.util.S3FileService;
+import ongi.maum_log.dto.MaumLogResponseDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,5 +58,18 @@ public class MaumLogService {
         URL presignedUrl = s3FileService.createSignedPutUrl(userDetails.getUser(), DIR_NAME,
                 fileName);
         return MaumLogPresignedResponseDto.from(presignedUrl.toString(), fileName);
+    }
+
+    public List<MaumLogResponseDto> getAllMaumLogs() {
+        return maumLogRepository.findAll().stream()
+            .map(m -> new MaumLogResponseDto(
+                m.getId(),
+                m.getFileName(),
+                m.getFileExtension(),
+                m.getLocation(),
+                m.getComment(),
+                m.getEmotions()
+            ))
+            .toList();
     }
 }

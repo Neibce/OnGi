@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.http.HttpStatusCode;
+import ongi.maum_log.dto.MaumLogResponseDto;
+import java.util.List;
 
 @RestController
 @RequestMapping("/maum-log")
@@ -34,5 +36,10 @@ public class MaumLogController {
             @Valid @RequestBody MaumLogUploadRequestDto request) {
         maumLogService.createMaumLog(userDetails, request);
         return ResponseEntity.status(HttpStatusCode.CREATED).build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MaumLogResponseDto>> getAllMaumLogs() {
+        return ResponseEntity.ok(maumLogService.getAllMaumLogs());
     }
 }
