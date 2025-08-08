@@ -6,7 +6,7 @@ class UserService {
   static const String baseUrl =
       'https://ongi-1049536928483.asia-northeast3.run.app';
 
-  Future<Map<String, dynamic>> user() async {
+  static Future<Map<String, dynamic>> user() async {
     final accessToken = await PrefsManager.getAccessToken();
 
     try {

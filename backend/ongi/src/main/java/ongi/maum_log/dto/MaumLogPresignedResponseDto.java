@@ -1,10 +1,22 @@
 package ongi.maum_log.dto;
 
 public record MaumLogPresignedResponseDto(
-        String presignedUrl,
-        String fileName
+        String frontFileName,
+        String frontPresignedUrl,
+        String backFileName,
+        String backPresignedUrl
 ) {
-    public static MaumLogPresignedResponseDto from(String presignedUrl, String fileName) {
-        return new MaumLogPresignedResponseDto(presignedUrl, fileName);
+    public static MaumLogPresignedResponseDto from(
+            String frontFileName,
+            String frontPresignedUrl,
+            String backFileName,
+            String backPresignedUrl
+    ) {
+        return new MaumLogPresignedResponseDto(
+                frontFileName,
+                frontPresignedUrl,
+                backFileName,
+                backPresignedUrl
+        );
     }
 }
