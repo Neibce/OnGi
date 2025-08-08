@@ -1,10 +1,12 @@
 package ongi.maum_log.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import ongi.maum_log.dto.DateCount;
 import ongi.maum_log.entity.MaumLog;
+import ongi.user.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -13,6 +15,17 @@ public interface MaumLogRepository extends JpaRepository<MaumLog, Long> {
 
     boolean existsByFrontFileName(String fileName);
     boolean existsByBackFileName(String fileName);
+    boolean existsByCreatedByAndCreatedAtBetween(
+            User user,
+            LocalDateTime startOfDay,
+            LocalDateTime endOfDay
+    );
+
+    List<MaumLog> findByCreatedByUuidInAndCreatedAtBetween(
+            List<UUID> users,
+            LocalDateTime startOfDay,
+            LocalDateTime endOfDay
+    );
 
     @Query(value = """
             SELECT DATE(created_at) AS date, COUNT(*) AS count

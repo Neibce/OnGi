@@ -37,29 +37,27 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentView = viewName;
     });
   }
-  void _goBackToHome(){
+
+  void _goBackToHome() {
     setState(() {
       _currentView = 'home';
     });
   }
-  Widget _buildCurrentView(){
-    switch(_currentView){
+
+  Widget _buildCurrentView() {
+    switch (_currentView) {
       case 'graph':
         return _buildGraphView();
       default:
         return _buildHomeView();
     }
   }
-  Widget _buildGraphView(){
-    return Stack(
-      children: [
-        HomeDegreeGraph(
-          onBack: _goBackToHome,
-        ),
-      ],
-    );
+
+  Widget _buildGraphView() {
+    return Stack(children: [HomeDegreeGraph(onBack: _goBackToHome)]);
   }
-  Widget _buildHomeView(){
+
+  Widget _buildHomeView() {
     return Stack(
       children: [
         Positioned(
@@ -90,25 +88,21 @@ class _HomeScreenState extends State<HomeScreen> {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.14),
+            SizedBox(height: MediaQuery.of(context).size.height * 0.13),
             HomeOngiText(username: _username),
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-            HomeCapsuleSection(
-              onGraphTap: () => _changeView('graph'),
-            ),
+            HomeCapsuleSection(onGraphTap: () => _changeView('graph')),
           ],
         ),
       ],
     );
   }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: [
-        Container(
-          color: AppColors.ongiOrange,
-          child: _buildCurrentView(),
-        ),
+        Container(color: AppColors.ongiOrange, child: _buildCurrentView()),
       ],
     );
   }
