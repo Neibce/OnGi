@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:ongi/core/app_colors.dart';
+import 'package:ongi/services/maumlog_service.dart';
+import 'package:ongi/models/maumlog.dart';
 
 class DetailRecordScreen extends StatefulWidget {
   final String imagePath;
@@ -13,12 +15,8 @@ class DetailRecordScreen extends StatefulWidget {
 }
 
 class _DetailRecordScreenState extends State<DetailRecordScreen> {
-  final List<String> _emotions = [
-    '즐거움', '설렘', '마음이 놓임', '뿌듯함', '서글픔',
-    '답답함', '마음이 따뜻', '허전함', '시원섭섭함', '들뜸',
-    '짜증남', '서운함', '걱정스러움', '그리움', '울적함',
-    '여유로움', '마음이 복잡함', '기운이 남', '포근함',
-  ];
+  static const String _emotionApiBaseUrl = 'http://10.0.2.2:8080';
+  late Future<List<Emotion>> _emotionsFuture;
   final Set<String> _selectedEmotions = {};
   final TextEditingController _commentController = TextEditingController();
 
@@ -26,6 +24,18 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
     const weekdays = ['월요일', '화요일', '수요일', '목요일', '금요일', '토요일', '일요일'];
     return '${date.year}년 ${date.month}월 ${date.day}일 ${weekdays[date.weekday - 1]}';
   }
+
+  @override
+  void initState() {
+    super.initState();
+    _emotionsFuture = fetchEmotions();
+  }
+
+  Future<List<Emotion>> fetchEmotions() async {
+    final service = EmotionService(baseUrl: _emotionApiBaseUrl);
+    return await service.fetchEmotions();
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -162,39 +172,51 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: _emotions.map((e) {
-                          final selected = _selectedEmotions.contains(e);
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                if (selected) {
-                                  _selectedEmotions.remove(e);
-                                } else {
-                                  _selectedEmotions.add(e);
-                                }
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: selected ? AppColors.ongiOrange : AppColors.ongiGrey,
-                                borderRadius: BorderRadius.circular(18),
-                              ),
-                              child: Text(
-                                e,
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 15,
-                                  fontFamily: 'Pretendard',
+                      FutureBuilder<List<Emotion>>(
+                        future: _emotionsFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return const Center(child: CircularProgressIndicator());
+                          }
+                          if (snapshot.hasError) {
+                            return Text('감정 불러오기 실패: ${snapshot.error}', style: TextStyle(color: Colors.red));
+                          }
+                          final emotions = snapshot.data ?? [];
+                          return Wrap(
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: emotions.map((e) {
+                              final selected = _selectedEmotions.contains(e.description);
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    if (selected) {
+                                      _selectedEmotions.remove(e.description);
+                                    } else {
+                                      _selectedEmotions.add(e.description);
+                                    }
+                                  });
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  decoration: BoxDecoration(
+                                    color: selected ? AppColors.ongiOrange : AppColors.ongiGrey,
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: Text(
+                                    e.description,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 15,
+                                      fontFamily: 'Pretendard',
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
+                              );
+                            }).toList(),
                           );
-                        }).toList(),
+                        },
                       ),
                     ],
                   ),
@@ -254,7 +276,29 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                         ),
                       ),
                       onPressed: () async {
-
+                        try {
+                          final file = File(widget.imagePath);
+                          final fileName = file.uri.pathSegments.last;
+                          final fileExtension = fileName.split('.').last;
+                          final selectedEmotionCodes = _selectedEmotions.map((desc) => Emotion.descriptionToCode(desc)).toList();
+                          final service = EmotionService(baseUrl: _emotionApiBaseUrl);
+                          await service.uploadMaumLog(
+                            fileName: fileName,
+                            fileExtension: fileExtension,
+                            location: widget.address,
+                            comment: _commentController.text,
+                            emotions: selectedEmotionCodes,
+                          );
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('기록이 저장되었습니다!')),
+                          );
+                          Navigator.of(context).pop();
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('업로드 실패: $e')),
+                          );
+                        }
                       },
                       child: const Text('기록하기'),
                     ),
