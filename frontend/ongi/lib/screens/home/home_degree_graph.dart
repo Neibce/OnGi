@@ -78,7 +78,10 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     );
   }
   List<String> get dates {
-    return contributions.map((c) => c.formattedDate).toList();
+    return contributions.map((c) {
+      final dt = c.dateTime;
+      return '${dt.month.toString().padLeft(2, '0')}/${dt.day.toString().padLeft(2, '0')}';
+    }).toList();
   }
 
   @override
