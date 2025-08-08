@@ -7,9 +7,10 @@ class PrefsManager {
   static const _userFamilyNameKey = 'userFamilyName';
   static const _isParent = 'isParent';
   static const _userProfileImageKey = 'userProfileImage';
-  
+  static const _uuidKey = 'uuid';
+
   static SharedPreferences? _instance;
-  
+
   static Future<SharedPreferences> get _prefs async {
     _instance ??= await SharedPreferences.getInstance();
     return _instance!;
@@ -45,6 +46,16 @@ class PrefsManager {
     return prefs.getString(_accessTokenKey) != null;
   }
 
+  static Future<void> saveUuid(String uuid) async {
+    final prefs = await _prefs;
+    await prefs.setString(_uuidKey, uuid);
+  }
+
+  static Future<String?> getUuid() async {
+    final prefs = await _prefs;
+    return prefs.getString(_uuidKey);
+  }
+
   static Future<void> logout() async {
     final prefs = await _prefs;
     await prefs.remove(_accessTokenKey);
@@ -55,6 +66,7 @@ class PrefsManager {
     final prefs = await _prefs;
     return {
       'name': prefs.getString(_userNameKey),
+      'uuid': prefs.getString(_uuidKey),
       'familycode': prefs.getString(_userFamilyCodeKey),
       'familyname': prefs.getString(_userFamilyNameKey),
       'profileImage': prefs.getString(_userProfileImageKey),

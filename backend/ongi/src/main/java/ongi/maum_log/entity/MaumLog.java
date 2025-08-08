@@ -27,10 +27,10 @@ public class MaumLog extends BaseEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String fileName;
+    private String frontFileName;
 
-    @Column(nullable = false)
-    private String fileExtension;
+    @Column(nullable = false, unique = true)
+    private String backFileName;
 
     private String location;
 
