@@ -2,6 +2,7 @@ package ongi.maum_log.service;
 
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,8 +16,10 @@ import ongi.family.repository.FamilyRepository;
 import ongi.family.service.FamilyService;
 import ongi.maum_log.dto.DateCount;
 import ongi.maum_log.dto.MaumLogCalendarDto;
+import ongi.maum_log.dto.MaumLogDto;
 import ongi.maum_log.dto.MaumLogPresignedResponseDto;
 import ongi.maum_log.dto.MaumLogUploadRequestDto;
+import ongi.maum_log.dto.MaumLogsResponseDto;
 import ongi.maum_log.entity.MaumLog;
 import ongi.maum_log.repository.MaumLogRepository;
 import ongi.security.CustomUserDetails;
@@ -64,6 +67,29 @@ public class MaumLogService {
 
         maumLogRepository.save(maumLog);
     }
+
+    public MaumLogsResponseDto getMaumLog(CustomUserDetails userDetails, LocalDate date) {
+        Family family = familyRepository.findByMembersContains(userDetails.getUser().getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("가족 정보를 찾을 수 없습니다."));
+
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(23, 59, 59);
+
+        boolean hasOwnUploaded = maumLogRepository.existsByCreatedByAndCreatedAtBetween(
+                userDetails.getUser(), startOfDay, endOfDay);
+
+        List<MaumLog> dateCounts = maumLogRepository.findByCreatedByUuidInAndCreatedAtBetween(
+                family.getMembers(), startOfDay, endOfDay);
+
+        List<MaumLogDto> maumLogDtos = dateCounts.stream().map(maumLog -> {
+            URL frontFileUrl = s3FileService.createSignedGetUrl(DIR_NAME, maumLog.getFrontFileName());
+            URL backFileUrl = s3FileService.createSignedGetUrl(DIR_NAME, maumLog.getBackFileName());
+            return MaumLogDto.of(frontFileUrl, backFileUrl, maumLog);
+        }).toList();
+
+        return MaumLogsResponseDto.of(hasOwnUploaded, maumLogDtos);
+    }
+
 
     public MaumLogCalendarDto getMaumLogCalendar(CustomUserDetails userDetails,
             YearMonth yearMonth) {
