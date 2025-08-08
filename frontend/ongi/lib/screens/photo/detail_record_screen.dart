@@ -36,7 +36,6 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
     return await service.fetchEmotions();
   }
 
-
   @override
   Widget build(BuildContext context) {
     final date = widget.date ?? DateTime.now();

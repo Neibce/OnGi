@@ -73,4 +73,10 @@ class PrefsManager {
       'isParent': prefs.getBool(_isParent) == true ? 'true' : 'false',
     };
   }
+
+  static Future<void> saveFamilyCodeAndName(String code, String name) async {
+    final prefs = await _prefs;
+    await prefs.setString(_userFamilyCodeKey, code);
+    await prefs.setString(_userFamilyNameKey, name);
+  }
 }
