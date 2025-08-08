@@ -4,6 +4,9 @@ import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/screens/home/home_ourfamily_text_withoutUser.dart';
+import 'package:ongi/services/temperature_service.dart';
+import 'package:ongi/models/temperature_contribution.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 final List<String> dates = ['6/11', '6/12', '6/13', '6/14', '6/15'];
 final List<double> temps = [36.2, 35.8, 37.2, 38.0, 38.6];
@@ -22,20 +25,40 @@ class HomeDegreeGraph extends StatefulWidget {
 
 class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   bool showHistory = false;
+  bool isLoading = true;
+  String? errorMsg;
+  List<Contribution> contributions = [];
 
-  final List<Map<String, String>> history = [
-    {"name": "양금명님", "change": "+0.3°C", "date": "25.06.15 22:07"},
-    {"name": "양은명님", "change": "+0.1°C", "date": "25.06.14 20:55"},
-    {"name": "양관식님", "change": "+0.2°C", "date": "25.06.14 17:14"},
-    {"name": "양관식님", "change": "+0.2°C", "date": "25.06.13 17:14"},
-    {"name": "양관식님", "change": "+0.2°C", "date": "25.06.13 17:14"},
-    {"name": "양관식님", "change": "+0.1°C", "date": "25.06.13 17:14"},
-    {"name": "오애순님", "change": "+0.2°C", "date": "25.06.13 15:09"},
-    {"name": "오애순님", "change": "+0.2°C", "date": "25.06.13 15:08"},
-    {"name": "오애순님", "change": "+0.2°C", "date": "25.06.13 15:08"},
-    {"name": "오애순님", "change": "+0.1°C", "date": "25.06.13 15:07"},
-    {"name": "양금명님", "change": "+0.1°C", "date": "25.06.13 12:28"},
-  ];
+  @override
+  void initState() {
+    super.initState();
+    fetchContributions();
+  }
+
+  Future<void> fetchContributions() async {
+    setState(() {
+      isLoading = true;
+      errorMsg = null;
+    });
+    try {
+      final userInfo = await PrefsManager.getUserInfo();
+      final familyCode = userInfo['familycode'];
+      if (familyCode == null) throw Exception('가족 코드가 없습니다. ');
+      final service = TemperatureService(baseUrl: 'http://localhost:8080');
+      final resp = await service.fetchFamilyTemperatureContributions(familyCode);
+      if (!mounted) return;
+      setState(() {
+        contributions = resp.contributions;
+        isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        errorMsg = e.toString();
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +101,13 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     borderRadius: BorderRadius.circular(24),
                   ),
                   padding: const EdgeInsets.all(20),
-                  child: showHistory ? _buildHistoryList() : _buildGraphCard(),
+                  child: isLoading
+                      ? const Center(child: CircularProgressIndicator())
+                      : errorMsg != null
+                          ? Center(child: Text(errorMsg!))
+                          : showHistory
+                              ? _buildHistoryList()
+                              : _buildGraphCard(),
                 ),
               ),
             ],
@@ -91,9 +120,9 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   Widget _buildGraphCard() {
     String latestName = '';
     String latestChange = '';
-    if (history.isNotEmpty) {
-      latestName = history[0]['name'] ?? '';
-      latestChange = history[0]['change'] ?? '';
+    if (contributions.isNotEmpty) {
+      latestName = contributions[0].userName;
+      latestChange = contributions[0].formattedChange;
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -216,13 +245,12 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
         SizedBox(
           height: 290,
           child: ListView.builder(
-            itemCount: history.length,
+            itemCount: contributions.length,
             itemBuilder: (context, idx) {
-              final item = history[idx];
+              final item = contributions[idx];
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // 왼쪽 선과 원
                   Column(
                     children: [
                       Container(
@@ -234,14 +262,14 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                           color: Colors.white,
                         ),
                       ),
-                      if (idx != history.length - 1)
+                      if (idx != contributions.length - 1)
                         Container(width: 2, height: 24, color: Colors.orange),
                     ],
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "${item['name']}이 ${item['change']} 상승 시켰어요!",
+                      "${item.userName}이 ${item.formattedChange} 상승 시켰어요!",
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 15,
@@ -250,7 +278,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     ),
                   ),
                   Text(
-                    item['date'] ?? '',
+                    item.formattedDate,
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,

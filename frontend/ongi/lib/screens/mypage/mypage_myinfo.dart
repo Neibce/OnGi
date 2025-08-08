@@ -20,7 +20,7 @@ class Myinfo extends StatelessWidget {
           return Center(child: Text('에러: \\${snapshot.error}', style: TextStyle(color: Colors.red)));
         }
         final userInfo = snapshot.data ?? {};
-        final name = userInfo['name'] ?? '사용자님';
+        final name = userInfo['name'] ?? '사용자';
         final familycode = userInfo['familycode'] ?? '33HYF6';
         final familyName = userInfo['familyName'] ?? '가족이름';
         final profileImage = userInfo['profileImage'] ?? 'assets/images/users/elderly_woman.png';
