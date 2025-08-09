@@ -1,11 +1,13 @@
 package ongi.maum_log.controller;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import lombok.AllArgsConstructor;
 import ongi.maum_log.dto.MaumLogCalendarDto;
 import ongi.maum_log.dto.MaumLogPresignedResponseDto;
 import ongi.maum_log.dto.MaumLogUploadRequestDto;
+import ongi.maum_log.dto.MaumLogsResponseDto;
 import ongi.maum_log.service.MaumLogService;
 import ongi.security.CustomUserDetails;
 import org.springframework.http.ResponseEntity;
@@ -49,5 +51,16 @@ public class MaumLogController {
         }
         MaumLogCalendarDto maumLogCalendarDto = maumLogService.getMaumLogCalendar(userDetails, yearMonth);
         return ResponseEntity.ok(maumLogCalendarDto);
+    }
+
+    @GetMapping
+    public ResponseEntity<MaumLogsResponseDto> getMaumLogCalendar(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam @Nullable LocalDate date) {
+        if (date == null) {
+            date = LocalDate.now();
+        }
+        MaumLogsResponseDto maumLogsResponseDto = maumLogService.getMaumLog(userDetails, date);
+        return ResponseEntity.ok(maumLogsResponseDto);
     }
 }
