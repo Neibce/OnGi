@@ -18,7 +18,7 @@ class TemperatureService {
       final data = json.decode(response.body);
       return List<Map<String, dynamic>>.from(data['dailyTemperatures'] ?? []);
     } else {
-      throw Exception('가족 온도 일별 데이터 불러오기 실패');
+      throw Exception('가족 온도 일별 데이터 불러오기 실패 ${response.statusCode}');
     }
   }
 
@@ -34,7 +34,6 @@ class TemperatureService {
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return data['contributions'] ?? [];
-
     } else {
       throw Exception('가족 온도 기여도 데이터 불러오기 실패');
     }
