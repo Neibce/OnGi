@@ -70,6 +70,8 @@ flutter:
     - assets/images/body_front_btn.png
     - assets/images/body_back.png
     - assets/images/body_back_btn.png
+    - assets/images/body_selector_front.svg
+    - assets/images/body_selector_back.svg
 
   fonts:
     - family: Pretendard

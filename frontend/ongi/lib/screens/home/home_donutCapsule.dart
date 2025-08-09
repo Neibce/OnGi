@@ -31,6 +31,7 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
       if (familyCode == null) throw Exception('가족 코드가 없습니다.');
+      final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
       final dailyTemps = await service.fetchFamilyTemperatureDaily(familyCode);
       final today = DateTime.now();
       final todayStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';

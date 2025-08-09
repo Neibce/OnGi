@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../widgets/date_carousel.dart';
+import '../../widgets/body_selector.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../../utils/prefs_manager.dart';
 
 class HealthStatusInputScreen extends StatefulWidget {
   const HealthStatusInputScreen({super.key});
@@ -14,6 +18,39 @@ class HealthStatusInputScreen extends StatefulWidget {
 class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Map<int, int> selectedDosages = {};
   bool isFront = true;
+  Set<String> selectedParts = {};
+  Map<String, String> painLevels = {}; // 부위별 통증 강도
+  DateTime selectedDate = DateTime.now();
+
+  static const List<String> painLevelOptions = [
+    'STRONG', 'MID_STRONG', 'MID_WEAK', 'WEAK'
+  ];
+
+  Future<void> submitPainRecords() async {
+    final accessToken = await PrefsManager.getAccessToken();
+    final url = Uri.parse('https://ongi-1049536928483.asia-northeast3.run.app/health/pain/record');
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $accessToken',
+    };
+    for (final part in selectedParts) {
+      final level = painLevels[part] ?? 'WEAK';
+      final body = jsonEncode({
+        'date': selectedDate.toIso8601String().substring(0, 10),
+        'painArea': part,
+        'painLevel': level,
+      });
+      final response = await http.post(url, headers: headers, body: body);
+      if (response.statusCode != 200) {
+        // 실패 처리 (에러 메시지 표시 등)
+        print('Failed to save $part: \\${response.body}');
+      }
+    }
+    // 완료 처리 (예: 완료 메시지, 화면 이동 등)
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('통증 기록이 저장되었습니다.')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,14 +147,55 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                         child: Stack(
                           children: [
                             Center(
-                              child: Image.asset(
-                                isFront
-                                    ? 'assets/images/body_front.png'
-                                    : 'assets/images/body_back.png',
-                                height: 400, // 필요시 반응형으로 조정
-                                fit: BoxFit.contain,
+                              child: BodySelector(
+                                selectedParts: selectedParts,
+                                onPartSelected: (part, selected) {
+                                  setState(() {
+                                    if (selected) {
+                                      selectedParts.add(part);
+                                    } else {
+                                      selectedParts.remove(part);
+                                      painLevels.remove(part);
+                                    }
+                                  });
+                                },
+                                isFront: isFront,
                               ),
                             ),
+                            // 선택된 부위별 통증 강도 선택 UI
+                            if (selectedParts.isNotEmpty)
+                              Positioned(
+                                left: 0,
+                                right: 0,
+                                bottom: 20,
+                                child: Column(
+                                  children: selectedParts.map((part) => Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 24),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          part,
+                                          style: const TextStyle(fontWeight: FontWeight.bold),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        DropdownButton<String>(
+                                          value: painLevels[part] ?? 'WEAK',
+                                          items: painLevelOptions.map((level) => DropdownMenuItem(
+                                            value: level,
+                                            child: Text(level),
+                                          )).toList(),
+                                          onChanged: (val) {
+                                            setState(() {
+                                              painLevels[part] = val!;
+                                            });
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  )).toList(),
+                                ),
+                              ),
                             Positioned(
                               right: 16,
                               bottom: 16,
@@ -129,8 +207,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                 },
                                 child: Image.asset(
                                   isFront
-                                      ? 'assets/images/body_front_btn.png'
-                                      : 'assets/images/body_back_btn.png',
+                                      ? 'assets/images/body_selector_frong.svg'
+                                      : 'assets/images/body_selector_back.svg',
                                   width: 60,
                                   height: 60,
                                 ),
@@ -139,6 +217,14 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                           ],
                         ),
                       ),
+                    ),
+                  ),
+                  // 기록하기 버튼
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    child: ElevatedButton(
+                      onPressed: selectedParts.isEmpty ? null : submitPainRecords,
+                      child: const Text('기록하기'),
                     ),
                   ),
                 ],
