@@ -3,7 +3,6 @@ import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/home/home_degree_graph.dart';
 import 'package:ongi/widgets/custom_chart_painter.dart';
-import 'package:ongi/services/temperature_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
 class HomeCapsuleSection extends StatefulWidget {
@@ -32,7 +31,6 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
       if (familyCode == null) throw Exception('가족 코드가 없습니다.');
-      final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
       final dailyTemps = await service.fetchFamilyTemperatureDaily(familyCode);
       final today = DateTime.now();
       final todayStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
