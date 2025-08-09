@@ -5,8 +5,8 @@ class TemperatureService {
   final String baseUrl;
   TemperatureService({required this.baseUrl});
 
-  Future<List<Map<String, dynamic>>> fetchFamilyTemperatureDaily(String familyCode, {String? token}) async {
-    final url = Uri.parse('$baseUrl/temperature/daily?familyId=$familyCode');
+  Future<List<Map<String, dynamic>>> fetchFamilyTemperatureDaily(String familyId, {String? token}) async {
+    final url = Uri.parse('$baseUrl/temperature/daily?familyId=$familyId');
     Map<String, String> headers = {
       'Content-Type': 'application/json',
     };
