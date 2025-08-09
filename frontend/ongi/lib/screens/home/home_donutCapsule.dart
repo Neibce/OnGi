@@ -190,10 +190,10 @@ class CapsuleButton extends StatelessWidget {
               svgAsset,
               width: MediaQuery.of(context).size.width * 0.07,
               height: MediaQuery.of(context).size.width * 0.07,
-              colorFilter: ColorFilter.mode(
-                selected ? Colors.white : AppColors.ongiOrange,
-                BlendMode.srcIn,
-              ),
+              // colorFilter: ColorFilter.mode(
+              //   selected ? Colors.white : AppColors.ongiOrange,
+              //   BlendMode.srcIn,
+              // ),
             ),
             if (selected && notificationText.isNotEmpty) ...[
               const SizedBox(width: 20),

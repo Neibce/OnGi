@@ -2,53 +2,27 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../widgets/date_carousel.dart';
-import '../../widgets/body_selector.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import '../../utils/prefs_manager.dart';
+import 'package:body_part_selector/body_part_selector.dart';
 
 class HealthStatusInputScreen extends StatefulWidget {
   const HealthStatusInputScreen({super.key});
 
   @override
-  State<HealthStatusInputScreen> createState() =>
-      _HealthStatusInputScreenState();
+  State<HealthStatusInputScreen> createState() => _HealthStatusInputScreenState();
 }
 
 class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
-  Map<int, int> selectedDosages = {};
-  bool isFront = true;
-  Set<String> selectedParts = {};
-  Map<String, String> painLevels = {}; // 부위별 통증 강도
+  Set<BodyParts> selectedParts = {};
+  Map<String, String> painLevels = {};
   DateTime selectedDate = DateTime.now();
 
   static const List<String> painLevelOptions = [
     'STRONG', 'MID_STRONG', 'MID_WEAK', 'WEAK'
   ];
 
-  Future<void> submitPainRecords() async {
-    final accessToken = await PrefsManager.getAccessToken();
-    final url = Uri.parse('https://ongi-1049536928483.asia-northeast3.run.app/health/pain/record');
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer 80eb477a6e3a43e681d317b25f5f3f9e',
-    };
-    for (final part in selectedParts) {
-      final level = painLevels[part] ?? 'WEAK';
-      final body = jsonEncode({
-        'date': selectedDate.toIso8601String().substring(0, 10),
-        'painArea': part,
-        'painLevel': level,
-      });
-      final response = await http.post(url, headers: headers, body: body);
-      if (response.statusCode != 200) {
-        // 실패 처리 (에러 메시지 표시 등)
-        print('Failed to save $part: \\${response.body}');
-      }
-    }
-    // 완료 처리 (예: 완료 메시지, 화면 이동 등)
+  void submitPainRecords() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('통증 기록이 저장되었습니다.')),
+      const SnackBar(content: Text('통증 기록이 저장되었습니다. (화면용 더미 동작)')),
     );
   }
 
@@ -147,71 +121,32 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                         child: Stack(
                           children: [
                             Center(
-                              child: BodySelector(
-                                selectedParts: selectedParts,
-                                onPartSelected: (part, selected) {
+                              child: BodyPartSelectorTurnable(
+                                bodyParts: selectedParts,
+                                onSelectionUpdated: (parts) {
                                   setState(() {
-                                    if (selected) {
-                                      selectedParts.add(part);
-                                    } else {
-                                      selectedParts.remove(part);
-                                      painLevels.remove(part);
-                                    }
+                                    selectedParts = parts;
                                   });
                                 },
-                                isFront: isFront,
                               ),
                             ),
-                            // 선택된 부위별 통증 강도 선택 UI
-                            if (selectedParts.isNotEmpty)
-                              Positioned(
-                                left: 0,
-                                right: 0,
-                                bottom: 20,
-                                child: Column(
-                                  children: selectedParts.map((part) => Padding(
-                                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 24),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          part,
-                                          style: const TextStyle(fontWeight: FontWeight.bold),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        DropdownButton<String>(
-                                          value: painLevels[part] ?? 'WEAK',
-                                          items: painLevelOptions.map((level) => DropdownMenuItem(
-                                            value: level,
-                                            child: Text(level),
-                                          )).toList(),
-                                          onChanged: (val) {
-                                            setState(() {
-                                              painLevels[part] = val!;
-                                            });
-                                          },
-                                        ),
-                                      ],
-                                    ),
-                                  )).toList(),
-                                ),
-                              ),
+                            // 앞/뒤 변환 버튼 (토글 텍스트)
                             Positioned(
                               right: 16,
                               bottom: 16,
-                              child: GestureDetector(
-                                onTap: () {
-                                  setState(() {
-                                    isFront = !isFront;
-                                  });
-                                },
-                                child: SvgPicture.asset(
-                                  isFront
-                                      ? 'assets/images/body_selector_front.svg'
-                                      : 'assets/images/body_selector_back.svg',
-                                  width: 60,
-                                  height: 60,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: AppColors.ongiOrange,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                                 ),
+                                onPressed: () {
+                                  // BodyPartSelectorTurnable은 자체적으로 앞/뒤 전환을 지원하므로 별도 isFront 관리 불필요
+                                },
+                                child: const Text('앞/뒤', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                               ),
                             ),
                           ],
@@ -219,7 +154,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                       ),
                     ),
                   ),
-                  // 기록하기 버튼
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     child: ElevatedButton(
