@@ -68,10 +68,11 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     try {
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
+      final token = await PrefsManager.getAccessToken();
       if (familyCode == null) throw Exception('가족 코드가 없습니다.');
       final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
-      final dailyResp = await service.fetchFamilyTemperatureDaily(familyCode);
-      final contribResp = await service.fetchFamilyTemperatureContributions(familyCode);
+      final dailyResp = await service.fetchFamilyTemperatureDaily(familyCode, token: token);
+      final contribResp = await service.fetchFamilyTemperatureContributions(familyCode, token: token);
       if (!mounted) return;
       setState(() {
         dailyTemperatures = dailyResp;
