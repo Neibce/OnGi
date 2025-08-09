@@ -199,8 +199,10 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   sideTitles: SideTitles(
                     showTitles: true,
                     getTitlesWidget: (value, meta) {
-                      int idx = value.round();
-                      if (idx < 0 || idx >= dates.length) return const SizedBox.shrink();
+                      if (value % 1 != 0) return const SizedBox.shrink();
+                      int idx = value.toInt();
+                      if (idx < 0 || idx >= dates.length)
+                        return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
@@ -276,12 +278,13 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
         SizedBox(
           height: 290,
           child: ListView.builder(
-            itemCount: contributions.length,
+            itemCount: history.length,
             itemBuilder: (context, idx) {
-              final item = contributions[idx];
+              final item = history[idx];
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 왼쪽 선과 원
                   Column(
                     children: [
                       Container(
@@ -293,14 +296,14 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                           color: Colors.white,
                         ),
                       ),
-                      if (idx != contributions.length - 1)
+                      if (idx != history.length - 1)
                         Container(width: 2, height: 24, color: Colors.orange),
                     ],
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "${item.userName}이 ${item.formattedChange} 상승 시켰어요!",
+                      "${item['name']}이 ${item['change']} 상승 시켰어요!",
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 15,
@@ -309,7 +312,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     ),
                   ),
                   Text(
-                    item.formattedDate,
+                    item['date'] ?? '',
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
@@ -325,4 +328,3 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     );
   }
 }
-
