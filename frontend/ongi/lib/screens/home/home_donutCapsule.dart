@@ -37,7 +37,7 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
       final today = DateTime.now();
       final todayStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       final match = dailyTemps.firstWhere(
-        (e) => e['date'] == todayStr,
+            (e) => e['date'] == todayStr,
         orElse: () => <String, dynamic>{},
       );
       setState(() {
@@ -57,84 +57,84 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
     return Expanded(
       child: Stack(
         children: [
-        // 도넛 차트 영역
-        Positioned(
-        left: 0,
-        bottom: MediaQuery.of(context).size.height * 0.05,
-        width: MediaQuery.of(context).size.width * 0.95,
-        height: MediaQuery.of(context).size.width * 0.95,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GestureDetector(
-                onTap: widget.onGraphTap,
-                child: Transform.translate(
-                  offset: Offset(
-                    -MediaQuery.of(context).size.width * 0.35,
-                    0,
-                  ),
-                  child: OverflowBox(
-                    maxWidth: double.infinity,
-                    maxHeight: double.infinity,
-                    child: CustomPaint(
-                      painter: CustomChartPainter(
-                        percentages: [15, 10, 20, 20],
+          // 도넛 차트 영역
+          Positioned(
+            left: 0,
+            bottom: MediaQuery.of(context).size.height * 0.05,
+            width: MediaQuery.of(context).size.width * 0.95,
+            height: MediaQuery.of(context).size.width * 0.95,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: widget.onGraphTap,
+                    child: Transform.translate(
+                      offset: Offset(
+                        -MediaQuery.of(context).size.width * 0.35,
+                        0,
                       ),
-                      size: Size(
-                        MediaQuery.of(context).size.width * 0.95,
-                        MediaQuery.of(context).size.width * 0.95,
+                      child: OverflowBox(
+                        maxWidth: double.infinity,
+                        maxHeight: double.infinity,
+                        child: CustomPaint(
+                          painter: CustomChartPainter(
+                            percentages: [15, 10, 20, 20],
+                          ),
+                          size: Size(
+                            MediaQuery.of(context).size.width * 0.95,
+                            MediaQuery.of(context).size.width * 0.95,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            // 텍스트 (화면 안에 있음)
-            Positioned(
-              left:
-              MediaQuery.of(context).size.width *
-                  0.04,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            todayTemperature?.toStringAsFixed(1) ?? '36.5',
-                            style: TextStyle(
-                              fontSize: 43,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.ongiOrange,
-                              height: 1,
-                            ),
+                // 텍스트 (화면 안에 있음)
+                Positioned(
+                  left:
+                  MediaQuery.of(context).size.width *
+                      0.04,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: isLoading
+                        ? const CircularProgressIndicator()
+                        : Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          todayTemperature?.toStringAsFixed(1) ?? '36.5',
+                          style: TextStyle(
+                            fontSize: 43,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ongiOrange,
+                            height: 1,
                           ),
-                          Text(
-                            '℃',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.ongiOrange,
-                            ),
+                        ),
+                        Text(
+                          '℃',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ongiOrange,
                           ),
-                        ],
-                      ),
-              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-    ),
-    Positioned(
-    right: 0,
-    bottom: MediaQuery.of(context).size.height * 0.05,
-    child: ButtonColumn(),
-    ),
-    ],
-    ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: MediaQuery.of(context).size.height * 0.05,
+            child: ButtonColumn(),
+          ),
+        ],
+      ),
     );
   }
 }

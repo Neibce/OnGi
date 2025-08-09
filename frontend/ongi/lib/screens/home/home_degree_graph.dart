@@ -48,7 +48,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   List<FlSpot> get spots {
     return List.generate(
       dailyTemperatures.length,
-      (i) => FlSpot(i.toDouble(), dailyTemperatures[i]['totalTemperature'] ?? 36.5),
+          (i) => FlSpot(i.toDouble(), dailyTemperatures[i]['totalTemperature'] ?? 36.5),
     );
   }
 
@@ -138,10 +138,10 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : errorMsg != null
-                          ? Center(child: Text(errorMsg!))
-                          : showHistory
-                              ? _buildHistoryList()
-                              : _buildGraphCard(),
+                      ? Center(child: Text(errorMsg!))
+                      : showHistory
+                      ? _buildHistoryList()
+                      : _buildGraphCard(),
                 ),
               ),
             ],
@@ -279,9 +279,9 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
         SizedBox(
           height: 290,
           child: ListView.builder(
-            itemCount: history.length,
+            itemCount: contributions.length,
             itemBuilder: (context, idx) {
-              final item = history[idx];
+              final item = contributions[idx];
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -297,14 +297,14 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                           color: Colors.white,
                         ),
                       ),
-                      if (idx != history.length - 1)
+                      if (idx != contributions.length - 1)
                         Container(width: 2, height: 24, color: Colors.orange),
                     ],
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "${item['name']}이 ${item['change']} 상승 시켰어요!",
+                      "${item.userName}이 ${item.formattedChange} 상승 시켰어요!",
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 15,
@@ -314,7 +314,6 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   ),
                   Text(
                     item.formattedDate ?? '',
-
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
