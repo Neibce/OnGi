@@ -31,7 +31,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     final url = Uri.parse('https://ongi-1049536928483.asia-northeast3.run.app/health/pain/record');
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer $accessToken',
+      'Authorization': 'Bearer 80eb477a6e3a43e681d317b25f5f3f9e',
     };
     for (final part in selectedParts) {
       final level = painLevels[part] ?? 'WEAK';
@@ -205,9 +205,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                     isFront = !isFront;
                                   });
                                 },
-                                child: Image.asset(
+                                child: SvgPicture.asset(
                                   isFront
-                                      ? 'assets/images/body_selector_frong.svg'
+                                      ? 'assets/images/body_selector_front.svg'
                                       : 'assets/images/body_selector_back.svg',
                                   width: 60,
                                   height: 60,
