@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import '../../widgets/date_carousel.dart';
+import '../../widgets/body_selector.dart';
 
 class HealthStatusInputScreen extends StatefulWidget {
   const HealthStatusInputScreen({super.key});
@@ -14,6 +15,7 @@ class HealthStatusInputScreen extends StatefulWidget {
 class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Map<int, int> selectedDosages = {};
   bool isFront = true;
+  String? selectedPart;
 
   @override
   Widget build(BuildContext context) {
@@ -110,12 +112,13 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                         child: Stack(
                           children: [
                             Center(
-                              child: Image.asset(
-                                isFront
-                                    ? 'assets/images/body_front.png'
-                                    : 'assets/images/body_back.png',
-                                height: 400, // 필요시 반응형으로 조정
-                                fit: BoxFit.contain,
+                              child: BodySelector(
+                                selectedPart: selectedPart,
+                                onPartSelected: (part) {
+                                  setState(() {
+                                    selectedPart = part;
+                                  });
+                                },
                               ),
                             ),
                             Positioned(
