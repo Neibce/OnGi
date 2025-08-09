@@ -16,7 +16,7 @@ class TemperatureService {
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return List<Map<String, dynamic>>.from(data['dailyTemperatures'] ?? data ?? []);
+      return List<Map<String, dynamic>>.from(data['dailyTemperatures'] ?? []);
     } else {
       throw Exception('가족 온도 일별 데이터 불러오기 실패');
     }
@@ -33,7 +33,8 @@ class TemperatureService {
     final response = await http.get(url, headers: headers);
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
-      return data['contributions'] ?? data ?? [];
+      return data['contributions'] ?? [];
+
     } else {
       throw Exception('가족 온도 기여도 데이터 불러오기 실패');
     }
