@@ -54,10 +54,12 @@ flutter:
     - assets/images/homebar_walk.svg
     - assets/images/exercise_record_title_logo.png
     - assets/images/walk_icon.svg
-    - assets/images/users/elderly_woman.png
+    - assets/images/users/
     - assets/images/close_icon_orange.svg
     - assets/images/close_icon_black.svg
     - assets/images/close_icon_white.svg
+    - assets/images/gallery_icon_white.svg
+    - assets/images/gallery_icon_orange.svg
     - assets/images/back_icon_black.svg
     - assets/images/back_icon_white.svg
     - assets/images/dropdown_icon.svg

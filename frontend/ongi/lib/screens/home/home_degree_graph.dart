@@ -48,7 +48,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   List<FlSpot> get spots {
     return List.generate(
       dailyTemperatures.length,
-      (i) => FlSpot(i.toDouble(), dailyTemperatures[i]['totalTemperature'] ?? 36.5),
+          (i) => FlSpot(i.toDouble(), dailyTemperatures[i]['totalTemperature'] ?? 36.5),
     );
   }
 
@@ -68,10 +68,11 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     try {
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
+      final token = await PrefsManager.getAccessToken();
       if (familyCode == null) throw Exception('가족 코드가 없습니다.');
       final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
-      final dailyResp = await service.fetchFamilyTemperatureDaily(familyCode);
-      final contribResp = await service.fetchFamilyTemperatureContributions(familyCode);
+      final dailyResp = await service.fetchFamilyTemperatureDaily(familyCode, token: token);
+      final contribResp = await service.fetchFamilyTemperatureContributions(familyCode, token: token);
       if (!mounted) return;
       setState(() {
         dailyTemperatures = dailyResp;
@@ -137,10 +138,10 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   child: isLoading
                       ? const Center(child: CircularProgressIndicator())
                       : errorMsg != null
-                          ? Center(child: Text(errorMsg!))
-                          : showHistory
-                              ? _buildHistoryList()
-                              : _buildGraphCard(),
+                      ? Center(child: Text(errorMsg!))
+                      : showHistory
+                      ? _buildHistoryList()
+                      : _buildGraphCard(),
                 ),
               ),
             ],
@@ -199,8 +200,10 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   sideTitles: SideTitles(
                     showTitles: true,
                     getTitlesWidget: (value, meta) {
-                      int idx = value.round();
-                      if (idx < 0 || idx >= dates.length) return const SizedBox.shrink();
+                      if (value % 1 != 0) return const SizedBox.shrink();
+                      int idx = value.toInt();
+                      if (idx < 0 || idx >= dates.length)
+                        return const SizedBox.shrink();
                       return Padding(
                         padding: const EdgeInsets.only(top: 8),
                         child: Text(
@@ -282,6 +285,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 왼쪽 선과 원
                   Column(
                     children: [
                       Container(
@@ -309,7 +313,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     ),
                   ),
                   Text(
-                    item.formattedDate,
+                    item.formattedDate ?? '',
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,
@@ -325,4 +329,3 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     );
   }
 }
-
