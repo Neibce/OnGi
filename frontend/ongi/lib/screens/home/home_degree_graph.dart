@@ -75,7 +75,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
       if (!mounted) return;
       setState(() {
         dailyTemperatures = dailyResp;
-        contributions = contribResp;
+        contributions = contribResp.map((e) => Contribution.fromJson(e)).toList();
         isLoading = false;
       });
     } catch (e) {

@@ -4,6 +4,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/home/home_degree_graph.dart';
 import 'package:ongi/widgets/custom_chart_painter.dart';
 import 'package:ongi/utils/prefs_manager.dart';
+import 'package:ongi/services/temperature_service.dart';
 
 class HomeCapsuleSection extends StatefulWidget {
   final VoidCallback? onGraphTap;
