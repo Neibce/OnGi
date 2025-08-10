@@ -233,18 +233,27 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            // 전면 사진이 있으면 우측 상단에 오버레이로 표시
+                            // 전면 사진이 있는 경우
                             if (widget.frontImagePath != null)
                               Positioned(
                                 top: 15,
-                                right: 15,
+                                left: 15,
                                 width: 120,
                                 height: 144,
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(22.5),
-                                  child: Image.file(
-                                    File(widget.frontImagePath!),
-                                    fit: BoxFit.cover,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: AppColors.ongiOrange,
+                                      width: 2.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(22.5),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(22.5),
+                                    child: Image.file(
+                                      File(widget.frontImagePath!),
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -319,7 +328,8 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                           context,
                           MaterialPageRoute(
                             builder: (context) => DetailRecordScreen(
-                              imagePath: widget.backImagePath,
+                              backImagePath: widget.backImagePath,
+                              frontImagePath: widget.frontImagePath,
                               address: _address,
                               date: DateTime.now(),
                             ),

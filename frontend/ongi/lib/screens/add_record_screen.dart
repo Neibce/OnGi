@@ -22,7 +22,6 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
   CameraController? frontCameraController;
   bool showFrontCamera = false;
   String? backCapturedImagePath;
-  String? frontCapturedImagePath; // 실제 데이터 전달용
   bool _isPhotoTaken = false;
 
   late AnimationController _frontAnimationController;
@@ -105,6 +104,50 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
         _isFrontAnimating = false;
       });
     });
+  }
+
+  Future<void> _handlePhotoCapture() async {
+    try {
+      setState(() {
+        _isPhotoTaken = true;
+      });
+      final XFile image = await controller.takePicture();
+      setState(() {
+        backCapturedImagePath = image.path;
+      });
+      if (currentCameraIndex == 0 && cameras!.length > 1) {
+        await _initializeFrontCamera();
+        final XFile frontImage = await frontCameraController!.takePicture();
+        await _startFrontAnimation(frontImage.path);
+
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CheckRecordScreen(
+              backImagePath: backCapturedImagePath!,
+              frontImagePath: frontImage.path,
+              address: null,
+            ),
+          ),
+        );
+      } else {
+        // 전면 카메라가 없으면 후면만 전달
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CheckRecordScreen(
+              backImagePath: backCapturedImagePath!,
+              frontImagePath: null,
+              address: null,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _isPhotoTaken = false;
+      });
+    }
   }
 
   @override
@@ -197,32 +240,32 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
                                 duration: const Duration(milliseconds: 300),
                                 child: backCapturedImagePath != null
                                     ? SizedBox.expand(
-                                        key: const ValueKey('captured_image'),
-                                        child: Image.file(
-                                          File(backCapturedImagePath!),
-                                          fit: BoxFit.cover,
-                                        ),
-                                      )
+                                  key: const ValueKey('captured_image'),
+                                  child: Image.file(
+                                    File(backCapturedImagePath!),
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
                                     : isInitialized
-                                        ? SizedBox.expand(
-                                            key: const ValueKey('camera_preview'),
-                                            child: FittedBox(
-                                              fit: BoxFit.cover,
-                                              child: SizedBox(
-                                                width: controller.value.previewSize?.height ?? 100,
-                                                height: controller.value.previewSize?.width ?? 100,
-                                                child: CameraPreview(controller),
-                                              ),
-                                            ),
-                                          )
-                                        : const SizedBox.expand(
-                                            key: ValueKey('camera_loading'),
-                                            child: Center(
-                                              child: CircularProgressIndicator(
-                                                color: AppColors.ongiOrange,
-                                              ),
-                                            ),
-                                          ),
+                                    ? SizedBox.expand(
+                                  key: const ValueKey('camera_preview'),
+                                  child: FittedBox(
+                                    fit: BoxFit.cover,
+                                    child: SizedBox(
+                                      width: controller.value.previewSize?.height ?? 100,
+                                      height: controller.value.previewSize?.width ?? 100,
+                                      child: CameraPreview(controller),
+                                    ),
+                                  ),
+                                )
+                                    : const SizedBox.expand(
+                                  key: ValueKey('camera_loading'),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: AppColors.ongiOrange,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                             if (_animatingFrontImagePath != null)
@@ -290,42 +333,7 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
                       icon: SvgPicture.asset("assets/images/camera_button.svg"),
                       onPressed: (_isPhotoTaken || !isInitialized)
                           ? null
-                          : () async {
-                              try {
-                                setState(() {
-                                  _isPhotoTaken = true;
-                                });
-
-                                final XFile image = await controller.takePicture();
-
-                                setState(() {
-                                  backCapturedImagePath = image.path;
-                                });
-
-                                if (currentCameraIndex == 0 && cameras!.length > 1) {
-                                  await _initializeFrontCamera();
-                                  final XFile frontImage = await frontCameraController!.takePicture();
-                                  await _startFrontAnimation(frontImage.path);
-                                }
-                              } catch (e) {
-                                setState(() {
-                                  _isPhotoTaken = false;
-                                });
-                              }
-
-                              // 사진 확인 화면으로
-                              if (backCapturedImagePath != null) {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => CheckRecordScreen(
-                                      backImagePath: backCapturedImagePath!,
-                                      frontImagePath: frontCapturedImagePath,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
+                          : _handlePhotoCapture,
                     ),
                   ),
                 ),

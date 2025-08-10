@@ -21,8 +21,8 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
   @override
   void initState() {
     super.initState();
-    _emotionsFuture = EmotionService(baseUrl: _apiBaseUrl).fetchEmotions();
-    _maumLogsFuture = EmotionService(baseUrl: _apiBaseUrl).fetchMaumLogs();
+    _emotionsFuture = MaumlogService(baseUrl: _apiBaseUrl).fetchEmotions();
+    _maumLogsFuture = MaumlogService(baseUrl: _apiBaseUrl).fetchMaumLogs();
   }
 
   @override

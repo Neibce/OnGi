@@ -3,12 +3,14 @@ import 'dart:io';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/services/maumlog_service.dart';
 import 'package:ongi/models/maumlog.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class DetailRecordScreen extends StatefulWidget {
-  final String imagePath;
+  final String backImagePath;
+  final String? frontImagePath;
   final String? address;
   final DateTime? date;
-  const DetailRecordScreen({super.key, required this.imagePath, this.address, this.date});
+  const DetailRecordScreen({super.key, required this.backImagePath, this.frontImagePath, this.address, this.date});
 
   @override
   State<DetailRecordScreen> createState() => _DetailRecordScreenState();
@@ -17,7 +19,7 @@ class DetailRecordScreen extends StatefulWidget {
 class _DetailRecordScreenState extends State<DetailRecordScreen> {
   static const String _emotionApiBaseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
   late Future<List<Emotion>> _emotionsFuture;
-  final Set<String> _selectedEmotions = {};
+  final Set<String> _selectedEmotionCodes = {}; // description 대신 code를 저장
   final TextEditingController _commentController = TextEditingController();
 
   String _formatKoreanDate(DateTime date) {
@@ -32,7 +34,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
   }
 
   Future<List<Emotion>> fetchEmotions() async {
-    final service = EmotionService(baseUrl: _emotionApiBaseUrl);
+    final service = MaumlogService(baseUrl: _emotionApiBaseUrl);
     return await service.fetchEmotions();
   }
 
@@ -103,14 +105,36 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                         borderRadius: BorderRadius.circular(25),
                         child: Stack(
                           children: [
-                            // ⬇️ 배경 이미지
                             Positioned.fill(
                               child: Image.file(
-                                File(widget.imagePath),
+                                File(widget.backImagePath),
                                 fit: BoxFit.cover,
                               ),
                             ),
-                            // ⬇️ 위치 오버레이
+                            if (widget.frontImagePath != null)
+                              Positioned(
+                                top: 15,
+                                left: 15,
+                                width: 120,
+                                height: 144,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: AppColors.ongiOrange,
+                                      width: 2.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(22.5),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(22.5),
+                                    child: Image.file(
+                                      File(widget.frontImagePath!),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            // 위치 오버레이
                             if (widget.address != null)
                               Align(
                                 alignment: Alignment.bottomCenter,
@@ -185,14 +209,14 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                             spacing: 8,
                             runSpacing: 8,
                             children: emotions.map((e) {
-                              final selected = _selectedEmotions.contains(e.description);
+                              final selected = _selectedEmotionCodes.contains(e.code);
                               return GestureDetector(
                                 onTap: () {
                                   setState(() {
                                     if (selected) {
-                                      _selectedEmotions.remove(e.description);
+                                      _selectedEmotionCodes.remove(e.code);
                                     } else {
-                                      _selectedEmotions.add(e.description);
+                                      _selectedEmotionCodes.add(e.code);
                                     }
                                   });
                                 },
@@ -221,7 +245,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                // 코멘트 입력란
+                // 코멘트
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: Row(
@@ -276,17 +300,55 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                       ),
                       onPressed: () async {
                         try {
-                          final file = File(widget.imagePath);
-                          final fileName = file.uri.pathSegments.last;
-                          final fileExtension = fileName.split('.').last;
-                          final selectedEmotionCodes = _selectedEmotions.toList().cast<String>();
-                          final service = EmotionService(baseUrl: _emotionApiBaseUrl);
+                          final selectedEmotionCodes = _selectedEmotionCodes.toList();
+                          final comment = _commentController.text.trim();
+                          final accessToken = await PrefsManager.getAccessToken();
+                          
+                          if (accessToken == null) {
+                            throw Exception('로그인이 필요합니다. 다시 로그인해주세요.');
+                          }
+                          
+                          print('🔐저장된 토큰: $accessToken');
+                          
+                          // 사용자 UUID 가져오기
+                          final userUuid = await PrefsManager.getUuid();
+                          if (userUuid == null) {
+                            throw Exception('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+                          }
+                          
+                          final service = MaumlogService(baseUrl: _emotionApiBaseUrl);
+                          
+                          final presignedData = await service.getPresignedUrls(
+                            accessToken: accessToken,
+                          );
+                          
+                          final frontFileName = presignedData['frontFileName'] as String;
+                          final frontPresignedUrl = presignedData['frontPresignedUrl'] as String;
+                          final backFileName = presignedData['backFileName'] as String;
+                          final backPresignedUrl = presignedData['backPresignedUrl'] as String;
+                          
+                          await service.uploadFileToS3(
+                            presignedUrl: backPresignedUrl,
+                            file: File(widget.backImagePath),
+                            uploaderUuid: userUuid,
+                          );
+                          
+                          final actualFrontFileName = widget.frontImagePath != null ? frontFileName : backFileName;
+                          if (widget.frontImagePath != null) {
+                            await service.uploadFileToS3(
+                              presignedUrl: frontPresignedUrl,
+                              file: File(widget.frontImagePath!),
+                              uploaderUuid: userUuid,
+                            );
+                          }
+                          
                           await service.uploadMaumLog(
-                            fileName: fileName,
-                            fileExtension: fileExtension,
+                            frontFileName: actualFrontFileName,
+                            backFileName: backFileName,
                             location: widget.address,
-                            comment: _commentController.text,
+                            comment: comment.isNotEmpty ? comment : null,
                             emotions: selectedEmotionCodes,
+                            accessToken: accessToken,
                           );
 
                           if (!mounted) return;
