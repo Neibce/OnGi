@@ -45,7 +45,7 @@ class BodySelector extends StatelessWidget {
       children: [
         SvgPicture.asset(
           isFront
-              ? 'assets/images/body_selector_front.svg'
+              ? 'assets/images/body_selector.svg'
               : 'assets/images/body_selector_back.svg',
           width: 265,
           height: 500,
