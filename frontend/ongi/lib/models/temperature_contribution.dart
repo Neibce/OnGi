@@ -1,5 +1,3 @@
-import 'package:intl/intl.dart';
-
 class FamilyTemperatureContributionResponse {
   final List<Contribution> contributions;
 
@@ -14,32 +12,29 @@ class FamilyTemperatureContributionResponse {
 }
 
 class Contribution {
-  final String userName;
-  final String formattedChange;
-  final String formattedDate;
-  final double temperature;
   final DateTime dateTime;
+  final String userName;
+  final String reason;
   final double contributed;
 
   Contribution({
-    required this.userName,
-    required this.formattedChange,
-    required this.formattedDate,
-    required this.temperature,
     required this.dateTime,
+    required this.userName,
+    required this.reason,
     required this.contributed,
   });
 
   factory Contribution.fromJson(Map<String, dynamic> json) {
-    final dateTime = DateTime.parse(json['dateTime']);
-    final contributed = (json['contributed'] ?? 0).toDouble();
     return Contribution(
+      dateTime: DateTime.parse(json['dateTime']),
       userName: json['userName'] ?? '',
-      formattedChange: '+${contributed.toStringAsFixed(1)}°',
-      formattedDate: '${dateTime.year}-${dateTime.month.toString().padLeft(2, '0')}-${dateTime.day.toString().padLeft(2, '0')}',
-      temperature: (json['temperature'] ?? 0).toDouble(),
-      contributed: contributed,
-      dateTime: dateTime,
+      reason: json['reason'] ?? '',
+      contributed: (json['contributed'] as num?)?.toDouble() ?? 0.0,
     );
   }
+
+  String get formattedDate => '${dateTime.year % 100}.${dateTime.month.toString().padLeft(2, '0')}.${dateTime.day.toString().padLeft(2, '0')} '
+      '${dateTime.hour.toString().padLeft(2, '0')}:${dateTime.minute.toString().padLeft(2, '0')}';
+
+  String get formattedChange => (contributed > 0 ? '+' : '') + contributed.toStringAsFixed(1) + '°C';
 }

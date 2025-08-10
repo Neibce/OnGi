@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:ongi/screens/home/home_degree_graph.dart';
 import 'package:ongi/widgets/custom_chart_painter.dart';
-import 'package:ongi/services/temperature_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
+import 'package:ongi/services/temperature_service.dart';
 
 class HomeCapsuleSection extends StatefulWidget {
   final VoidCallback? onGraphTap;
@@ -32,12 +31,13 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
       if (familyCode == null) throw Exception('가족 코드가 없습니다.');
+      final token = await PrefsManager.getAccessToken();
       final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
-      final dailyTemps = await service.fetchFamilyTemperatureDaily(familyCode);
+      final dailyTemps = await service.fetchFamilyTemperatureDaily(familyCode, token: token);
       final today = DateTime.now();
       final todayStr = '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
       final match = dailyTemps.firstWhere(
-        (e) => e['date'] == todayStr,
+            (e) => e['date'] == todayStr,
         orElse: () => <String, dynamic>{},
       );
       setState(() {
@@ -57,84 +57,84 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
     return Expanded(
       child: Stack(
         children: [
-        // 도넛 차트 영역
-        Positioned(
-        left: 0,
-        bottom: MediaQuery.of(context).size.height * 0.05,
-        width: MediaQuery.of(context).size.width * 0.95,
-        height: MediaQuery.of(context).size.width * 0.95,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: GestureDetector(
-                onTap: widget.onGraphTap,
-                child: Transform.translate(
-                  offset: Offset(
-                    -MediaQuery.of(context).size.width * 0.35,
-                    0,
-                  ),
-                  child: OverflowBox(
-                    maxWidth: double.infinity,
-                    maxHeight: double.infinity,
-                    child: CustomPaint(
-                      painter: CustomChartPainter(
-                        percentages: [15, 10, 20, 20],
+          // 도넛 차트 영역
+          Positioned(
+            left: 0,
+            bottom: MediaQuery.of(context).size.height * 0.05,
+            width: MediaQuery.of(context).size.width * 0.95,
+            height: MediaQuery.of(context).size.width * 0.95,
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: GestureDetector(
+                    onTap: widget.onGraphTap,
+                    child: Transform.translate(
+                      offset: Offset(
+                        -MediaQuery.of(context).size.width * 0.35,
+                        0,
                       ),
-                      size: Size(
-                        MediaQuery.of(context).size.width * 0.95,
-                        MediaQuery.of(context).size.width * 0.95,
+                      child: OverflowBox(
+                        maxWidth: double.infinity,
+                        maxHeight: double.infinity,
+                        child: CustomPaint(
+                          painter: CustomChartPainter(
+                            percentages: [15, 10, 20, 20],
+                          ),
+                          size: Size(
+                            MediaQuery.of(context).size.width * 0.95,
+                            MediaQuery.of(context).size.width * 0.95,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            // 텍스트 (화면 안에 있음)
-            Positioned(
-              left:
-              MediaQuery.of(context).size.width *
-                  0.04,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: isLoading
-                    ? const CircularProgressIndicator()
-                    : Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            todayTemperature?.toStringAsFixed(1) ?? '36.5',
-                            style: TextStyle(
-                              fontSize: 43,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.ongiOrange,
-                              height: 1,
-                            ),
+                // 텍스트 (화면 안에 있음)
+                Positioned(
+                  left:
+                  MediaQuery.of(context).size.width *
+                      0.04,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: isLoading
+                        ? const CircularProgressIndicator()
+                        : Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          todayTemperature?.toStringAsFixed(1) ?? '36.5',
+                          style: TextStyle(
+                            fontSize: 43,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ongiOrange,
+                            height: 1,
                           ),
-                          Text(
-                            '℃',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.w800,
-                              color: AppColors.ongiOrange,
-                            ),
+                        ),
+                        Text(
+                          '℃',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ongiOrange,
                           ),
-                        ],
-                      ),
-              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-    ),
-    Positioned(
-    right: 0,
-    bottom: MediaQuery.of(context).size.height * 0.05,
-    child: ButtonColumn(),
-    ),
-    ],
-    ),
+          ),
+          Positioned(
+            right: 0,
+            bottom: MediaQuery.of(context).size.height * 0.05,
+            child: ButtonColumn(),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -190,10 +190,10 @@ class CapsuleButton extends StatelessWidget {
               svgAsset,
               width: MediaQuery.of(context).size.width * 0.07,
               height: MediaQuery.of(context).size.width * 0.07,
-              colorFilter: ColorFilter.mode(
-                selected ? Colors.white : AppColors.ongiOrange,
-                BlendMode.srcIn,
-              ),
+              // colorFilter: ColorFilter.mode(
+              //   selected ? Colors.white : AppColors.ongiOrange,
+              //   BlendMode.srcIn,
+              // ),
             ),
             if (selected && notificationText.isNotEmpty) ...[
               const SizedBox(width: 20),

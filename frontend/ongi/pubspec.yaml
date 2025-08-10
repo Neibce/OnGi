@@ -24,6 +24,10 @@ dependencies:
   table_calendar: ^3.2.0
   intl: ^0.20.2
   camera: ^0.11.2
+  body_part_selector: ^0.2.0
+  flutter_svg: any
+  path_drawing: ^1.0.1
+  interactable_svg: ^0.0.7
   geolocator: ^14.0.2
   geocoding: ^4.0.0
 
@@ -72,7 +76,8 @@ flutter:
     - assets/images/body_front_btn.png
     - assets/images/body_back.png
     - assets/images/body_back_btn.png
-    - assets/images/body_selector.svg
+    - assets/images/body_selector_front.svg
+    - assets/images/body_selector_back.svg
 
   fonts:
     - family: Pretendard
