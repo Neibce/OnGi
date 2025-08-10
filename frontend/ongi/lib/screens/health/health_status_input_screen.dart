@@ -65,7 +65,140 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     return painAreas.toSet().toList();
   }
 
-  // 통증 기록 저장
+  // 선택된 통증 부위를 한국어로 변환
+  String _getPainAreaInKorean(PainArea painArea) {
+    switch (painArea) {
+      case PainArea.head:
+        return '머리';
+      case PainArea.neck:
+        return '목';
+      case PainArea.shoulder:
+        return '어깨';
+      case PainArea.chest:
+        return '가슴';
+      case PainArea.back:
+        return '등';
+      case PainArea.arm:
+        return '팔';
+      case PainArea.hand:
+        return '손';
+      case PainArea.abdomen:
+        return '복부';
+      case PainArea.waist:
+        return '허리';
+      case PainArea.leg:
+        return '다리';
+      case PainArea.knee:
+        return '무릎';
+      case PainArea.foot:
+        return '발';
+      case PainArea.none:
+        return '없음';
+    }
+  }
+
+  // 확인 다이얼로그 표시
+  void showConfirmationDialog() {
+    final painAreas = _getSelectedPainAreas();
+    
+    if (painAreas.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('통증 부위를 선택해주세요.')),
+      );
+      return;
+    }
+
+    final koreanPainAreas = painAreas.map(_getPainAreaInKorean).toList();
+    final painAreasText = koreanPainAreas.join(', ');
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 닫기 버튼
+                Align(
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.close,
+                        color: AppColors.ongiOrange,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ),
+                
+                const SizedBox(height: 8),
+                
+                // 선택된 부위 표시
+                RichText(
+                  textAlign: TextAlign.left,
+                  text: TextSpan(
+                    style: TextStyle(
+                      fontSize: 32,
+                      color: AppColors.ongiOrange,
+                      fontWeight: FontWeight.w600,
+                      height: 1.2,
+                    ),
+                    children: [
+                      TextSpan(text: painAreasText),
+                      const TextSpan(text: '\n불편하신가요?'),
+                    ],
+                  ),
+                ),
+                
+                const SizedBox(height: 32),
+                
+                // 기록하기 버튼
+                SizedBox(
+                  width: double.infinity,
+                  height: 60,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // 다이얼로그 닫기
+                      submitPainRecords(); // API 호출
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.ongiOrange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      '기록하기',
+                      style: TextStyle(
+                        fontSize: 32,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // 통증 기록 저장 (실제 API 호출)
   void submitPainRecords() async {
     // 토큰 확인
     final token = await PrefsManager.getAccessToken();
@@ -120,7 +253,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('통증 기록을 위해 가족이 필요합니다'),
-                    Text('가족을 생성하거나 가입해주세요', style: TextStyle(fontSize: 12)),
+                    Text('가족을 생성하거나 가입해주세요.', style: TextStyle(fontSize: 12)),
                   ],
                 ),
               ),
@@ -141,13 +274,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     }
     
     final painAreas = _getSelectedPainAreas();
-    
-    if (painAreas.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('통증 부위를 선택해주세요.')),
-      );
-      return;
-    }
 
     // 로딩 상태 표시
     showDialog(
@@ -304,9 +430,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                 onSelectionUpdated: onBodyPartsSelected,
                                 side: isFrontView ? BodySide.front : BodySide.back,
                                 selectedColor: AppColors.ongiOrange,
+                                unselectedColor: AppColors.ongiGrey,
+                                selectedOutlineColor: Colors.white,
+                                unselectedOutlineColor: Colors.white,
                               ),
                             ),
-                    
                     //기록완료 버튼
                     Positioned(
                       right: 16,
@@ -330,7 +458,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                           ],
                         ),
                         child: GestureDetector(
-                          onTap: hasSelectedParts ? submitPainRecords : null,
+                          onTap: hasSelectedParts ? showConfirmationDialog : null,
                           child: Center(
                             child: Text(
                               '완료',
@@ -345,9 +473,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                       ),
                     ),
                     // 앞뒤 전환 버튼 (오른쪽 하단)
-                    Positioned(
-                      right: 16,
-                      bottom: 16,
+                            Positioned(
+                              right: 16,
+                              bottom: 16,
                       child: Container(
                         width: 50,
                         height: 50,
@@ -379,8 +507,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                             ),
                           ),
                         ),
-                      ),
-                    ),
+                              ),
+                            ),
                           ],
                         ),
                       ),
