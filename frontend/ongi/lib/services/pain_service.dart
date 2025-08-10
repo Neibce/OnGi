@@ -19,28 +19,18 @@ class PainService {
         throw Exception('Access token not found');
       }
 
-      final requestBody = {
-        'date': date,
-        'painArea': painArea,
-        'painLevel': painLevel,
-      };
-      
-      print('Pain record request: $requestBody');
-      print('Token length: ${token?.length}');
-      print('Token preview: ${token?.substring(0, min(20, token?.length ?? 0))}...');
-      print('Request URL: $baseUrl/health/pain/record');
-      
       final response = await http.post(
         Uri.parse('$baseUrl/health/pain/record'),
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer 80eb477a6e3a43e681d317b25f5f3f9e',
+          'Authorization': 'Bearer $token',
         },
-        body: jsonEncode(requestBody),
+        body: jsonEncode({
+          'date': date,
+          'painArea': painArea,
+          'painLevel': painLevel,
+        }),
       );
-      
-      print('Response status: ${response.statusCode}');
-      print('Response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
@@ -48,7 +38,6 @@ class PainService {
         throw Exception('Failed to add pain record: ${response.statusCode}');
       }
     } catch (e) {
-      print('Error adding pain record: $e');
       return null;
     }
   }

@@ -3,6 +3,9 @@ import 'package:body_part_selector/body_part_selector.dart';
 import '../../core/app_colors.dart';
 import '../../widgets/date_carousel.dart';
 import '../../services/pain_service.dart';
+import '../../services/user_service.dart';
+import '../../services/family_service.dart';
+import '../../utils/prefs_manager.dart';
 import 'package:intl/intl.dart';
 
 class HealthStatusInputScreen extends StatefulWidget {
@@ -36,33 +39,27 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     });
   }
 
-  // BodyParts를 API enum으로 매핑
   List<PainArea> _getSelectedPainAreas() {
     List<PainArea> painAreas = [];
     
-    // BodyParts 구조 디버깅
-    print('BodyParts object: $_bodyParts');
-    print('BodyParts toString: ${_bodyParts.toString()}');
-    
-    // 안전한 방법으로 확인
+    // BodyParts를 API enum으로 매핑
     final bodyPartsString = _bodyParts.toString();
     
-    // 각 부위별로 문자열에서 찾아서 체크
     if (bodyPartsString.contains('head: true')) painAreas.add(PainArea.head);
     if (bodyPartsString.contains('neck: true')) painAreas.add(PainArea.neck);
-    if (bodyPartsString.contains('shoulder') && bodyPartsString.contains('true')) painAreas.add(PainArea.shoulder);
-    if (bodyPartsString.contains('chest: true')) painAreas.add(PainArea.chest);
-    if (bodyPartsString.contains('pelvis: true') || bodyPartsString.contains('back: true')) painAreas.add(PainArea.back);
-    if (bodyPartsString.contains('arm') && bodyPartsString.contains('true')) painAreas.add(PainArea.arm);
-    if (bodyPartsString.contains('hand') && bodyPartsString.contains('true')) painAreas.add(PainArea.hand);
-    if (bodyPartsString.contains('stomach: true') || bodyPartsString.contains('abdomen: true')) painAreas.add(PainArea.abdomen);
-    if (bodyPartsString.contains('hip') && bodyPartsString.contains('true')) painAreas.add(PainArea.waist);
-    if (bodyPartsString.contains('leg') && bodyPartsString.contains('true')) painAreas.add(PainArea.leg);
-    if (bodyPartsString.contains('knee') && bodyPartsString.contains('true')) painAreas.add(PainArea.knee);
-    if (bodyPartsString.contains('foot') && bodyPartsString.contains('true') || 
-        bodyPartsString.contains('ankle') && bodyPartsString.contains('true')) painAreas.add(PainArea.foot);
-    
-    print('Selected pain areas: $painAreas');
+    if (bodyPartsString.contains('leftShoulder: true') || bodyPartsString.contains('rightShoulder: true')) painAreas.add(PainArea.shoulder);
+    if (bodyPartsString.contains('upperBody: true')) painAreas.add(PainArea.chest);
+    if (bodyPartsString.contains('lowerBody: true')) painAreas.add(PainArea.back);
+    if (bodyPartsString.contains('leftUpperArm: true') || bodyPartsString.contains('rightUpperArm: true') ||
+        bodyPartsString.contains('leftElbow: true') || bodyPartsString.contains('rightElbow: true') ||
+        bodyPartsString.contains('leftLowerArm: true') || bodyPartsString.contains('rightLowerArm: true')) painAreas.add(PainArea.arm);
+    if (bodyPartsString.contains('leftHand: true') || bodyPartsString.contains('rightHand: true')) painAreas.add(PainArea.hand);
+    if (bodyPartsString.contains('abdomen: true')) painAreas.add(PainArea.abdomen);
+    if (bodyPartsString.contains('vestibular: true')) painAreas.add(PainArea.waist); // vestibular를 waist로 매핑
+    if (bodyPartsString.contains('leftUpperLeg: true') || bodyPartsString.contains('rightUpperLeg: true') ||
+        bodyPartsString.contains('leftLowerLeg: true') || bodyPartsString.contains('rightLowerLeg: true')) painAreas.add(PainArea.leg);
+    if (bodyPartsString.contains('leftKnee: true') || bodyPartsString.contains('rightKnee: true')) painAreas.add(PainArea.knee);
+    if (bodyPartsString.contains('leftFoot: true') || bodyPartsString.contains('rightFoot: true')) painAreas.add(PainArea.foot);
     
     // 중복 제거
     return painAreas.toSet().toList();
@@ -72,11 +69,73 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   void submitPainRecords() async {
     // 토큰 확인
     final token = await PrefsManager.getAccessToken();
-    print('Current access token: $token');
     
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('로그인이 필요합니다. 다시 로그인해주세요.')),
+      );
+      return;
+    }
+    
+    // 사용자 인증 확인
+    try {
+      await UserService.user();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.warning, color: Colors.white),
+              SizedBox(width: 8),
+              Expanded(child: Text('인증이 만료되었습니다. 다시 로그인해주세요.')),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 5),
+          action: SnackBarAction(
+            label: '로그인',
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.pushReplacementNamed(context, '/login');
+            },
+          ),
+        ),
+      );
+      return;
+    }
+    
+    // 가족 정보 확인
+    final familyInfo = await FamilyService.getFamilyInfo();
+    
+    if (familyInfo == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.family_restroom, color: Colors.white),
+              SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('통증 기록을 위해 가족이 필요합니다'),
+                    Text('가족을 생성하거나 가입해주세요', style: TextStyle(fontSize: 12)),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: Colors.red,
+          duration: Duration(seconds: 8),
+          action: SnackBarAction(
+            label: '가족 설정',
+            textColor: Colors.white,
+            onPressed: () {
+              Navigator.pushNamed(context, '/family');
+            },
+          ),
+        ),
       );
       return;
     }
@@ -107,7 +166,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         final result = await PainService.addPainRecord(
           date: dateString,
           painArea: painArea.value,
-          painLevel: PainLevel.midWeak.value, // 기본값으로 설정 (추후 사용자 선택 가능)
+          painLevel: PainLevel.midWeak.value,
         );
         
         if (result == null) {
@@ -242,7 +301,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                               padding: const EdgeInsets.all(20),
                               child: BodyPartSelector(
                                 bodyParts: _bodyParts,
-                                onSelectionUpdated: (p) => setState(() => _bodyParts = p),
+                                onSelectionUpdated: onBodyPartsSelected,
                                 side: isFrontView ? BodySide.front : BodySide.back,
                                 selectedColor: AppColors.ongiOrange,
                               ),
