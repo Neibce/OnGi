@@ -32,6 +32,9 @@ public class TemperatureService {
     private final UserRepository userRepository;
     private final StepRepository stepRepository;
     private static final double BASE_TEMPERATURE = 36.5;
+    
+    // 가족 전체 온도 변화를 나타내는 가상 사용자 ID
+    private static final UUID FAMILY_WIDE_USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     // 소수점 1자리 반올림 유틸
     private static double round(double value, int places) {
@@ -137,7 +140,12 @@ public class TemperatureService {
         List<FamilyTemperatureContributionResponse.Contribution> contributions = temps.stream()
             .map(t -> {
                 User user = userMap.get(t.getUserId());
-                String userName = user != null ? user.getName() : "우리 가족";
+                String userName;
+                if (t.getUserId().equals(FAMILY_WIDE_USER_ID)) {
+                    userName = "우리 가족";
+                } else {
+                    userName = user.getName();
+                }
                 return new FamilyTemperatureContributionResponse.Contribution(
                     t.getCreatedAt(),
                     userName,
@@ -156,8 +164,8 @@ public class TemperatureService {
 
     // 활동별 reason 상수 정의
     private static final String REASON_EMOTION_UPLOAD = "EMOTION_UPLOAD";
-    private static final String REASON_ALL_EMOTION_UPLOAD = "ALL_EMOTION_UPLOAD";
-    private static final String REASON_STEP_GOAL = "STEP_GOAL";
+    private static final String REASON_ALL_EMOTION_UPLOAD = "ALL_FAMILY_EMOTION_UPLOAD";
+    private static final String REASON_STEP_GOAL = "FAMILY_STEP_GOAL";
     private static final String REASON_PARENT_PAIN_INPUT = "PARENT_PAIN_INPUT";
     private static final String REASON_PARENT_MED_INPUT = "PARENT_MED_INPUT";
     private static final String REASON_PARENT_EXERCISE_INPUT = "PARENT_EXERCISE_INPUT";
@@ -271,7 +279,7 @@ public class TemperatureService {
 
 
     // 매일 23:59:59에 당일의 가족별 보너스 온도 상승 처리
-    @Scheduled(cron = "59 59 23 * * *")
+    @Scheduled(cron = "59 37 15 * * *")
     @Transactional
     public void processFamilyBonusTemperature() {
         var families = familyRepository.findAll();
@@ -286,13 +294,13 @@ public class TemperatureService {
     // 모든 구성원이 감정기록 업로드 시 보너스 지급
     private void processEmotionBonus(ongi.family.entity.Family family, String familyId, LocalDate targetDate) {
         var memberIds = family.getMembers();
-        boolean alreadyEmotionBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_ALL_EMOTION_UPLOAD, targetDate);
+        boolean alreadyEmotionBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(FAMILY_WIDE_USER_ID, familyId, REASON_ALL_EMOTION_UPLOAD, targetDate);
         boolean allEmotionUploaded = memberIds.stream().allMatch(
                 userId -> temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(userId, familyId, REASON_EMOTION_UPLOAD, targetDate)
         );
         if (allEmotionUploaded && !alreadyEmotionBonus) {
             Temperature temp = Temperature.builder()
-                    .userId(null)
+                    .userId(FAMILY_WIDE_USER_ID)
                     .familyId(familyId)
                     .temperature(0.1)
                     .reason(REASON_ALL_EMOTION_UPLOAD)
@@ -310,11 +318,11 @@ public class TemperatureService {
         int goal = (int)(parentCount * 7000 + childCount * 10000);
         List<Step> steps = stepRepository.findByFamilyAndDate(family, targetDate);
         int totalSteps = steps.stream().mapToInt(Step::getSteps).sum();
-        boolean alreadyStepBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(null, familyId, REASON_STEP_GOAL, targetDate);
+        boolean alreadyStepBonus = temperatureRepository.existsByUserIdAndFamilyIdAndReasonAndDate(FAMILY_WIDE_USER_ID, familyId, REASON_STEP_GOAL, targetDate);
         boolean stepGoalMet = totalSteps >= goal;
         if (stepGoalMet && !alreadyStepBonus) {
             Temperature temp = Temperature.builder()
-                    .userId(null)
+                    .userId(FAMILY_WIDE_USER_ID)
                     .familyId(familyId)
                     .temperature(0.2)
                     .reason(REASON_STEP_GOAL)
@@ -324,26 +332,24 @@ public class TemperatureService {
     }
 
 
-    // 매주 일요일 23:59:59 에 만보기 경쟁 결과 보너스 온도 상승 처리 (후순위! 일단 안만들어도 됨)
+    // 매주 일요일 23:59:59 에 만보기 가족 경쟁 결과 보너스 온도 상승 처리 (후순위! 일단 안만들어도 됨)
     // TODO: 만보기 전체 경쟁 상위 10% -> +3도
     // TODO: 만보기 전체 경쟁 상위 20% -> +1도
 
 
 
-    // 매일 23:59:59에 당일의 가족별 온도 하락 처리
-    @Scheduled(cron = "59 59 23 * * *")
+    //// 매주 일요일 23:59:59에 일주일 미접속 온도 하락 처리
+    @Scheduled(cron = "59 59 23 * * 0")
     @Transactional
-    public void processFamilyTemperatureDecrease() {
+    public void processWeeklyTemperatureDecrease() {
         var families = familyRepository.findAll();
         for (var family : families) {
             String familyId = family.getCode();
             decreaseTemperatureForInactiveParent(familyId);
             decreaseTemperatureForInactiveChild(familyId);
-            decreaseTemperatureForNoLogin(familyId);
         }
     }
-
-    // 부모 1명 이상 일주일 동안안 아무 활동 없을 시 온도 하락
+    // 부모 1명 이상 일주일 동안 아무 활동 없을 시 온도 하락
     public void decreaseTemperatureForInactiveParent(String familyId) {
 
         List<UUID> memberIds = familyRepository.findById(familyId).get().getMembers();
@@ -357,15 +363,14 @@ public class TemperatureService {
 
         if (parentInactive) {
             Temperature temp = Temperature.builder()
-                    .userId(null)
+                    .userId(FAMILY_WIDE_USER_ID)
                     .familyId(familyId)
                     .temperature(-10.0)
-                    .reason("INACTIVE_PARENT")
+                    .reason("INACTIVE_PARENT_7DAY")
                     .build();
             temperatureRepository.save(temp);
         }
     }
-
     // 자녀 1명 이상 일주일 동안 아무 활동 없을 시 온도 하락
     public void decreaseTemperatureForInactiveChild(String familyId) {
 
@@ -379,26 +384,38 @@ public class TemperatureService {
                 .anyMatch(child -> !temperatureRepository.existsByUserIdAndFamilyIdAndCreatedAtAfter(child.getUuid(), familyId, since));
         if (childInactive) {
             Temperature temp = Temperature.builder()
-                    .userId(null)
+                    .userId(FAMILY_WIDE_USER_ID)
                     .familyId(familyId)
                     .temperature(-10.0)
-                    .reason("INACTIVE_CHILD")
+                    .reason("INACTIVE_CHILD_7DAY")
                     .build();
             temperatureRepository.save(temp);
         }
     }
 
-    // 하루 동안 아무도 활동 없을 시 시 온도 하락
+
+    //// 매일 23:59:59에 하루 미접속 온도 하락 처리
+    @Scheduled(cron = "59 59 23 * * *")
+    @Transactional
+    public void processDailyTemperatureDecrease() {
+        var families = familyRepository.findAll();
+        for (var family : families) {
+            String familyId = family.getCode();
+            decreaseTemperatureForNoLogin(familyId);
+        }
+    }
+    // 하루 동안 아무도 활동 없을 시 온도 하락
     public void decreaseTemperatureForNoLogin(String familyId) {
 
         LocalDateTime since = LocalDate.now().atStartOfDay(); // 오늘 00:00~
+        // 만보기(STEP_GOAL)를 제외한 가족 전체 활동 체크
         boolean noLogin = !temperatureRepository.existsByFamilyIdAndCreatedAtAfter(familyId, since);
         if (noLogin) {
             Temperature temp = Temperature.builder()
-                    .userId(null)
+                    .userId(FAMILY_WIDE_USER_ID)
                     .familyId(familyId)
                     .temperature(-0.5)
-                    .reason("NO_LOGIN")
+                    .reason("INACTIVE_ALL_FAMILY_TODAY")
                     .build();
             temperatureRepository.save(temp);
         }
