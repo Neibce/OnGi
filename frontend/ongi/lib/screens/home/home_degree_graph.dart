@@ -44,7 +44,6 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   // 5일간 온도 총합 데이터
   List<Map<String, dynamic>> dailyTemperatures = [];
 
-  // 그래프 spots
   List<FlSpot> get spots {
     return List.generate(
       dailyTemperatures.length,
@@ -58,6 +57,31 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
       final date = DateTime.parse(e['date']);
       return '${date.month.toString().padLeft(2, '0')}/${date.day.toString().padLeft(2, '0')}';
     }).toList();
+  }
+
+  double get yCenter {
+    if (dailyTemperatures.isEmpty) return 36.5;
+    final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
+    final minTemp = temps.reduce((a, b) => a < b ? a : b);
+    final maxTemp = temps.reduce((a, b) => a > b ? a : b);
+    return (minTemp + maxTemp) / 2;
+  }
+
+  double get minY {
+    if (dailyTemperatures.isEmpty) return 36.5;
+    final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
+    return temps.reduce((a, b) => a < b ? a : b);
+  }
+
+  double get maxY {
+    if (dailyTemperatures.isEmpty) return 36.5;
+    final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
+    return temps.reduce((a, b) => a > b ? a : b);
+  }
+
+  double get horizontalInterval {
+    if ((maxY - minY) == 0) return 0.1;
+    return (maxY - minY) / 9;
   }
 
   Future<void> fetchAllTemperatureData() async {
@@ -154,9 +178,11 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   Widget _buildGraphCard() {
     String latestName = '';
     String latestChange = '';
+    bool isRise = true;
     if (contributions.isNotEmpty) {
       latestName = contributions[0].userName;
       latestChange = contributions[0].formattedChange;
+      isRise = contributions[0].contributed >= 0;
     }
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -165,14 +191,14 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
           height: 270,
           child: LineChart(
             LineChartData(
-              minY: 35.2,
-              maxY: 40.5,
+              minY: minY,
+              maxY: maxY,
               minX: -0.5,
               maxX: (dates.length - 0.5),
               gridData: FlGridData(
                 show: true,
                 drawVerticalLine: false,
-                horizontalInterval: 0.5,
+                horizontalInterval: horizontalInterval,
                 getDrawingHorizontalLine: (value) =>
                     FlLine(color: Colors.grey[300], strokeWidth: 1),
               ),
@@ -180,9 +206,9 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
-                    interval: 0.5,
+                    interval: horizontalInterval,
                     getTitlesWidget: (value, meta) {
-                      if (value == 35.2 || value == 40.5)
+                      if (value < minY || value > maxY)
                         return const SizedBox.shrink();
                       return Text(
                         value.toStringAsFixed(1),
@@ -252,7 +278,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
         const SizedBox(height: 12),
         Text(
           latestName.isNotEmpty && latestChange.isNotEmpty
-              ? '최근 $latestName 님이 $latestChange 상승 시켰어요!'
+              ? '최근 $latestName 님이 $latestChange ${isRise ? '상승' : '하강'} 시켰어요!'
               : '최근 온도 변화 데이터가 없습니다.',
           style: const TextStyle(
             fontSize: 15,
