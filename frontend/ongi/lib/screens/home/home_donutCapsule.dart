@@ -4,10 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/widgets/custom_chart_painter.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/services/temperature_service.dart';
+import 'package:ongi/services/health_service.dart';
+import 'package:ongi/services/pill_service.dart';
+import 'package:ongi/services/step_service.dart';
 
 class HomeCapsuleSection extends StatefulWidget {
   final VoidCallback? onGraphTap;
-  const HomeCapsuleSection({super.key, this.onGraphTap});
+  final VoidCallback? onRefresh;
+  const HomeCapsuleSection({super.key, this.onGraphTap, this.onRefresh});
 
   @override
   State<HomeCapsuleSection> createState() => _HomeCapsuleSectionState();
@@ -16,11 +20,21 @@ class HomeCapsuleSection extends StatefulWidget {
 class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
   double? todayTemperature;
   bool isLoading = true;
+  final GlobalKey<_ButtonColumnState> _buttonColumnKey = GlobalKey<_ButtonColumnState>();
 
   @override
   void initState() {
     super.initState();
     fetchTodayTemperature();
+  }
+
+  // 전체 데이터 새로고침
+  void refreshAllData() {
+    fetchTodayTemperature();
+    _buttonColumnKey.currentState?.refreshData();
+    if (widget.onRefresh != null) {
+      widget.onRefresh!();
+    }
   }
 
   Future<void> fetchTodayTemperature() async {
@@ -131,7 +145,7 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
           Positioned(
             right: 0,
             bottom: MediaQuery.of(context).size.height * 0.05,
-            child: ButtonColumn(),
+            child: ButtonColumn(key: _buttonColumnKey),
           ),
         ],
       ),
@@ -190,10 +204,7 @@ class CapsuleButton extends StatelessWidget {
               svgAsset,
               width: MediaQuery.of(context).size.width * 0.07,
               height: MediaQuery.of(context).size.width * 0.07,
-              // colorFilter: ColorFilter.mode(
-              //   selected ? Colors.white : AppColors.ongiOrange,
-              //   BlendMode.srcIn,
-              // ),
+              color: selected ? Colors.white : AppColors.ongiOrange,
             ),
             if (selected && notificationText.isNotEmpty) ...[
               const SizedBox(width: 20),
@@ -231,7 +242,159 @@ class ButtonColumn extends StatefulWidget {
 }
 
 class _ButtonColumnState extends State<ButtonColumn> {
-  int selectedIdx = -1; // 초기값을 -1로 변경 (아무것도 선택되지 않은 상태)
+  int selectedIdx = -1; // 초기값을 -1로 (아무것도 선택되지 않은 상태)
+  
+  // API 데이터 상태
+  String pillText = '';
+  String painText = '';
+  String stepText = '';
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      // 병렬로 데이터 로드
+      final futures = await Future.wait([
+        _loadPillData(),
+        _loadPainData(),
+        _loadStepData(),
+      ]);
+
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('데이터 로드 중 오류: $e');
+    }
+  }
+
+  Future<void> _loadPillData() async {
+    try {
+      print('약물 데이터 로딩 시작');
+      final pillSchedule = await PillService.getTodayPillSchedule();
+      print('약물 데이터 응답: $pillSchedule');
+      if (pillSchedule.isNotEmpty) {
+        // 첫 번째 약물 정보 사용
+        final pill = pillSchedule.first;
+        final pillName = pill['name'] ?? '약물';
+        final intakeTimes = pill['intakeTimes'] as List<dynamic>? ?? [];
+        
+        if (intakeTimes.isNotEmpty) {
+          // 다음 복용 시간 찾기
+          final now = DateTime.now();
+          final currentTime = TimeOfDay.fromDateTime(now);
+          
+          TimeOfDay? nextIntakeTime;
+          for (final timeStr in intakeTimes) {
+            final time = TimeOfDay(
+              hour: int.parse(timeStr.split(':')[0]),
+              minute: int.parse(timeStr.split(':')[1]),
+            );
+            
+            // 현재 시간보다 늦은 시간 찾기
+            if (time.hour > currentTime.hour || 
+                (time.hour == currentTime.hour && time.minute > currentTime.minute)) {
+              nextIntakeTime = time;
+              break;
+            }
+          }
+          
+          if (nextIntakeTime != null) {
+            final nextDateTime = DateTime(now.year, now.month, now.day, nextIntakeTime.hour, nextIntakeTime.minute);
+            final difference = nextDateTime.difference(now);
+            setState(() {
+              pillText = '${difference.inMinutes}분 뒤, $pillName 복용 예정';
+            });
+          } else {
+            setState(() {
+              pillText = '$pillName 복용 완료';
+            });
+          }
+        } else {
+          setState(() {
+            pillText = '$pillName 등록됨';
+          });
+        }
+      } else {
+        setState(() {
+          pillText = '등록된 약이 없습니다';
+        });
+      }
+    } catch (e) {
+      print('약물 데이터 로딩 오류: $e');
+      setState(() {
+        pillText = '오늘의 복용 약'; // 기본값
+      });
+    }
+  }
+
+  Future<void> _loadPainData() async {
+    try {
+      print('통증 데이터 로딩 시작');
+      final userInfo = await PrefsManager.getUserInfo();
+      final userId = userInfo['uuid'];
+      print('사용자 ID: $userId');
+      if (userId != null) {
+        final painRecords = await HealthService.fetchPainRecords(userId);
+        print('통증 데이터 응답: $painRecords');
+        
+        // 오늘 날짜의 통증 기록만 필터링
+        final today = DateTime.now();
+        final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+        
+        final todayPainRecords = painRecords.where((record) => record['date'] == todayStr).toList();
+        
+        if (todayPainRecords.isNotEmpty) {
+          final areas = todayPainRecords.map((record) => record['painArea'].toString()).toSet().join(', ');
+          setState(() {
+            painText = '오늘의 통증 부위: $areas';
+          });
+        } else {
+          setState(() {
+            painText = '오늘 통증 기록이 없습니다';
+          });
+        }
+      }
+    } catch (e) {
+      print('통증 데이터 로딩 오류: $e');
+      setState(() {
+        painText = '오늘의 통증 부위'; // 기본값
+      });
+    }
+  }
+
+  Future<void> _loadStepData() async {
+    try {
+      print('걸음 수 데이터 로딩 시작');
+      final totalSteps = await StepService.getTodayTotalSteps();
+      print('걸음 수 응답: $totalSteps');
+      setState(() {
+        stepText = '${totalSteps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} 걸음';
+      });
+    } catch (e) {
+      print('걸음 수 데이터 로딩 오류: $e');
+      setState(() {
+        stepText = '오늘의 걸음'; // 기본값
+      });
+    }
+  }
+
+  // 외부에서 호출할 수 있는 새로고침 메서드
+  void refreshData() {
+    _loadData();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -246,7 +409,7 @@ class _ButtonColumnState extends State<ButtonColumn> {
             selected: selectedIdx == 0,
             onTap: () =>
                 setState(() => selectedIdx = selectedIdx == 0 ? -1 : 0),
-            notificationText: selectedIdx == 0 ? '23분 뒤, 이부프로펜 1알 섭취 예정' : '',
+            notificationText: selectedIdx == 0 ? (isLoading ? '로딩 중...' : pillText) : '',
           ),
           const SizedBox(height: 8),
           CapsuleButton(
@@ -254,7 +417,7 @@ class _ButtonColumnState extends State<ButtonColumn> {
             selected: selectedIdx == 1,
             onTap: () =>
                 setState(() => selectedIdx = selectedIdx == 1 ? -1 : 1),
-            notificationText: selectedIdx == 1 ? '오늘의 통증 부위: 허리, 오른쪽 무릎' : '',
+            notificationText: selectedIdx == 1 ? (isLoading ? '로딩 중...' : painText) : '',
           ),
           const SizedBox(height: 8),
           CapsuleButton(
@@ -262,7 +425,7 @@ class _ButtonColumnState extends State<ButtonColumn> {
             selected: selectedIdx == 2,
             onTap: () =>
                 setState(() => selectedIdx = selectedIdx == 2 ? -1 : 2),
-            notificationText: selectedIdx == 2 ? '12,000 걸음' : '',
+            notificationText: selectedIdx == 2 ? (isLoading ? '로딩 중...' : stepText) : '',
           ),
         ],
       ),
