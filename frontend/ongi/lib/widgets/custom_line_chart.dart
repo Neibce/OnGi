@@ -9,9 +9,9 @@ class CustomLineChart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = Size(MediaQuery.of(context).size.width * 0.95, 26);
+    final size = Size(MediaQuery.of(context).size.width * 0.95, 16);
     return CustomPaint(
-        painter: CustomLineChartPainter(current: 250, max: max),
+        painter: CustomLineChartPainter(current: current, max: max),
         size: size,
       );
   }

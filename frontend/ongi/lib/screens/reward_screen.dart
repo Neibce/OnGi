@@ -3,6 +3,7 @@ import 'package:flutter_neumorphic_plus/flutter_neumorphic.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/services/temperature_service.dart';
+import 'package:ongi/widgets/custom_line_chart.dart';
 import 'package:ongi/widgets/reward_product_card.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
@@ -321,13 +322,12 @@ class _RewardScreenState extends State<RewardScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Padding(
-                                  padding: EdgeInsets.fromLTRB(12, 20, 10, 0),
+                                  padding: EdgeInsets.fromLTRB(12, 20, 10, 12),
                                   child: Image.asset(
                                     'assets/images/photobook_icon.png',
-                                    width: 110,
+                                    width: 100,
                                   ),
                                 ),
-                                const SizedBox(width: 20),
                                 Expanded(
                                   child: Padding(
                                     padding: EdgeInsets.all(8),
@@ -364,6 +364,9 @@ class _RewardScreenState extends State<RewardScreen> {
                                             color: AppColors.ongiOrange,
                                           ),
                                         ),
+                                        const SizedBox(height: 30),
+                                        CustomLineChart(current: availableTempValue != null
+                                            ? availableTempValue! + 36.5 : 0, max: 300),
                                       ],
                                     ),
                                   ),

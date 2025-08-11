@@ -37,8 +37,8 @@ class CustomLineChartPainter extends CustomPainter {
       canvas,
       bgRect,
       color: Colors.black26,
-      blur: 4,
-      offset: const Offset(0, 3.5),
+      blur: 3,
+      offset: const Offset(0, 3),
       spread: 20,
     );
 
@@ -46,7 +46,7 @@ class CustomLineChartPainter extends CustomPainter {
     if (progressRight > innerLeft) {
       final progressRect = RRect.fromRectAndRadius(
         Rect.fromLTRB(innerLeft, innerTop, progressRight, innerBottom),
-        Radius.circular((innerBottom - innerTop) / 2),
+        Radius.circular(999),
       );
       final progressPaint = Paint()..color = const Color(0xFFFF7A00); // 오렌지
       canvas.drawRRect(progressRect, progressPaint);
