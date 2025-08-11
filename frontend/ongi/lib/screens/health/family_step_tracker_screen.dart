@@ -337,7 +337,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                       steps: _memberSteps[i].steps,
                                       image: _memberSteps[i].imageAsset,
                                       isTop:
-                                          i == 0 && _memberSteps[i].steps >= 0,
+                                          i == 0 && _memberSteps[i].steps > 0,
                                     ),
                                   if (_memberSteps.isEmpty)
                                     const Padding(
