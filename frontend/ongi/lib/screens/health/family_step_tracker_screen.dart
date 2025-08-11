@@ -38,7 +38,6 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   void _updateFromDateCarousel(DateTime date) {
     setState(() {
       selectedDate = DateTime(date.year, date.month, date.day);
-      // TODO: 선택된 날짜에 맞게 데이터 갱신 로직 연동
     });
     _fetchStepsForDate(selectedDate);
   }
@@ -62,7 +61,6 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       int parsedTotal = 0;
       final List<_MemberStep> parsedMembers = [];
       if (result != null) {
-        // 총 걸음수 파싱
         if (result['totalSteps'] is int) {
           parsedTotal = result['totalSteps'] as int;
         } else if (result['steps'] is int) {
@@ -71,7 +69,6 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
           parsedTotal = result['total'] as int;
         }
 
-        // 멤버별 걸음수 파싱
         final dynamic members = result['memberSteps'];
         if (members is List) {
           for (final dynamic item in members) {
@@ -94,7 +91,6 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
         }
       }
 
-      // 정렬: 걸음수 내림차순
       parsedMembers.sort((a, b) => b.steps.compareTo(a.steps));
 
       setState(() {
