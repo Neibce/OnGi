@@ -27,6 +27,14 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
     _loadMaumLogData();
   }
 
+  @override
+  void didUpdateWidget(PhotoDateScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.date != widget.date) {
+      _loadMaumLogData();
+    }
+  }
+
   Future<void> _loadMaumLogData() async {
     try {
       setState(() {

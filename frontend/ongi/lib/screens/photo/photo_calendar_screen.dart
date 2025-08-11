@@ -267,7 +267,7 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
     if (_currentView == 'photoDate') {
       return Stack(
         children: [
-          const PhotoDateScreen(date:"2025-08-11"),
+          PhotoDateScreen(date: _selectedDate != null ? _formatDateKey(_selectedDate!) : _formatDateKey(DateTime.now())),
           Positioned(
             top: MediaQuery.of(context).padding.top + 15,
             left: 40,
