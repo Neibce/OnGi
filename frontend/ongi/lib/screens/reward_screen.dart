@@ -76,21 +76,32 @@ class _RewardScreenState extends State<RewardScreen> {
         familyCode,
         token: token,
       );
+
+      const baseline = 36.5; // 기준 온도
       final today = DateTime.now();
       final todayStr =
           '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
       final match = dailyTemps.firstWhere(
         (e) => e['date'] == todayStr,
         orElse: () => <String, dynamic>{},
       );
+
+      double value;
+      if (match.isEmpty) {
+        value = 0.0;
+      } else {
+        final raw = (match['totalTemperature'] as num?)?.toDouble();
+        value = raw == null ? 0.0 : (raw - baseline);
+      }
+
       setState(() {
-        availableTempValue = match.isEmpty
-            ? 0.0
-            : ((match['totalTemperature'] as num?)?.toDouble() ?? 36.5);
+        // 음수 방지 -> 음수 온도이면 0.0으로 뜸
+        availableTempValue = value.clamp(0.0, double.infinity);
       });
     } catch (e) {
       setState(() {
-        availableTempValue = 36.5;
+        availableTempValue = 0.0;
       });
     }
   }
