@@ -3,6 +3,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/widgets/custom_drop_down.dart';
 import 'package:ongi/screens/health/pill_update_popup.dart';
+import 'package:ongi/services/pill_service.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class AddPillScreen extends StatefulWidget {
   const AddPillScreen({super.key});
@@ -12,6 +14,7 @@ class AddPillScreen extends StatefulWidget {
 }
 
 class _AddPillScreenState extends State<AddPillScreen> {
+  final TextEditingController _nameController = TextEditingController();
   Set<String> selectedDays = <String>{};
   final List<String> days = ['일', '월', '화', '수', '목', '금', '토'];
   String selectedFrequency = '하루 세 번';
@@ -76,6 +79,177 @@ class _AddPillScreenState extends State<AddPillScreen> {
     '취침 전',
     '상관없음',
   ];
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  int _frequencyToTimes(String frequency) {
+    switch (frequency) {
+      case '하루 한 번':
+        return 1;
+      case '하루 두 번':
+        return 2;
+      case '하루 세 번':
+        return 3;
+      case '하루 네 번':
+        return 4;
+      default:
+        return 1;
+    }
+  }
+
+  List<String> _mapDaysToServer(Set<String> daysKo) {
+    const Map<String, String> koToEnum = {
+      '월': 'MONDAY',
+      '화': 'TUESDAY',
+      '수': 'WEDNESDAY',
+      '목': 'THURSDAY',
+      '금': 'FRIDAY',
+      '토': 'SATURDAY',
+      '일': 'SUNDAY',
+    };
+    // 선택 순서 유지
+    final List<String> ordered = days
+        .where((d) => daysKo.contains(d))
+        .map((d) => koToEnum[d] ?? d)
+        .toList();
+    return ordered;
+  }
+
+  String _mapIntakeDetailToServer(String label) {
+    switch (label) {
+      case '식전 30분':
+        return 'BEFORE_MEAL_30MIN';
+      case '식후 30분 이내':
+        return 'AFTER_MEAL_30MIN';
+      case '식후 1시간':
+        return 'AFTER_MEAL_60MIN';
+      case '취침 전':
+        return 'BEFORE_SLEEP';
+      case '상관없음':
+        return 'NONE';
+      default:
+        return 'ANYTIME';
+    }
+  }
+
+  Future<void> _submit() async {
+    final String pillName = _nameController.text.trim();
+    if (pillName.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '약 이름을 입력해주세요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    if (selectedDays.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '복용 요일을 하나 이상 선택해주세요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final int timesPerDay = _frequencyToTimes(selectedFrequency);
+    if (selectedTimes.length < timesPerDay) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '복용 시간을 ${timesPerDay}개 선택해주세요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    final String? parentUuid = await PrefsManager.getUuid();
+    if (parentUuid == null || parentUuid.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            'uuid가 존재하지 않습니다. 재로그인 후 다시 시도해주세요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    try {
+      await PillService.addPills(
+        name: pillName,
+        times: timesPerDay,
+        intakeDetail: _mapIntakeDetailToServer(selectedMealTiming),
+        intakeTimes: selectedTimes.take(timesPerDay).toList(),
+        intakeDays: _mapDaysToServer(selectedDays),
+        parentUuid: parentUuid,
+      );
+
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const PillUpdatePopup()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('약 정보 등록에 실패했습니다: $e')));
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,8 +272,8 @@ class _AddPillScreenState extends State<AddPillScreen> {
                           top: 10,
                         ),
                         child: TextField(
-                          //controller: _passwordCtrl,
-                          keyboardType: TextInputType.visiblePassword,
+                          controller: _nameController,
+                          keyboardType: TextInputType.text,
                           style: const TextStyle(
                             fontSize: 25,
                             color: AppColors.ongiOrange,
@@ -323,16 +497,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
                   width: double.infinity,
                   height: 72,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => PillUpdatePopup(),
-                        ),
-                      );
-                      print('약 정보 등록');
-                      // Navigator.of(context).pop();
-                    },
+                    onPressed: _isSubmitting ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.ongiOrange,
                       foregroundColor: Colors.white,
@@ -341,13 +506,24 @@ class _AddPillScreenState extends State<AddPillScreen> {
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
-                    child: const Text(
-                      '등록하기',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.w400,
-                      ),
-                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            height: 28,
+                            width: 28,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 3,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            '등록하기',
+                            style: TextStyle(
+                              fontSize: 32,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
                   ),
                 ),
               ),
