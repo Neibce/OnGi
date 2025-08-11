@@ -8,6 +8,7 @@ import 'package:ongi/screens/health/pill_history_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/health/health_status_input_screen.dart';
 import 'package:ongi/services/exercise_service.dart';
+import 'package:ongi/services/step_service.dart';
 
 class HealthHomeScreen extends StatefulWidget {
   const HealthHomeScreen({super.key});
@@ -22,12 +23,14 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
   int _todayExerciseHours = 0;
   int _todayExerciseMinutes = 0;
   bool _isLoadingExercise = true;
+  int _todaysteps = 0;
 
   @override
   void initState() {
     super.initState();
     _loadUserName();
     _loadTodayExerciseTime();
+    _loadStep();
   }
 
   Future<void> _loadUserName() async {
@@ -83,6 +86,41 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
         _todayExerciseMinutes = 0;
         _isLoadingExercise = false;
       });
+    }
+  }
+
+  Future<void> _loadStep() async {
+    try {
+      final now = DateTime.now();
+      final dateKey =
+          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
+      final stepService = StepService();
+
+      final serverData = await stepService.getSteps(date: dateKey);
+
+      int todaySteps = 0;
+      if (serverData != null) {
+        final dynamic stepsField =
+            serverData['totalSteps'] ?? serverData['steps'] ?? serverData['total'];
+        if (stepsField is int) {
+          todaySteps = stepsField;
+        } else if (stepsField != null) {
+          todaySteps = int.tryParse(stepsField.toString()) ?? 0;
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          _todaysteps = todaySteps;
+        });
+      }
+    } catch (e) {
+      print('오늘 걸음 수 조회 실패: $e');
+      if (mounted) {
+        setState(() {
+          _todaysteps = 0;
+        });
+      }
     }
   }
 
@@ -489,12 +527,12 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                             width: 100,
                           ),
                         ),
-                        const Align(
+                        Align(
                           alignment: Alignment.topRight,
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                TextSpan(
+                                const TextSpan(
                                   text: '오늘은 ',
                                   style: TextStyle(
                                     fontSize: 25,
@@ -504,15 +542,15 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: '20,315 ',
-                                  style: TextStyle(
+                                  text: '$_todaysteps',
+                                  style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.w600,
                                     height: 1.2,
                                     color: AppColors.ongiOrange,
                                   ),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: '걸음\n걸으셨어요!',
                                   style: TextStyle(
                                     fontSize: 25,
