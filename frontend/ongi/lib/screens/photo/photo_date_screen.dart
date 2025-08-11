@@ -1,40 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/core/app_colors.dart';
+import 'package:ongi/models/maum_log.dart';
+import 'package:ongi/services/maum_log_service.dart';
 import 'dart:ui'; // Added for ImageFilter
 
 class PhotoDateScreen extends StatefulWidget {
-  const PhotoDateScreen({super.key});
+  final String date;
+  
+  const PhotoDateScreen({super.key, required this.date});
 
   @override
   State<PhotoDateScreen> createState() => _PhotoDateScreenState();
 }
 
 class _PhotoDateScreenState extends State<PhotoDateScreen> {
-  int _currentPage = 1;
-  final List<Map<String, String>> _photos = [
-    {
-      'main': 'assets/images/sample_family_photo.png',
-      'sub': 'assets/images/sample_family_photo.png',
-      'profile': 'assets/images/users/elderly_woman.png',
-      'text': '엄마는 금정산 등산 덕에 활기가 너무 좋다~',
-      'location': '부산광역시, 장전동',
-    },
-    {
-      'main': 'assets/images/sample_family_photo.png',
-      'sub': 'assets/images/sample_family_photo.png',
-      'profile': 'assets/images/users/elderly_woman.png',
-      'text': '오늘은 가족과 함께 산책 헤헤',
-      'location': '서울특별시, 강남구',
-    },
-    {
-      'main': 'assets/images/sample_family_photo.png',
-      'sub': 'assets/images/sample_family_photo.png',
-      'profile': 'assets/images/users/elderly_woman.png',
-      'text': '즐거운 여행의 추억 :)',
-      'location': '경기도, 수원시',
-    },
-  ];
+  int _currentPage = 0;
+  MaumLogResponse? _maumLogResponse;
+  bool _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMaumLogData();
+  }
+
+  Future<void> _loadMaumLogData() async {
+    try {
+      setState(() {
+        _isLoading = true;
+        _error = null;
+      });
+      
+      final response = await MaumLogService.getMaumLog(widget.date);
+      
+      setState(() {
+        _maumLogResponse = response;
+        _isLoading = false;
+        if (response.maumLogDtos.isNotEmpty) {
+          _currentPage = 0;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +57,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
     final screenHeight = MediaQuery.of(context).size.height;
     final cardWidth = screenWidth;
     final cardHeight = screenHeight * 0.4;
-    // 카드 크기 되돌림
+    
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AppLightBackground(
@@ -81,209 +96,14 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                       child: SizedBox(
                         width: cardWidth,
                         height: cardHeight,
-                        child: PageView.builder(
-                          itemCount: _photos.length,
-                          controller: PageController(
-                            viewportFraction: 0.78,
-                            initialPage: _currentPage,
-                          ),
-                          onPageChanged: (idx) =>
-                              setState(() => _currentPage = idx),
-                          itemBuilder: (context, idx) {
-                            final photo = _photos[idx];
-                            final isActive = idx == _currentPage;
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              margin: EdgeInsets.symmetric(
-                                horizontal: isActive ? 0 : 8,
-                                vertical: isActive ? 0 : 16,
-                              ),
-                              width: cardWidth,
-                              height: cardHeight,
-                              child: Stack(
-                                clipBehavior: Clip.none,
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(32),
-                                    child: isActive
-                                        ? Image.asset(
-                                            photo['main']!,
-                                            width: cardWidth,
-                                            height: cardHeight,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : ImageFiltered(
-                                            imageFilter: ImageFilter.blur(
-                                              sigmaX: 8,
-                                              sigmaY: 8,
-                                            ),
-                                            child: Opacity(
-                                              opacity: 0.7,
-                                              child: Image.asset(
-                                                photo['main']!,
-                                                width: cardWidth,
-                                                height: cardHeight,
-                                                fit: BoxFit.cover,
-                                              ),
-                                            ),
-                                          ),
-                                  ),
-                                  // 좌상단 서브(프로필) 사진
-                                  Positioned(
-                                    left: 16,
-                                    top: 16,
-                                    child: Container(
-                                      width: 88,
-                                      height: 100,
-                                      decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color: AppColors.ongiOrange,
-                                          width: 3,
-                                        ),
-                                        borderRadius: BorderRadius.circular(15),
-                                      ),
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(15),
-                                        child: Image.asset(
-                                          photo['sub'] ?? photo['main']!,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  // 하단 오버레이
-                                  Positioned(
-                                    left: 0,
-                                    right: 0,
-                                    bottom: 0,
-                                    child: Container(
-                                      padding: const EdgeInsets.fromLTRB(
-                                        20,
-                                        16,
-                                        20,
-                                        24,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        borderRadius: const BorderRadius.only(
-                                          bottomLeft: Radius.circular(32),
-                                          bottomRight: Radius.circular(32),
-                                        ),
-                                        gradient: LinearGradient(
-                                          begin: Alignment.topCenter,
-                                          end: Alignment.bottomCenter,
-                                          colors: [
-                                            Colors.black.withOpacity(0.0),
-                                            Colors.black.withOpacity(0.4),
-                                          ],
-                                        ),
-                                      ),
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Row(
-                                            children: [
-                                              // 원형 프로필
-                                              CircleAvatar(
-                                                radius: 16,
-                                                backgroundImage: AssetImage(
-                                                  photo['profile']!,
-                                                ),
-                                              ),
-                                              const SizedBox(width: 8),
-                                              Expanded(
-                                                child: Text(
-                                                  photo['text']!,
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 10,
-                                                    fontFamily: 'Pretendard',
-                                                    fontWeight: FontWeight.w500,
-                                                    shadows: [
-                                                      Shadow(
-                                                        color: Colors.black38,
-                                                        blurRadius: 4,
-                                                        offset: Offset(0, 2),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                          const SizedBox(height: 8),
-                                          // 위치 버튼 스타일
-                                          Align(
-                                            alignment: Alignment.center,
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 2,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    Icons.place,
-                                                    color: AppColors.ongiOrange,
-                                                    size: 16,
-                                                  ),
-                                                  const SizedBox(width: 4),
-                                                  Text(
-                                                    photo['location']!,
-                                                    style: TextStyle(
-                                                      color:
-                                                          AppColors.ongiOrange,
-                                                      fontSize: 11,
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      fontFamily: 'Pretendard',
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        ),
+                        child: _buildContent(cardWidth, cardHeight),
                       ),
                     ),
                     // 감정 태그 버튼
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _buildTagButton('뿌듯함', AppColors.ongiOrange),
-                        const SizedBox(width: 6),
-                        _buildTagButton('기운이 남', AppColors.ongiOrange),
-                        const SizedBox(width: 6),
-                        _buildTagButton('들뜸', AppColors.ongiOrange),
-                      ],
-                    ),
+                    _buildEmotionTags(),
                     const SizedBox(height: 16),
                     // 페이지인디케이터
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        for (int i = 0; i < _photos.length; i++) ...[
-                          _buildIndicator(i == _currentPage),
-                          if (i != _photos.length - 1) const SizedBox(width: 6),
-                        ],
-                      ],
-                    ),
+                    _buildPageIndicators(),
                   ],
                 ),
               ),
@@ -291,6 +111,309 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildContent(double cardWidth, double cardHeight) {
+    if (_isLoading) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppColors.ongiOrange,
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.error_outline,
+              color: AppColors.ongiOrange,
+              size: 48,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              '마음 기록을 불러올 수 없습니다',
+              style: TextStyle(
+                color: AppColors.ongiOrange,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ElevatedButton(
+              onPressed: _loadMaumLogData,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.ongiOrange,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('다시 시도'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_maumLogResponse == null || _maumLogResponse!.maumLogDtos.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.photo_camera_outlined,
+              color: AppColors.ongiOrange,
+              size: 48,
+            ),
+            SizedBox(height: 16),
+            Text(
+              '이 날의 마음 기록이 없습니다',
+              style: TextStyle(
+                color: AppColors.ongiOrange,
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final maumLogs = _maumLogResponse!.maumLogDtos;
+    
+    return PageView.builder(
+      itemCount: maumLogs.length,
+      controller: PageController(
+        viewportFraction: 0.78,
+        initialPage: _currentPage,
+      ),
+      onPageChanged: (idx) => setState(() => _currentPage = idx),
+      itemBuilder: (context, idx) {
+        final maumLog = maumLogs[idx];
+        final isActive = idx == _currentPage;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: EdgeInsets.symmetric(
+            horizontal: isActive ? 0 : 8,
+            vertical: isActive ? 0 : 16,
+          ),
+          width: cardWidth,
+          height: cardHeight,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(32),
+                child: isActive
+                    ? Image.network(
+                        maumLog.frontPresignedUrl,
+                        width: cardWidth,
+                        height: cardHeight,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: cardWidth,
+                            height: cardHeight,
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.broken_image,
+                              color: Colors.grey,
+                              size: 48,
+                            ),
+                          );
+                        },
+                      )
+                    : ImageFiltered(
+                        imageFilter: ImageFilter.blur(
+                          sigmaX: 8,
+                          sigmaY: 8,
+                        ),
+                        child: Opacity(
+                          opacity: 0.7,
+                          child: Image.network(
+                            maumLog.frontPresignedUrl,
+                            width: cardWidth,
+                            height: cardHeight,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: cardWidth,
+                                height: cardHeight,
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                  size: 48,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+              ),
+              // 좌상단 서브(프로필) 사진
+              Positioned(
+                left: 16,
+                top: 16,
+                child: Container(
+                  width: 88,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: AppColors.ongiOrange,
+                      width: 3,
+                    ),
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Image.network(
+                      maumLog.backPresignedUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.grey,
+                            size: 24,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              // 하단 오버레이
+              Positioned(
+                left: 0,
+                right: 0,
+                bottom: 0,
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(
+                    20,
+                    16,
+                    20,
+                    24,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(32),
+                      bottomRight: Radius.circular(32),
+                    ),
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [
+                        Colors.black.withOpacity(0.0),
+                        Colors.black.withOpacity(0.4),
+                      ],
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Image.asset("assets/images/users/elderly_woman.png", width: 30),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              maumLog.comment,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontFamily: 'Pretendard',
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      // 위치 버튼 스타일
+                      Align(
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SvgPicture.asset('assets/images/location_icon.svg'),
+                              const SizedBox(width: 4),
+                              Text(
+                                maumLog.location,
+                                style: TextStyle(
+                                  color: AppColors.ongiOrange,
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w500,
+                                  fontFamily: 'Pretendard',
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmotionTags() {
+    if (_maumLogResponse == null || 
+        _maumLogResponse!.maumLogDtos.isEmpty ||
+        _currentPage >= _maumLogResponse!.maumLogDtos.length) {
+      return const SizedBox.shrink();
+    }
+
+    final currentMaumLog = _maumLogResponse!.maumLogDtos[_currentPage];
+    final emotions = currentMaumLog.formattedEmotions;
+
+    if (emotions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (int i = 0; i < emotions.length; i++) ...[
+          _buildTagButton(emotions[i], AppColors.ongiOrange),
+          if (i != emotions.length - 1) const SizedBox(width: 6),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildPageIndicators() {
+    if (_maumLogResponse == null || _maumLogResponse!.maumLogDtos.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final maumLogs = _maumLogResponse!.maumLogDtos;
+    
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        for (int i = 0; i < maumLogs.length; i++) ...[
+          _buildIndicator(i == _currentPage),
+          if (i != maumLogs.length - 1) const SizedBox(width: 6),
+        ],
+      ],
     );
   }
 

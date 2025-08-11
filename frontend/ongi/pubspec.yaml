@@ -84,6 +84,7 @@ flutter:
     - assets/images/speech_bubble.png
     - assets/images/body_selector_front.svg
     - assets/images/body_selector_back.svg
+    - assets/images/location_icon.svg
 
   fonts:
     - family: Pretendard
