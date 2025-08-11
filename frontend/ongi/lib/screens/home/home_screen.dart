@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/home/home_degree_graph.dart';
 import 'package:ongi/screens/home/home_logo.dart';
 import 'package:ongi/screens/home/home_ourfamily_text.dart';
+import 'package:ongi/screens/reward_screen.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/screens/home/home_donutCapsule.dart';
 
@@ -48,6 +50,8 @@ class _HomeScreenState extends State<HomeScreen> {
     switch (_currentView) {
       case 'graph':
         return _buildGraphView();
+      case 'reward':
+        return _buildRewardView();
       default:
         return _buildHomeView();
     }
@@ -55,6 +59,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildGraphView() {
     return Stack(children: [HomeDegreeGraph(onBack: _goBackToHome)]);
+  }
+
+  Widget _buildRewardView() {
+    return Stack(children: [RewardScreen(onRewardTap: _goBackToHome)]);
   }
 
   Widget _buildHomeView() {
@@ -83,7 +91,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        // Background logo (top right)
         const HomeBackgroundLogo(),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,6 +100,23 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
             HomeCapsuleSection(onGraphTap: () => _changeView('graph')),
           ],
+        ),
+        Positioned(
+          top: 120,
+          right: 10,
+          child: ElevatedButton(
+            onPressed: () => _changeView('reward'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: CircleBorder(),
+            ),
+            child: SvgPicture.asset(
+              'assets/images/reward_icon.svg',
+              width: 48,
+              height: 48,
+            ),
+          ),
         ),
       ],
     );
