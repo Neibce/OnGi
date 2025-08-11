@@ -16,7 +16,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   Map<int, int> selectedDosages = {};
   late final PageController _dateCarouselController;
   DateTime selectedDate = DateTime.now();
-  final ExerciseService _stepService = ExerciseService();
+  final StepService _stepService = StepService();
   bool _isLoading = false;
   int _totalSteps = 0;
   String? _errorMessage;

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:ongi/utils/prefs_manager.dart';
 
-class ExerciseService {
+class StepService {
   static const String baseUrl =
       'https://ongi-1049536928483.asia-northeast3.run.app';
 
