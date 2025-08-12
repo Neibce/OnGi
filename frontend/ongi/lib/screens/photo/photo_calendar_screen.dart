@@ -267,7 +267,11 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
     if (_currentView == 'photoDate') {
       return Stack(
         children: [
-          PhotoDateScreen(date: _selectedDate != null ? _formatDateKey(_selectedDate!) : _formatDateKey(DateTime.now())),
+          PhotoDateScreen(
+            date: _selectedDate != null
+                ? _formatDateKey(_selectedDate!)
+                : _formatDateKey(DateTime.now()),
+          ),
           Positioned(
             top: MediaQuery.of(context).padding.top + 15,
             left: 40,
@@ -322,9 +326,8 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
   }
 
   List<Color> _buildCircleColorsForCount(int count) {
-    // final Color orange = AppColors.ongiOrange.withValues(alpha: 0.9);
     final Color orange = AppColors.ongiOrange;
-    final Color grey = AppColors.ongiGrey;
+    final Color grey = AppColors.ongiGrey.withValues(alpha: 0.9);
 
     if (count >= 4) {
       return [orange, orange, orange, orange];
