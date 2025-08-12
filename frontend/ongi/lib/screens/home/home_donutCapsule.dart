@@ -340,6 +340,34 @@ class _ButtonColumnState extends State<ButtonColumn> {
     }
   }
 
+  // 통증 부위 코드를 한글로 변환하는 함수
+  String _convertPainAreaToKorean(String painArea) {
+    final Map<String, String> painAreaMap = {
+      'head': '머리',
+      'neck': '목',
+      'shoulder': '어깨',
+      'arm': '팔',
+      'chest': '가슴',
+      'back': '등',
+      'waist': '허리',
+      'hip': '엉덩이',
+      'leg': '다리',
+      'knee': '무릎',
+      'ankle': '발목',
+      'foot': '발',
+      'stomach': '배',
+      'wrist': '손목',
+      'hand': '손',
+      'elbow': '팔꿈치',
+      'thigh': '허벅지',
+      'calf': '종아리',
+      'spine': '척추',
+      'pelvis': '골반',
+    };
+    
+    return painAreaMap[painArea.toLowerCase()] ?? painArea;
+  }
+
   Future<void> _loadPainData() async {
     try {
       print('통증 데이터 로딩 시작');
@@ -350,16 +378,19 @@ class _ButtonColumnState extends State<ButtonColumn> {
         final painRecords = await HealthService.fetchPainRecords(userId);
         print('통증 데이터 응답: $painRecords');
         
-        // 오늘 날짜의 통증 기록만 필터링
+
         final today = DateTime.now();
         final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
         
         final todayPainRecords = painRecords.where((record) => record['date'] == todayStr).toList();
         
         if (todayPainRecords.isNotEmpty) {
-          final areas = todayPainRecords.map((record) => record['painArea'].toString()).toSet().join(', ');
+          final koreanAreas = todayPainRecords
+              .map((record) => _convertPainAreaToKorean(record['painArea'].toString()))
+              .toSet()
+              .join(', ');
           setState(() {
-            painText = '오늘의 통증 부위: $areas';
+            painText = '오늘의 통증 부위: $koreanAreas';
           });
         } else {
           setState(() {
