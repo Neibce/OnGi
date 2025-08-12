@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ongi/core/app_orange_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:ongi/screens/home/home_screen.dart';
 
 class PhotoRemindPopup extends StatelessWidget {
   const PhotoRemindPopup({super.key});
@@ -77,8 +78,59 @@ class PhotoRemindPopup extends StatelessWidget {
                               borderRadius: BorderRadius.circular(20),
                             ),
                           ),
-                          onPressed: () {
-                            Navigator.of(context).pop(); // 마음 기록 입력 화면 완성하고 수정
+                          onPressed: () async {
+                            try {
+                              // 팝업 닫기
+                              Navigator.of(context).pop();
+                              
+                              // 알림 전송 시뮬레이션 (실제 API 호출로 대체 가능)
+                              await Future.delayed(const Duration(milliseconds: 500));
+                              
+                              if (Navigator.of(context).mounted) {
+                                // 성공 메시지 표시
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      '가족들에게 알림을 보냈습니다! 📲',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    backgroundColor: AppColors.ongiOrange,
+                                    duration: Duration(seconds: 3),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                
+                                // 약간의 딜레이 후 홈화면으로 이동
+                                await Future.delayed(const Duration(milliseconds: 100));
+                                
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => const HomeScreen(),
+                                  ),
+                                );
+                              }
+                            } catch (e) {
+                              // 에러 발생 시 에러 메시지 표시
+                              if (Navigator.of(context).mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      '알림 전송에 실패했습니다. 다시 시도해주세요.',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    backgroundColor: Colors.red,
+                                    duration: Duration(seconds: 3),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                              }
+                            }
                           },
                           child: const Text(
                             '재촉하기!',

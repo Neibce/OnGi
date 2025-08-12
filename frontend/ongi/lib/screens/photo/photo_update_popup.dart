@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ongi/core/app_orange_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:ongi/screens/bottom_nav.dart';
 
 class PhotoUpdatePopup extends StatelessWidget {
   const PhotoUpdatePopup({super.key});
@@ -65,9 +66,23 @@ class PhotoUpdatePopup extends StatelessWidget {
                           borderRadius: BorderRadius.circular(20),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.of(context).pop(); // 마음 기록 입력 화면 완성하고 수정
+                      onPressed: () async {
+                        // 팝업 닫기
+                        Navigator.of(context).pop();
+                        
+                        await Future.delayed(const Duration(milliseconds: 100));
+                        
+                        if (Navigator.of(context).mounted) {
+                          // 앨범 탭이 선택된 상태로 BottomNavScreen으로 이동
+                          Navigator.of(context).pushAndRemoveUntil(
+                            MaterialPageRoute(
+                              builder: (context) => const BottomNavScreen(initialIndex: 2),
+                            ),
+                            (route) => false, // 모든 이전 화면 제거
+                          );
+                        }
                       },
+
                       child: const Text(
                         '보러가기!',
                         style: TextStyle(

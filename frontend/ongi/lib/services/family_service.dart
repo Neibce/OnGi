@@ -9,7 +9,7 @@ class FamilyService {
   static Future<Map<String, dynamic>?> getFamilyInfo() async {
     try {
       final token = await PrefsManager.getAccessToken();
-      
+
       if (token == null) {
         throw Exception('Access token not found');
       }

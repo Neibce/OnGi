@@ -26,6 +26,7 @@ import ongi.security.CustomUserDetails;
 import ongi.temperature.service.TemperatureService;
 import ongi.user.entity.User;
 import ongi.util.S3FileService;
+import ongi.maum_log.dto.MaumLogResponseDto;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -126,5 +127,18 @@ public class MaumLogService {
                 frontFileName, frontPresignedUrl.toString(),
                 backFileName, backPresignedUrl.toString()
         );
+    }
+
+    public List<MaumLogResponseDto> getAllMaumLogs() {
+        return maumLogRepository.findAll().stream()
+            .map(m -> new MaumLogResponseDto(
+                m.getId(),
+                m.getFileName(),
+                m.getFileExtension(),
+                m.getLocation(),
+                m.getComment(),
+                m.getEmotions()
+            ))
+            .toList();
     }
 }
