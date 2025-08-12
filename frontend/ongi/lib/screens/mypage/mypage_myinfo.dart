@@ -11,11 +11,16 @@ class Myinfo extends StatelessWidget {
   Future<Map<String, String>> fetchFamilyInfo() async {
     final token = await PrefsManager.getAccessToken();
     if (token == null) throw Exception('로그인 필요');
-    final url = Uri.parse('https://ongi-1049536928483.asia-northeast3.run.app/family');
-    final response = await http.get(url, headers: {
-      'Authorization': 'Bearer $token',
-      'Content-Type': 'application/json',
-    });
+    final url = Uri.parse(
+      'https://ongi-1049536928483.asia-northeast3.run.app/family',
+    );
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return {
@@ -38,25 +43,32 @@ class Myinfo extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return Center(child: Text('에러: ${snapshot.error}', style: TextStyle(color: Colors.red)));
+          return Center(
+            child: Text(
+              '에러: ${snapshot.error}',
+              style: TextStyle(color: Colors.red),
+            ),
+          );
         }
         final familycode = snapshot.data?['familycode'] ?? '가족코드';
         final familyName = snapshot.data?['familyname'] ?? '가족이름';
         // 기존 PrefsManager.getUserInfo()에서 불러오던 나머지 정보는 그대로 사용
         // (예: name, profileImage, isParent 등)
         // 아래는 예시로 name 등은 PrefsManager에서 계속 불러오도록 유지
-        return FutureBuilder<Map<String, String?>> (
+        return FutureBuilder<Map<String, String?>>(
           future: PrefsManager.getUserInfo(),
           builder: (context, userSnapshot) {
             final userInfo = userSnapshot.data ?? {};
             final name = userInfo['name'] ?? '사용자';
-            final profileImage = userInfo['profileImage'] ?? 'assets/images/users/elderly_woman.png';
+            final profileImage =
+                userInfo['profileImage'] ??
+                'assets/images/users/elderly_woman.png';
             final isParent = userInfo['isParent'] == 'true';
             final roleText = isParent ? '부모' : '자녀';
             return Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: screenWidth * 0.05, // 32/375
-                vertical: screenHeight * 0.02,   // 16/812
+                vertical: screenHeight * 0.02, // 16/812
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +123,9 @@ class Myinfo extends StatelessWidget {
                           ],
                         ),
                         Padding(
-                          padding: EdgeInsets.only(left: screenWidth * 0.021), // 8/375
+                          padding: EdgeInsets.only(
+                            left: screenWidth * 0.021,
+                          ), // 8/375
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -141,18 +155,44 @@ class Myinfo extends StatelessWidget {
                                   Builder(
                                     builder: (context) => OutlinedButton(
                                       onPressed: () async {
-                                        await Clipboard.setData(ClipboardData(text: familycode));
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(content: Text('가족코드가 복사되었습니다.')),
+                                        await Clipboard.setData(
+                                          ClipboardData(text: familycode),
+                                        );
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: const Text(
+                                              '가족코드가 복사되었어요.',
+                                              style: TextStyle(
+                                                color: AppColors.ongiOrange,
+                                              ),
+                                            ),
+                                            backgroundColor: Colors.white,
+                                            behavior: SnackBarBehavior.floating,
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                            duration: const Duration(
+                                              seconds: 2,
+                                            ),
+                                          ),
                                         );
                                       },
                                       style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(color: AppColors.ongiOrange, width: 1),
+                                        side: const BorderSide(
+                                          color: AppColors.ongiOrange,
+                                          width: 1,
+                                        ),
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                         ),
                                         minimumSize: Size.zero,
-                                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                        tapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
                                         backgroundColor: Colors.white,
                                         padding: EdgeInsets.symmetric(
                                           horizontal: screenWidth * 0.01,
@@ -176,7 +216,10 @@ class Myinfo extends StatelessWidget {
                               OutlinedButton(
                                 onPressed: () {},
                                 style: OutlinedButton.styleFrom(
-                                  side: const BorderSide(color: AppColors.ongiOrange, width: 1),
+                                  side: const BorderSide(
+                                    color: AppColors.ongiOrange,
+                                    width: 1,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(30),
                                   ),
@@ -201,10 +244,10 @@ class Myinfo extends StatelessWidget {
                         ),
                       ],
                     ),
-                ),
-            ],
-          ),
-        );
+                  ),
+                ],
+              ),
+            );
           },
         );
       },

@@ -12,7 +12,8 @@ class HealthStatusInputScreen extends StatefulWidget {
   const HealthStatusInputScreen({super.key});
 
   @override
-  State<HealthStatusInputScreen> createState() => _HealthStatusInputScreenState();
+  State<HealthStatusInputScreen> createState() =>
+      _HealthStatusInputScreenState();
 }
 
 class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
@@ -41,26 +42,45 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
 
   List<PainArea> _getSelectedPainAreas() {
     List<PainArea> painAreas = [];
-    
+
     // BodyParts를 API enum으로 매핑
     final bodyPartsString = _bodyParts.toString();
-    
+
     if (bodyPartsString.contains('head: true')) painAreas.add(PainArea.head);
     if (bodyPartsString.contains('neck: true')) painAreas.add(PainArea.neck);
-    if (bodyPartsString.contains('leftShoulder: true') || bodyPartsString.contains('rightShoulder: true')) painAreas.add(PainArea.shoulder);
-    if (bodyPartsString.contains('upperBody: true')) painAreas.add(PainArea.chest);
-    if (bodyPartsString.contains('lowerBody: true')) painAreas.add(PainArea.back);
-    if (bodyPartsString.contains('leftUpperArm: true') || bodyPartsString.contains('rightUpperArm: true') ||
-        bodyPartsString.contains('leftElbow: true') || bodyPartsString.contains('rightElbow: true') ||
-        bodyPartsString.contains('leftLowerArm: true') || bodyPartsString.contains('rightLowerArm: true')) painAreas.add(PainArea.arm);
-    if (bodyPartsString.contains('leftHand: true') || bodyPartsString.contains('rightHand: true')) painAreas.add(PainArea.hand);
-    if (bodyPartsString.contains('abdomen: true')) painAreas.add(PainArea.abdomen);
-    if (bodyPartsString.contains('vestibular: true')) painAreas.add(PainArea.waist); // vestibular를 waist로 매핑
-    if (bodyPartsString.contains('leftUpperLeg: true') || bodyPartsString.contains('rightUpperLeg: true') ||
-        bodyPartsString.contains('leftLowerLeg: true') || bodyPartsString.contains('rightLowerLeg: true')) painAreas.add(PainArea.leg);
-    if (bodyPartsString.contains('leftKnee: true') || bodyPartsString.contains('rightKnee: true')) painAreas.add(PainArea.knee);
-    if (bodyPartsString.contains('leftFoot: true') || bodyPartsString.contains('rightFoot: true')) painAreas.add(PainArea.foot);
-    
+    if (bodyPartsString.contains('leftShoulder: true') ||
+        bodyPartsString.contains('rightShoulder: true'))
+      painAreas.add(PainArea.shoulder);
+    if (bodyPartsString.contains('upperBody: true'))
+      painAreas.add(PainArea.chest);
+    if (bodyPartsString.contains('lowerBody: true'))
+      painAreas.add(PainArea.back);
+    if (bodyPartsString.contains('leftUpperArm: true') ||
+        bodyPartsString.contains('rightUpperArm: true') ||
+        bodyPartsString.contains('leftElbow: true') ||
+        bodyPartsString.contains('rightElbow: true') ||
+        bodyPartsString.contains('leftLowerArm: true') ||
+        bodyPartsString.contains('rightLowerArm: true'))
+      painAreas.add(PainArea.arm);
+    if (bodyPartsString.contains('leftHand: true') ||
+        bodyPartsString.contains('rightHand: true'))
+      painAreas.add(PainArea.hand);
+    if (bodyPartsString.contains('abdomen: true'))
+      painAreas.add(PainArea.abdomen);
+    if (bodyPartsString.contains('vestibular: true'))
+      painAreas.add(PainArea.waist); // vestibular를 waist로 매핑
+    if (bodyPartsString.contains('leftUpperLeg: true') ||
+        bodyPartsString.contains('rightUpperLeg: true') ||
+        bodyPartsString.contains('leftLowerLeg: true') ||
+        bodyPartsString.contains('rightLowerLeg: true'))
+      painAreas.add(PainArea.leg);
+    if (bodyPartsString.contains('leftKnee: true') ||
+        bodyPartsString.contains('rightKnee: true'))
+      painAreas.add(PainArea.knee);
+    if (bodyPartsString.contains('leftFoot: true') ||
+        bodyPartsString.contains('rightFoot: true'))
+      painAreas.add(PainArea.foot);
+
     // 중복 제거
     return painAreas.toSet().toList();
   }
@@ -100,12 +120,22 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   // 확인 다이얼로그 표시
   void showConfirmationDialog() {
     final painAreas = _getSelectedPainAreas();
-    
+
     if (painAreas.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('통증 부위를 선택해주세요.')),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '통증 부위를 선택해주세요.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
-      return;
     }
 
     final koreanPainAreas = painAreas.map(_getPainAreaInKorean).toList();
@@ -142,9 +172,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // 선택된 부위 표시
                 RichText(
                   textAlign: TextAlign.left,
@@ -161,9 +191,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                     ],
                   ),
                 ),
-                
+
                 const SizedBox(height: 32),
-                
+
                 // 기록하기 버튼
                 SizedBox(
                   width: double.infinity,
@@ -202,14 +232,25 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   void submitPainRecords() async {
     // 토큰 확인
     final token = await PrefsManager.getAccessToken();
-    
+
     if (token == null || token.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 필요합니다. 다시 로그인해주세요.')),
+        SnackBar(
+          content: const Text(
+            '로그인이 필요합니다. 다시 시도해주세요',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
       return;
     }
-    
+
     // 사용자 인증 확인
     try {
       await UserService.user();
@@ -220,11 +261,20 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
             children: [
               Icon(Icons.warning, color: Colors.white),
               SizedBox(width: 8),
-              Expanded(child: Text('인증이 만료되었습니다. 다시 로그인해주세요.')),
+              Expanded(
+                child: Text(
+                  '인증이 만료되었습니다. 다시 로그인해주세요.',
+                  style: TextStyle(color: AppColors.ongiOrange),
+                ),
+              ),
             ],
           ),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 5),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
           action: SnackBarAction(
             label: '로그인',
             textColor: Colors.white,
@@ -236,10 +286,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       );
       return;
     }
-    
+
     // 가족 정보 확인
     final familyInfo = await FamilyService.getFamilyInfo();
-    
+
     if (familyInfo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -272,21 +322,19 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       );
       return;
     }
-    
+
     final painAreas = _getSelectedPainAreas();
 
     // 로딩 상태 표시
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
+      builder: (context) => const Center(child: CircularProgressIndicator()),
     );
 
     try {
       final dateString = DateFormat('yyyy-MM-dd').format(selectedDate);
-      
+
       // 여러 부위가 선택된 경우 각각 개별 API 호출
       for (final painArea in painAreas) {
         final result = await PainService.addPainRecord(
@@ -294,32 +342,39 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           painArea: painArea.value,
           painLevel: PainLevel.midWeak.value,
         );
-        
+
         if (result == null) {
           throw Exception('통증 기록 저장에 실패했습니다.');
         }
       }
-      
+
       // 로딩 다이얼로그 닫기
       Navigator.of(context).pop();
-      
+
       // 성공 메시지
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('통증 기록이 저장되었습니다. (${painAreas.length}개 부위)'),
-          backgroundColor: AppColors.ongiOrange,
+          content: Text(
+            '통증 기록이 저장되었습니다. (${painAreas.length}개 부위)',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
         ),
       );
-      
+
       // 선택 초기화
       setState(() {
         _bodyParts = const BodyParts();
       });
-      
     } catch (e) {
       // 로딩 다이얼로그 닫기
       Navigator.of(context).pop();
-      
+
       // 에러 메시지
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -416,7 +471,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                       offset: const Offset(0, -10),
                       child: Container(
                         width: double.infinity,
-                        margin: const EdgeInsets.symmetric(horizontal: 80, vertical: 5),
+                        margin: const EdgeInsets.symmetric(
+                          horizontal: 80,
+                          vertical: 5,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
@@ -428,85 +486,99 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                               child: BodyPartSelector(
                                 bodyParts: _bodyParts,
                                 onSelectionUpdated: onBodyPartsSelected,
-                                side: isFrontView ? BodySide.front : BodySide.back,
+                                side: isFrontView
+                                    ? BodySide.front
+                                    : BodySide.back,
                                 selectedColor: AppColors.ongiOrange,
                                 unselectedColor: AppColors.ongiGrey,
                                 selectedOutlineColor: Colors.white,
                                 unselectedOutlineColor: Colors.white,
                               ),
                             ),
-                    //기록완료 버튼
-                    Positioned(
-                      right: 16,
-                      top: 16,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: hasSelectedParts ? AppColors.ongiOrange : Colors.grey[300],
-                          border: Border.all(
-                            color: hasSelectedParts ? AppColors.ongiOrange : Colors.grey[400]!,
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
-                          onTap: hasSelectedParts ? showConfirmationDialog : null,
-                          child: Center(
-                            child: Text(
-                              '완료',
-                              style: TextStyle(
-                                color: hasSelectedParts ? Colors.white : Colors.grey[600],
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
+                            //기록완료 버튼
+                            Positioned(
+                              right: 16,
+                              top: 16,
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: hasSelectedParts
+                                      ? AppColors.ongiOrange
+                                      : Colors.grey[300],
+                                  border: Border.all(
+                                    color: hasSelectedParts
+                                        ? AppColors.ongiOrange
+                                        : Colors.grey[400]!,
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: GestureDetector(
+                                  onTap: hasSelectedParts
+                                      ? showConfirmationDialog
+                                      : null,
+                                  child: Center(
+                                    child: Text(
+                                      '완료',
+                                      style: TextStyle(
+                                        color: hasSelectedParts
+                                            ? Colors.white
+                                            : Colors.grey[600],
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    // 앞뒤 전환 버튼 (오른쪽 하단)
+                            // 앞뒤 전환 버튼 (오른쪽 하단)
                             Positioned(
                               right: 16,
                               bottom: 16,
-                      child: Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: isFrontView ? Colors.white : AppColors.ongiOrange,
-                          border: Border.all(
-                            color: AppColors.ongiOrange,
-                            width: 2,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 4,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: GestureDetector(
-                          onTap: toggleView,
-                          child: Center(
-                            child: Text(
-                              isFrontView ? '앞' : '뒤',
-                              style: TextStyle(
-                                color: isFrontView ? AppColors.ongiOrange : Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: isFrontView
+                                      ? Colors.white
+                                      : AppColors.ongiOrange,
+                                  border: Border.all(
+                                    color: AppColors.ongiOrange,
+                                    width: 2,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                  ],
+                                ),
+                                child: GestureDetector(
+                                  onTap: toggleView,
+                                  child: Center(
+                                    child: Text(
+                                      isFrontView ? '앞' : '뒤',
+                                      style: TextStyle(
+                                        color: isFrontView
+                                            ? AppColors.ongiOrange
+                                            : Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ],

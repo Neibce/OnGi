@@ -131,6 +131,12 @@ class PillService {
 
   /// 오늘의 약 복용 예정 조회
   static Future<List<Map<String, dynamic>>> getTodayPillSchedule() async {
+    return getPillScheduleByDate(DateTime.now());
+  }
+
+  /// 특정 날짜의 약 복용 예정 조회
+  static Future<List<Map<String, dynamic>>> getPillScheduleByDate(
+      DateTime date) async {
     final accessToken = await PrefsManager.getAccessToken();
     final parentId = await PrefsManager.getUuid();
 
@@ -139,9 +145,8 @@ class PillService {
     }
 
     try {
-      final today = DateTime.now();
-      final dateStr =
-          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      final String dateStr =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
       final response = await http.get(
         Uri.parse('$baseUrl/pills?parentUuid=$parentId&date=$dateStr'),
@@ -157,6 +162,41 @@ class PillService {
       } else {
         throw Exception(
           '약 복용 일정을 불러오는 데에 실패했습니다. 상태 코드: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      return [];
+    }
+  }
+
+  /// 특정 날짜의 약 복용 기록 조회
+  static Future<List<Map<String, dynamic>>> getPillRecordsByDate(
+      DateTime date) async {
+    final accessToken = await PrefsManager.getAccessToken();
+    final parentId = await PrefsManager.getUuid();
+
+    if (accessToken == null) {
+      throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
+    }
+
+    try {
+      final String dateStr =
+          '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/pills/records?parentUuid=$parentId&date=$dateStr'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        return List<Map<String, dynamic>>.from(data);
+      } else {
+        throw Exception(
+          '약 복용 기록 조회에 실패했습니다. 상태 코드: ${response.statusCode}',
         );
       }
     } catch (e) {
