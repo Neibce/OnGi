@@ -80,32 +80,38 @@ class PhotoRemindPopup extends StatelessWidget {
                           ),
                           onPressed: () async {
                             try {
-                              // 팝업 닫기
                               Navigator.of(context).pop();
-                              
-                              // 알림 전송 시뮬레이션 (실제 API 호출로 대체 가능)
-                              await Future.delayed(const Duration(milliseconds: 500));
-                              
+
+                              // TODO: 실제 API 호출로 대체
+                              await Future.delayed(
+                                const Duration(milliseconds: 500),
+                              );
+
                               if (Navigator.of(context).mounted) {
-                                // 성공 메시지 표시
                                 ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      '가족들에게 알림을 보냈습니다! 📲',
+                                  SnackBar(
+                                    content: const Text(
+                                      '가족들에게 알림을 보냈습니다!',
                                       style: TextStyle(
                                         fontSize: 16,
                                         fontWeight: FontWeight.w500,
+                                        color: AppColors.ongiOrange,
                                       ),
                                     ),
-                                    backgroundColor: AppColors.ongiOrange,
-                                    duration: Duration(seconds: 3),
+                                    backgroundColor: Colors.white,
                                     behavior: SnackBarBehavior.floating,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    duration: const Duration(seconds: 2),
                                   ),
                                 );
-                                
+
                                 // 약간의 딜레이 후 홈화면으로 이동
-                                await Future.delayed(const Duration(milliseconds: 100));
-                                
+                                await Future.delayed(
+                                  const Duration(milliseconds: 100),
+                                );
+
                                 Navigator.of(context).push(
                                   MaterialPageRoute(
                                     builder: (context) => const HomeScreen(),

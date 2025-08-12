@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/services/pill_service.dart';
 import 'package:ongi/core/app_colors.dart';
+import 'package:ongi/widgets/date_carousel.dart';
 import 'add_pill_screen.dart';
 
 class PillHistoryScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
   bool _isLoading = true;
   List<Map<String, dynamic>> _todaySchedule = <Map<String, dynamic>>[];
   final Set<String> _takenKeys = <String>{};
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -28,9 +30,26 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
     });
     try {
       final List<Map<String, dynamic>> schedule =
-          await PillService.getTodayPillSchedule();
+          await PillService.getPillScheduleByDate(_selectedDate);
+      final Set<String> taken = <String>{};
+      for (final pill in schedule) {
+        final dynamic idRaw = pill['id'] ?? pill['pillId'] ?? pill['pillID'];
+        final String pillId = idRaw?.toString() ?? '';
+        if (pillId.isEmpty) continue;
+        final Map<String, dynamic> status =
+            Map<String, dynamic>.from(pill['dayIntakeStatus'] ?? {});
+        for (final String scheduled in status.keys) {
+          final String hhmm = scheduled.length >= 5
+              ? scheduled.substring(0, 5)
+              : scheduled;
+          taken.add('$pillId|$hhmm');
+        }
+      }
       setState(() {
         _todaySchedule = schedule;
+        _takenKeys
+          ..clear()
+          ..addAll(taken);
         _isLoading = false;
       });
     } catch (e) {
@@ -73,10 +92,10 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
       await PillService.addPillRecord(
         pillId: pillId,
         intakeTime: intakeTime,
-        intakeDate: DateTime.now(),
+        intakeDate: _selectedDate,
       );
       if (!mounted) return;
-      final String key = '$pillId|$intakeTime';
+      final String key = '$pillId|${_displayTime(intakeTime)}';
       setState(() {
         _takenKeys.add(key);
       });
@@ -176,7 +195,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
               ),
             ),
             Positioned(
-              top: circleSize * 0.3 + 40,
+              top: circleSize * 0.3 + 105,
               left: 0,
               right: 0,
               bottom: 0,
@@ -266,10 +285,13 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                SvgPicture.asset(
-                                  'assets/images/pill_item_icon.svg',
-                                  width: 38,
-                                  height: 38,
+                                Padding(
+                                  padding: EdgeInsets.only(top: 2),
+                                  child: SvgPicture.asset(
+                                    'assets/images/pill_item_icon.svg',
+                                    width: 38,
+                                    height: 38,
+                                  ),
                                 ),
                                 const SizedBox(width: 20),
                                 Expanded(
@@ -311,9 +333,10 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                                         spacing: 12,
                                         runSpacing: 8,
                                         children: times.map((timeStr) {
-                                          final String key = '$pillId|$timeStr';
-                                          final bool taken = _takenKeys
-                                              .contains(key);
+                                          final String key =
+                                              '$pillId|${_displayTime(timeStr)}';
+                                          final bool taken =
+                                              _takenKeys.contains(key);
                                           return GestureDetector(
                                             onTap: taken || pillId.isEmpty
                                                 ? null
@@ -363,6 +386,21 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                         },
                       ),
                     ),
+            ),
+            Positioned(
+              top: circleSize * 0.3 + 40,
+              left: 0,
+              right: 0,
+              child: DateCarousel(
+                onDateChanged: (date) {
+                  final DateTime justDate =
+                      DateTime(date.year, date.month, date.day);
+                  if (justDate.isAtSameMomentAs(_selectedDate)) return;
+                  _selectedDate = justDate;
+                  _takenKeys.clear();
+                  _fetchTodaySchedule();
+                },
+              ),
             ),
           ],
         ),

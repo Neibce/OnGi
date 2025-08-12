@@ -9,6 +9,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/screens/health/health_status_input_screen.dart';
 import 'package:ongi/services/exercise_service.dart';
 import 'package:ongi/services/step_service.dart';
+import 'package:ongi/services/pill_service.dart';
 
 class HealthHomeScreen extends StatefulWidget {
   const HealthHomeScreen({super.key});
@@ -23,7 +24,8 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
   int _todayExerciseHours = 0;
   int _todayExerciseMinutes = 0;
   bool _isLoadingExercise = true;
-  int _todaysteps = 0;
+  int _todaySteps = 0;
+  int _todayPillCount = 0;
 
   @override
   void initState() {
@@ -31,6 +33,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     _loadUserName();
     _loadTodayExerciseTime();
     _loadStep();
+    _loadPillCount();
   }
 
   Future<void> _loadUserName() async {
@@ -101,7 +104,9 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
       int todaySteps = 0;
       if (serverData != null) {
         final dynamic stepsField =
-            serverData['totalSteps'] ?? serverData['steps'] ?? serverData['total'];
+            serverData['totalSteps'] ??
+            serverData['steps'] ??
+            serverData['total'];
         if (stepsField is int) {
           todaySteps = stepsField;
         } else if (stepsField != null) {
@@ -111,16 +116,28 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
       if (mounted) {
         setState(() {
-          _todaysteps = todaySteps;
+          _todaySteps = todaySteps;
         });
       }
     } catch (e) {
       print('오늘 걸음 수 조회 실패: $e');
       if (mounted) {
         setState(() {
-          _todaysteps = 0;
+          _todaySteps = 0;
         });
       }
+    }
+  }
+
+  Future<void> _loadPillCount() async {
+    try {
+      int todayPillCount = (await PillService.getTodayPillSchedule()).length;
+      _todayPillCount = todayPillCount;
+    } catch (e) {
+      print('오늘 걸음 수 조회 실패: $e');
+      setState(() {
+        _todayPillCount = 0;
+      });
     }
   }
 
@@ -391,12 +408,12 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                             width: 150,
                           ),
                         ),
-                        const Align(
+                        Align(
                           alignment: Alignment.topRight,
                           child: Text.rich(
                             TextSpan(
                               children: [
-                                TextSpan(
+                                const TextSpan(
                                   text: '오늘 ',
                                   style: TextStyle(
                                     fontSize: 25,
@@ -406,15 +423,15 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: '2개의 약',
-                                  style: TextStyle(
+                                  text: '$_todayPillCount개의 약',
+                                  style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.w600,
                                     height: 1.2,
                                     color: AppColors.ongiOrange,
                                   ),
                                 ),
-                                TextSpan(
+                                const TextSpan(
                                   text: '을\n더 섭취하셔야 해요!',
                                   style: TextStyle(
                                     fontSize: 25,
@@ -542,7 +559,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: '$_todaysteps',
+                                  text: '$_todaySteps',
                                   style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.w600,

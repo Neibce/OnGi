@@ -21,7 +21,7 @@ class DateCarousel extends StatefulWidget {
 class _DateCarouselState extends State<DateCarousel> {
   static const int _kInitialPage = 5000;
   late final PageController _controller;
-  late final DateTime _anchorDate;
+  late DateTime _anchorDate;
   int _currentIndex = _kInitialPage;
   bool _isUpdating = false;
 
@@ -44,6 +44,9 @@ class _DateCarouselState extends State<DateCarousel> {
     }
     super.dispose();
   }
+
+  // didUpdateWidget 제거: 부모에서 initialDate를 변경하지 않도록 하여
+  // 캐러셀 재앵커링에 따른 반복 재빌드/겹침을 방지
 
   DateTime _dateFromIndex(int index) {
     final int offset = index - _kInitialPage;

@@ -39,12 +39,34 @@ class _FamilycodeCreateScreenState extends State<FamilycodeCreateScreen> {
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('코드 생성에 실패했습니다.')),
+          SnackBar(
+            content: const Text(
+              '코드 생성에 실패하였습니다..',
+              style: TextStyle(color: AppColors.ongiOrange),
+            ),
+            backgroundColor: Colors.white,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('코드 생성 실패: $e')),
+        SnackBar(
+          content: Text(
+            '코드 생성 실패 : $e',
+            style: const TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
       );
     }
   }
@@ -63,7 +85,7 @@ class _FamilycodeCreateScreenState extends State<FamilycodeCreateScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
                   5,
-                      (index) => Container(
+                  (index) => Container(
                     width: 58,
                     height: 7.5,
                     margin: const EdgeInsets.symmetric(horizontal: 6),
@@ -119,8 +141,10 @@ class _FamilycodeCreateScreenState extends State<FamilycodeCreateScreen> {
                 decoration: InputDecoration(
                   hintText: 'FAMILYCODE',
                   hintStyle: const TextStyle(color: Colors.grey),
-                  contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 13,
+                  ),
                   filled: true,
                   fillColor: Colors.transparent,
                   enabledBorder: OutlineInputBorder(
