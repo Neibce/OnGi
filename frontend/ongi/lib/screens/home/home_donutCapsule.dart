@@ -54,17 +54,16 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
         familyCode,
         token: token,
       );
-      final today = DateTime.now();
-      final todayStr =
-          '${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-      final match = dailyTemps.firstWhere(
-        (e) => e['date'] == todayStr,
-        orElse: () => <String, dynamic>{},
-      );
+      double latestTotalTemperature;
+      if (dailyTemps.isEmpty) {
+        latestTotalTemperature = 36.5;
+      } else {
+        final lastEntry = dailyTemps.last;
+        latestTotalTemperature =
+            ((lastEntry['totalTemperature'] as num?)?.toDouble()) ?? 36.5;
+      }
       setState(() {
-        todayTemperature = match.isNotEmpty
-            ? (match['totalTemperature'] ?? 36.5)
-            : 36.5;
+        todayTemperature = latestTotalTemperature;
         isLoading = false;
       });
     } catch (e) {
