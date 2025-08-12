@@ -19,6 +19,8 @@ class MaumLogRecord {
   final String? location;
   final String? comment;
   final List<String> emotions; // Emotion 리스트
+  final String? uploaderUuid; // 업로더 UUID 추가
+  final String? uploaderName; // 업로더 이름 추가
 
   MaumLogRecord({
     required this.id,
@@ -27,6 +29,8 @@ class MaumLogRecord {
     this.location,
     this.comment,
     required this.emotions,
+    this.uploaderUuid,
+    this.uploaderName,
   });
 
   factory MaumLogRecord.fromJson(Map<String, dynamic> json) {
@@ -37,6 +41,8 @@ class MaumLogRecord {
       location: json['location'],
       comment: json['comment'],
       emotions: List<String>.from(json['emotions'] ?? []),
+      uploaderUuid: json['uploaderUuid'],
+      uploaderName: json['uploaderName'],
     );
   }
 }
