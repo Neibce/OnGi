@@ -365,8 +365,12 @@ class _RewardScreenState extends State<RewardScreen> {
                                           ),
                                         ),
                                         const SizedBox(height: 30),
-                                        CustomLineChart(current: availableTempValue != null
-                                            ? availableTempValue! + 36.5 : 0, max: 300),
+                                        CustomLineChart(
+                                          current: availableTempValue != null
+                                              ? availableTempValue!
+                                              : 0,
+                                          max: 300,
+                                        ),
                                       ],
                                     ),
                                   ),
