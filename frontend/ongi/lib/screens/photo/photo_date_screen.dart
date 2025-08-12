@@ -5,9 +5,6 @@ import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/models/maum_log.dart';
 import 'package:ongi/services/maum_log_service.dart';
 import 'dart:ui'; // Added for ImageFilter
-import 'package:ongi/services/maumlog_service.dart';
-import 'package:ongi/models/maumlog.dart';
-import 'package:ongi/utils/prefs_manager.dart';
 
 class PhotoDateScreen extends StatefulWidget {
   final String date;
@@ -72,54 +69,51 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AppLightBackground(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 130),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 40),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 타이틀
-                    const Text(
-                      '우리가족의',
-                      style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w200,
-                        height: 1.2,
-                        color: AppColors.ongiOrange,
-                      ),
-                    ),
-                    const Text(
-                      '마음 기록',
-                      style: TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w800,
-                        height: 1.2,
-                        color: AppColors.ongiOrange,
-                      ),
-                    ),
-                    const SizedBox(height: 45),
-                    // 사진 카드 PageView
-                    Center(
-                      child: SizedBox(
-                        width: cardWidth,
-                        height: cardHeight,
-                        child: _buildContent(cardWidth, cardHeight),
-                      ),
-                    ),
-                    // 감정 태그 버튼
-                    _buildEmotionTags(),
-                    const SizedBox(height: 16),
-                    // 페이지인디케이터
-                    _buildPageIndicators(),
-                  ],
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 130),
+                // 타이틀
+                const Text(
+                  '우리가족의',
+                  style: TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.w200,
+                    height: 1.2,
+                    color: AppColors.ongiOrange,
+                  ),
                 ),
-              ),
+                const Text(
+                  '마음 기록',
+                  style: TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                    color: AppColors.ongiOrange,
+                  ),
+                ),
+                const SizedBox(height: 45),
+                // 사진 카드 PageView
+                Center(
+                  child: SizedBox(
+                    width: cardWidth,
+                    height: cardHeight,
+                    child: _buildContent(cardWidth, cardHeight),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // 감정 태그 버튼
+                _buildEmotionTags(),
+                const SizedBox(height: 16),
+                // 페이지인디케이터
+                _buildPageIndicators(),
+                const SizedBox(height: 40), // 하단 여백
+              ],
             ),
-          ],
+          ),
         ),
       ),
     );
@@ -218,50 +212,50 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                 borderRadius: BorderRadius.circular(32),
                 child: isActive
                     ? Image.network(
-                        maumLog.frontPresignedUrl,
-                        width: cardWidth,
-                        height: cardHeight,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: cardWidth,
-                            height: cardHeight,
-                            color: Colors.grey[300],
-                            child: const Icon(
-                              Icons.broken_image,
-                              color: Colors.grey,
-                              size: 48,
-                            ),
-                          );
-                        },
-                      )
-                    : ImageFiltered(
-                        imageFilter: ImageFilter.blur(
-                          sigmaX: 8,
-                          sigmaY: 8,
-                        ),
-                        child: Opacity(
-                          opacity: 0.7,
-                          child: Image.network(
-                            maumLog.frontPresignedUrl,
-                            width: cardWidth,
-                            height: cardHeight,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                width: cardWidth,
-                                height: cardHeight,
-                                color: Colors.grey[300],
-                                child: const Icon(
-                                  Icons.broken_image,
-                                  color: Colors.grey,
-                                  size: 48,
-                                ),
-                              );
-                            },
-                          ),
-                        ),
+                  maumLog.frontPresignedUrl,
+                  width: cardWidth,
+                  height: cardHeight,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: cardWidth,
+                      height: cardHeight,
+                      color: Colors.grey[300],
+                      child: const Icon(
+                        Icons.broken_image,
+                        color: Colors.grey,
+                        size: 48,
                       ),
+                    );
+                  },
+                )
+                    : ImageFiltered(
+                  imageFilter: ImageFilter.blur(
+                    sigmaX: 8,
+                    sigmaY: 8,
+                  ),
+                  child: Opacity(
+                    opacity: 0.7,
+                    child: Image.network(
+                      maumLog.frontPresignedUrl,
+                      width: cardWidth,
+                      height: cardHeight,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          width: cardWidth,
+                          height: cardHeight,
+                          color: Colors.grey[300],
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: Colors.grey,
+                            size: 48,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
               // 좌상단 서브(프로필) 사진
               Positioned(
@@ -399,14 +393,30 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
       return const SizedBox.shrink();
     }
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        for (int i = 0; i < emotions.length; i++) ...[
-          _buildTagButton(emotions[i], AppColors.ongiOrange),
-          if (i != emotions.length - 1) const SizedBox(width: 6),
-        ],
-      ],
+    List<Widget> rows = [];
+    for (int i = 0; i < emotions.length; i += 4) {
+      final rowEmotions = emotions.sublist(i, i + 4 > emotions.length ? emotions.length : i + 4);
+      
+      rows.add(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            for (int j = 0; j < rowEmotions.length; j++) ...[
+              _buildTagButton(rowEmotions[j], AppColors.ongiOrange),
+              if (j != rowEmotions.length - 1) const SizedBox(width: 6),
+            ],
+          ],
+        ),
+      );
+      
+      // 마지막 행이 아니면 세로 간격 추가
+      if (i + 4 < emotions.length) {
+        rows.add(const SizedBox(height: 2));
+      }
+    }
+
+    return Column(
+      children: rows,
     );
   }
 

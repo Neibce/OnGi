@@ -9,14 +9,15 @@ import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 
 class BottomNavScreen extends StatefulWidget {
-  const BottomNavScreen({super.key});
+  final int initialIndex;
+  const BottomNavScreen({super.key, this.initialIndex = 0});
 
   @override
   State<BottomNavScreen> createState() => _BottomNavScreenState();
 }
 
 class _BottomNavScreenState extends State<BottomNavScreen> {
-  int _currentIndex = 0;
+  late int _currentIndex;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -24,6 +25,12 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     const PhotoCalendarScreen(),
     const ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   void _onTabTapped(int index) {
     setState(() {

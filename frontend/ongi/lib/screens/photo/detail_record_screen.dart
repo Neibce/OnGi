@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/services/maumlog_service.dart';
+import 'package:ongi/services/maum_log_service.dart';
 import 'package:ongi/models/maumlog.dart';
 import 'package:ongi/utils/prefs_manager.dart';
+import 'package:ongi/screens/photo/photo_remind_popup.dart';
+import 'package:ongi/screens/photo/photo_update_popup.dart';
 
 class DetailRecordScreen extends StatefulWidget {
   final String backImagePath;
@@ -36,6 +39,72 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
   Future<List<Emotion>> fetchEmotions() async {
     final service = MaumlogService(baseUrl: _emotionApiBaseUrl);
     return await service.fetchEmotions();
+  }
+
+  Future<void> _checkFamilyPhotoStatusAndShowPopup() async {
+    try {
+      // 오늘 날짜 형식으로
+      final today = widget.date ?? DateTime.now();
+      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+      
+      // 현재 사용자 정보 가져오기
+      final userInfo = await PrefsManager.getUserInfo();
+      final currentUserName = userInfo['name'] ?? '';
+      
+      // 가족들의 마음 기록 상태 확인
+      final maumLogResponse = await MaumLogService.getMaumLog(todayStr);
+      
+      if (!mounted) return;
+      
+      // 현재 사용자 제외한 다른 가족이 사진을 업로드했는지 확인
+      final familyPhotos = maumLogResponse.maumLogDtos.where(
+        (log) => log.uploader != currentUserName
+      ).toList();
+      
+      final hasFamilyPhotos = familyPhotos.isNotEmpty;
+      
+      if (hasFamilyPhotos) {
+        // 가족들이 사진을 올렸으면 photo_update_popup 보여주기
+        await _showPhotoUpdatePopup();
+      } else {
+        // 가족들이 사진을 올리지 않았으면 photo_remind_popup 보여주기
+        await _showPhotoRemindPopup();
+      }
+      
+      // 팝업이 닫힌 후 화면 종료
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
+    } catch (e) {
+      print('가족 사진 상태 확인 중 오류: $e');
+      // 오류 발생 시 기본 완료 메시지 표시
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('기록이 저장되었습니다!')),
+        );
+        Navigator.of(context).pop();
+      }
+    }
+  }
+
+  Future<void> _showPhotoUpdatePopup() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const PhotoUpdatePopup();
+      },
+    );
+  }
+
+  Future<void> _showPhotoRemindPopup() async {
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return const PhotoRemindPopup();
+      },
+    );
   }
 
   @override
@@ -352,10 +421,9 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           );
 
                           if (!mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('기록이 저장되었습니다!')),
-                          );
-                          Navigator.of(context).pop();
+                          
+                          // 기록 저장 후 가족들의 사진 업로드 상태 확인
+                          await _checkFamilyPhotoStatusAndShowPopup();
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('업로드 실패: $e')),
