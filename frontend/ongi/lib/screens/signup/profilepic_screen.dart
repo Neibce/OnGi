@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/signup/mode_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,7 +17,7 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
   String? _selectedAsset;
 
   Widget _buildSelectableIcon(String assetPath, {double size = 90}) {
-    bool isSelected = _selectedAsset == assetPath;
+    final bool isSelected = _selectedAsset == assetPath;
 
     return GestureDetector(
       onTap: () {
@@ -24,18 +26,41 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
         });
       },
       child: Center(
-        child: Container(
+        child: SizedBox(
           width: size,
           height: size,
-          decoration: BoxDecoration(
-            border: Border.all(
-              color: isSelected ? AppColors.ongiOrange : Colors.transparent,
-              width: 2,
-            ),
-            borderRadius: BorderRadius.circular(100),
+          child: Stack(
+            children: [
+              // 이미지 (원형 클리핑)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(size / 2),
+                child: Image.asset(
+                  assetPath,
+                  width: size,
+                  height: size,
+                  fit: BoxFit.contain, // 원래 쓰던 contain 유지
+                ),
+              ),
+
+              if (isSelected)
+                Positioned(
+                  right: -5,
+                  bottom: 0,
+                  child: AnimatedScale(
+                    scale: 1,
+                    duration: const Duration(milliseconds: 180),
+                    child: Container(
+                      height: 42,
+                      padding: EdgeInsets.all(size * 0.08),
+                      child: SvgPicture.asset(
+                        'assets/images/users/pfp_check_icon.svg',
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Image.asset(assetPath, fit: BoxFit.contain),
         ),
       ),
     );
@@ -106,15 +131,15 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
                 children: <Widget>[
                   _buildSelectableIcon(
                     'assets/images/users/mom_icon.png',
-                    size: 98,
+                    size: 107,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/dad_icon.png',
-                    size: 105,
+                    size: 110,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/daughter_icon.png',
-                    size: 120,
+                    size: 103,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/son_icon.png',
@@ -126,11 +151,11 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/black_man_icon.png',
-                    size: 89,
+                    size: 91,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/baby_icon.png',
-                    size: 88,
+                    size: 96,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/dog_icon.png',
@@ -138,7 +163,7 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/robot_icon.png',
-                    size: 88,
+                    size: 98,
                   ),
                 ],
               ),
