@@ -35,7 +35,6 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  flutter_native_splash: ^2.4.1
 
 flutter:
   uses-material-design: true
@@ -50,6 +49,8 @@ flutter:
     - assets/images/nav_Mypage.svg
     - assets/images/pill_history_title_logo.png
     - assets/images/pill_item_icon.svg
+    - assets/images/splash_icon.svg
+    - assets/images/splash_icon.png
     - assets/images/add_icon.svg
     - assets/images/ruler_icon.svg
     - assets/images/parent_exercise_icon.png
@@ -107,9 +108,3 @@ flutter:
           weight: 800
         - asset: assets/fonts/Pretendard-Black.ttf
           weight: 900
-
-flutter_native_splash:
-  color: "#FFFFFF"
-  image: assets/images/logo.png
-  color_dark: "#FFFFFF"
-  image_dark: assets/images/logo.png
