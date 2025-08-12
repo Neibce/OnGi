@@ -191,6 +191,9 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
               firstDay: DateTime.utc(2024, 1, 1),
               lastDay: DateTime.utc(2030, 1, 1),
               focusedDay: _focusedDay,
+              // 달력 내부에서는 가로 스와이프(월 전환)만 허용하고,
+              // 세로 드래그는 부모 스크롤뷰로 전달되도록 제한
+              availableGestures: AvailableGestures.horizontalSwipe,
               rowHeight: 90,
               headerStyle: const HeaderStyle(
                 formatButtonVisible: false,
