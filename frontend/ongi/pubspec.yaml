@@ -68,6 +68,7 @@ flutter:
     - assets/images/all_pfp_icons.png
     - assets/images/photobook_icon.png
     - assets/images/reward_products/
+    - assets/images/users/
     - assets/images/close_icon_black.svg
     - assets/images/close_icon_white.svg
     - assets/images/back_icon_black.svg
