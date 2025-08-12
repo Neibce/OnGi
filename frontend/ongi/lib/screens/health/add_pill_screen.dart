@@ -136,7 +136,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
       case '취침 전':
         return 'BEFORE_SLEEP';
       case '상관없음':
-        return 'NONE';
+        return 'ANYTIME';
       default:
         return 'ANYTIME';
     }
