@@ -25,8 +25,8 @@ class DayCircles extends StatelessWidget {
           children: [
             _buildCircle(appColors[3], size - overlap, size - overlap, size),
             _buildCircle(appColors[2], 0, size - overlap, size),
-            _buildCircle(appColors[0], 0, 0, size),
             _buildCircle(appColors[1], size - overlap, 0, size),
+            _buildCircle(appColors[0], 0, 0, size),
           ],
         ),
       ),
