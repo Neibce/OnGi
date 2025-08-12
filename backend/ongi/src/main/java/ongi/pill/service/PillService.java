@@ -75,11 +75,14 @@ public class PillService {
             throw new IllegalArgumentException("해당 시간에 복용할 수 없는 약입니다.");
         }
 
-        PillIntakeRecord pillIntakeRecord = PillIntakeRecord.builder()
-                .pill(pill)
-                .intakeTime(request.intakeTime())
-                .intakeDate(request.intakeDate())
-                .build();
+        PillIntakeRecord pillIntakeRecord =
+                pillIntakeRecordRepository.findByPillAndIntakeDateAndIntakeTime(pill,
+                                request.intakeDate(), request.intakeTime())
+                        .orElse(PillIntakeRecord.builder()
+                                        .pill(pill)
+                                        .intakeTime(request.intakeTime())
+                                        .intakeDate(request.intakeDate())
+                                        .build());
 
         pillIntakeRecordRepository.save(pillIntakeRecord);
     }

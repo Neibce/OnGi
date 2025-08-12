@@ -7,6 +7,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,9 @@ import ongi.common.entity.BaseEntity;
 @AllArgsConstructor
 @Builder
 @Getter
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"pill_id", "intake_date", "intake_time"})
+})
 public class PillIntakeRecord extends BaseEntity {
 
     @Id

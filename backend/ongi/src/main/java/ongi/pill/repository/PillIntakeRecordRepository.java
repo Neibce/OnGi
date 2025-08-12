@@ -1,5 +1,7 @@
 package ongi.pill.repository;
 
+import java.time.LocalTime;
+import java.util.Optional;
 import ongi.pill.entity.Pill;
 import ongi.pill.entity.PillIntakeRecord;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,4 +14,5 @@ import java.util.List;
 public interface PillIntakeRecordRepository extends JpaRepository<PillIntakeRecord, Long> {
 
     List<PillIntakeRecord> findByPillInAndIntakeDate(List<Pill> pills, LocalDate intakeDate);
+    Optional<PillIntakeRecord> findByPillAndIntakeDateAndIntakeTime(Pill pill, LocalDate intakeDate, LocalTime intakeTime);
 }

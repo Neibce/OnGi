@@ -20,8 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import software.amazon.awssdk.http.HttpStatusCode;
-import ongi.maum_log.dto.MaumLogResponseDto;
-import java.util.List;
 
 @RestController
 @RequestMapping("/maum-log")
