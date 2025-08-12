@@ -48,6 +48,23 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
     return raw;
   }
 
+  String _mapIntakeDetailToKorean(String label) {
+    switch (label) {
+      case 'BEFORE_MEAL_30MIN':
+        return '식전 30분';
+      case 'AFTER_MEAL_30MIN':
+        return '식후 30분 이내';
+      case 'AFTER_MEAL_60MIN':
+        return '식후 1시간';
+      case 'BEFORE_SLEEP':
+        return '취침 전';
+      case 'ANYTIME':
+        return '상관없음';
+      default:
+        return '';
+    }
+  }
+
   Future<void> _addRecord({
     required String pillId,
     required String intakeTime,
@@ -180,7 +197,9 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                                   MaterialPageRoute(
                                     builder: (context) => const AddPillScreen(),
                                   ),
-                                );
+                                ).then((_) {
+                                  _fetchTodaySchedule();
+                                });
                               },
                               child: Container(
                                 margin: const EdgeInsets.symmetric(
@@ -221,8 +240,10 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                           final String pillId = idRaw?.toString() ?? '';
                           final String pillName = (pill['name'] ?? '약물')
                               .toString();
-                          final String intakeDetail =
-                              (pill['intakeDetail'] ?? '').toString();
+                          final String intakeDetail = _mapIntakeDetailToKorean(
+                            pill['intakeDetail'],
+                          ).toString();
+                          // (pill['intakeDetail'] ?? '').toString();
                           final List<dynamic> timesDyn =
                               pill['intakeTimes'] as List<dynamic>? ??
                               <dynamic>[];
@@ -303,8 +324,8 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                                             child: Container(
                                               padding:
                                                   const EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 10,
+                                                    horizontal: 27,
+                                                    vertical: 6,
                                                   ),
                                               decoration: BoxDecoration(
                                                 color: taken
@@ -322,21 +343,10 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                                                       color: taken
                                                           ? Colors.black
                                                           : Colors.white,
-                                                      fontSize: 14,
+                                                      fontSize: 11,
                                                       fontWeight:
-                                                          FontWeight.w700,
+                                                          FontWeight.w600,
                                                     ),
-                                                  ),
-                                                  const SizedBox(width: 8),
-                                                  Icon(
-                                                    taken
-                                                        ? Icons.check
-                                                        : Icons
-                                                              .medication_outlined,
-                                                    size: 18,
-                                                    color: taken
-                                                        ? Colors.black
-                                                        : Colors.white,
                                                   ),
                                                 ],
                                               ),
