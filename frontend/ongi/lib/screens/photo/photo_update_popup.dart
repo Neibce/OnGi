@@ -10,7 +10,7 @@ class PhotoUpdatePopup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: AppColors.ongiOrange,
       body: AppOrangeBackground(
         child: Stack(
           children: [

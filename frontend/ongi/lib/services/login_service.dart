@@ -24,6 +24,12 @@ class LoginService {
       await PrefsManager.saveAccessToken(responseJson["accessToken"]);
       await PrefsManager.saveUserName(responseJson["userInfo"]["name"]);
       await PrefsManager.saveUuid(responseJson["userInfo"]["uuid"]);
+      
+      // isParent 정보도 저장
+      if (responseJson["userInfo"]["isParent"] != null) {
+        await PrefsManager.saveIsParent(responseJson["userInfo"]["isParent"]);
+      }
+      
       return responseJson;
     } else {
       throw Exception('로그인 실패: ${response.statusCode} ${response.body}');

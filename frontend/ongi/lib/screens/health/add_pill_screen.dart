@@ -7,7 +7,12 @@ import 'package:ongi/services/pill_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
 class AddPillScreen extends StatefulWidget {
-  const AddPillScreen({super.key});
+  final String? targetParentId;
+  
+  const AddPillScreen({
+    super.key,
+    this.targetParentId,
+  });
 
   @override
   State<AddPillScreen> createState() => _AddPillScreenState();
@@ -199,7 +204,12 @@ class _AddPillScreenState extends State<AddPillScreen> {
       return;
     }
 
-    final String? parentUuid = await PrefsManager.getUuid();
+    // 전달받은 targetParentId가 있으면 사용, 없으면 본인 UUID 사용
+    String? parentUuid = widget.targetParentId;
+    if (parentUuid == null) {
+      parentUuid = await PrefsManager.getUuid();
+    }
+    
     if (parentUuid == null || parentUuid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

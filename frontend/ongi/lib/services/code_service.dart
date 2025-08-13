@@ -26,7 +26,9 @@ class CodeService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return jsonDecode(response.body);
+        var json = jsonDecode(response.body);
+        PrefsManager.saveFamilyCodeAndName(json['code'], json['name']);
+        return json;
       } else {
         throw Exception('회원가입에 실패했습니다. 상태 코드: ${response.statusCode}');
       }
