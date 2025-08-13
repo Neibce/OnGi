@@ -79,12 +79,29 @@ public class PillService {
                 pillIntakeRecordRepository.findByPillAndIntakeDateAndIntakeTime(pill,
                                 request.intakeDate(), request.intakeTime())
                         .orElse(PillIntakeRecord.builder()
-                                        .pill(pill)
-                                        .intakeTime(request.intakeTime())
-                                        .intakeDate(request.intakeDate())
-                                        .build());
+                                .pill(pill)
+                                .intakeTime(request.intakeTime())
+                                .intakeDate(request.intakeDate())
+                                .build());
 
         pillIntakeRecordRepository.save(pillIntakeRecord);
+    }
+
+    @Transactional
+    public void deletePillIntake(User user, PillIntakeRecordRequest request) {
+        if (!user.getIsParent()) {
+            throw new IllegalArgumentException("해당 사용자는 부모가 아닙니다.");
+        }
+
+        Pill pill = pillRepository.findById(request.pillId())
+                .orElseThrow(() -> new EntityNotFoundException("약 정보를 찾을 수 없습니다."));
+
+        PillIntakeRecord pillIntakeRecord =
+                pillIntakeRecordRepository.findByPillAndIntakeDateAndIntakeTime(pill,
+                                request.intakeDate(), request.intakeTime())
+                        .orElseThrow(() -> new EntityNotFoundException("복용 기록을 찾을 수 없습니다."));
+
+        pillIntakeRecordRepository.delete(pillIntakeRecord);
     }
 
     public List<PillInfoWithIntakeStatus> getFamilyPills(User user, UUID parentUuid,
