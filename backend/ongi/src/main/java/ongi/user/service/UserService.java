@@ -23,7 +23,8 @@ public class UserService {
     @Transactional
     public void updateFcmToken(User user, FcmTokenUpdateRequestDto requestDto) {
         UserFcmToken userFcmToken = userFcmTokenRepository.findByUser(user).orElse(
-                UserFcmToken.builder().user(user).token(requestDto.fcmToken()).build());
+                UserFcmToken.builder().user(user).build());
+        userFcmToken.setToken(requestDto.fcmToken());
 
         userFcmTokenRepository.save(userFcmToken);
     }
