@@ -4,9 +4,10 @@ import 'package:ongi/screens/add_record_screen.dart';
 import 'package:ongi/screens/home/home_screen.dart';
 import 'package:ongi/screens/health/health_home_screen.dart';
 import 'package:ongi/screens/photo/photo_calendar_screen.dart';
-import 'package:ongi/screens/photo/photo_date_screen.dart';
 import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
+import 'package:ongi/services/maum_log_service.dart';
+import 'package:intl/intl.dart';
 
 class BottomNavScreen extends StatefulWidget {
   final int initialIndex;
@@ -36,6 +37,67 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  Future<void> _onAddRecordTapped() async {
+    try {
+      final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+
+      final maumLogResponse = await MaumLogService.getMaumLog(today);
+
+      if (maumLogResponse.hasUploadedOwn) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '오늘의 마음 기록 완료!',
+                    style: TextStyle(
+                      color: AppColors.ongiOrange,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    '같은 날에는 한 번만 기록할 수 있어요.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                      color: Colors.black45,
+                    ),
+                  ),
+                ],
+              ),
+              backgroundColor: Colors.white,
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddRecordScreen()),
+          );
+        }
+      }
+    } catch (e) {
+      print('마음로그 확인 중 에러: $e');
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AddRecordScreen()),
+        );
+      }
+    }
   }
 
   @override
@@ -83,14 +145,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             '건강 기록',
           ),
           GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const AddRecordScreen(),
-                ),
-              );
-            },
+            onTap: () => _onAddRecordTapped(),
             child: Container(
               width: 56,
               height: 56,

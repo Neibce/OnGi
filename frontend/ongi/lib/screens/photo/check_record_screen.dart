@@ -7,17 +7,25 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:ongi/screens/photo/detail_record_screen.dart';
 
+import '../home/home_screen.dart';
+
 class CheckRecordScreen extends StatefulWidget {
   final String backImagePath;
   final String? frontImagePath;
   final String? address;
-  const CheckRecordScreen({super.key, required this.backImagePath, this.frontImagePath, this.address});
+  const CheckRecordScreen({
+    super.key,
+    required this.backImagePath,
+    this.frontImagePath,
+    this.address,
+  });
 
   @override
   State<CheckRecordScreen> createState() => CheckRecordScreenState();
 }
 
-class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProviderStateMixin {
+class CheckRecordScreenState extends State<CheckRecordScreen>
+    with TickerProviderStateMixin {
   late CameraController controller;
   List<CameraDescription>? cameras;
   bool isInitialized = false;
@@ -115,29 +123,63 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
   }
 
   Future<void> _fetchLocation() async {
-    setState(() { _isLocating = true; });
+    setState(() {
+      _isLocating = true;
+    });
     try {
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
       }
-      if (permission == LocationPermission.deniedForever || permission == LocationPermission.denied) {
-        setState(() { _address = '위치 권한이 필요합니다.'; _isLocating = false; });
+      if (permission == LocationPermission.deniedForever ||
+          permission == LocationPermission.denied) {
+        setState(() {
+          _address = '위치 권한이 필요합니다.';
+          _isLocating = false;
+        });
         return;
       }
-      Position pos = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-      List<Placemark> placemarks = await placemarkFromCoordinates(pos.latitude, pos.longitude);
+      Position pos = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        pos.latitude,
+        pos.longitude,
+      );
       if (placemarks.isNotEmpty) {
         final p = placemarks.first;
         setState(() {
-          _address = '${p.administrativeArea ?? ''} ${p.locality ?? ''} ${p.subLocality ?? ''}'.trim();
+          List<String> addressParts = [];
+          
+          if (p.administrativeArea != null && p.administrativeArea!.isNotEmpty) {
+            addressParts.add(p.administrativeArea!);
+          }
+          
+          // locality가 administrativeArea와 다를 때만 추가
+          if (p.locality != null && 
+              p.locality!.isNotEmpty && 
+              p.locality != p.administrativeArea) {
+            addressParts.add(p.locality!);
+          }
+        
+          if (p.subLocality != null && p.subLocality!.isNotEmpty) {
+            addressParts.add(p.subLocality!);
+          }
+          
+          _address = addressParts.join(' ').trim();
           _isLocating = false;
         });
       } else {
-        setState(() { _address = '주소를 찾을 수 없습니다.'; _isLocating = false; });
+        setState(() {
+          _address = '주소를 찾을 수 없습니다.';
+          _isLocating = false;
+        });
       }
     } catch (e) {
-      setState(() { _address = '위치 정보를 불러올 수 없습니다.'; _isLocating = false; });
+      setState(() {
+        _address = '위치 정보를 불러올 수 없습니다.';
+        _isLocating = false;
+      });
     }
   }
 
@@ -263,7 +305,9 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                                 alignment: Alignment.bottomCenter,
                                 child: Padding(
                                   padding: EdgeInsets.only(bottom: 12),
-                                  child: CircularProgressIndicator(color: AppColors.ongiOrange),
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.ongiOrange,
+                                  ),
                                 ),
                               )
                             else if (widget.address != null)
@@ -272,7 +316,10 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                                 child: Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(20),
@@ -287,7 +334,11 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.place, color: AppColors.ongiOrange, size: 18),
+                                        Icon(
+                                          Icons.place,
+                                          color: AppColors.ongiOrange,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           widget.address!,
@@ -318,7 +369,7 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.ongiOrange,
                         foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -339,16 +390,14 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                       child: const Text(
                         '등록하기',
                         style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400,
                           fontFamily: 'Pretendard',
                         ),
                       ),
                     ),
                   ),
                 ),
-
-
                 const Spacer(),
               ],
             ),
@@ -362,7 +411,10 @@ class CheckRecordScreenState extends State<CheckRecordScreen> with TickerProvide
                 width: 28,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => HomeScreen()),
+                );
               },
               iconSize: 36,
             ),

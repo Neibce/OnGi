@@ -13,14 +13,21 @@ class DetailRecordScreen extends StatefulWidget {
   final String? frontImagePath;
   final String? address;
   final DateTime? date;
-  const DetailRecordScreen({super.key, required this.backImagePath, this.frontImagePath, this.address, this.date});
+  const DetailRecordScreen({
+    super.key,
+    required this.backImagePath,
+    this.frontImagePath,
+    this.address,
+    this.date,
+  });
 
   @override
   State<DetailRecordScreen> createState() => _DetailRecordScreenState();
 }
 
 class _DetailRecordScreenState extends State<DetailRecordScreen> {
-  static const String _emotionApiBaseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
+  static const String _emotionApiBaseUrl =
+      'https://ongi-1049536928483.asia-northeast3.run.app';
   late Future<List<Emotion>> _emotionsFuture;
   final Set<String> _selectedEmotionCodes = {}; // description 대신 code를 저장
   final TextEditingController _commentController = TextEditingController();
@@ -45,24 +52,25 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
     try {
       // 오늘 날짜 형식으로
       final today = widget.date ?? DateTime.now();
-      final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
-      
+      final todayStr =
+          '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+
       // 현재 사용자 정보 가져오기
       final userInfo = await PrefsManager.getUserInfo();
       final currentUserName = userInfo['name'] ?? '';
-      
+
       // 가족들의 마음 기록 상태 확인
       final maumLogResponse = await MaumLogService.getMaumLog(todayStr);
-      
+
       if (!mounted) return;
-      
+
       // 현재 사용자 제외한 다른 가족이 사진을 업로드했는지 확인
-      final familyPhotos = maumLogResponse.maumLogDtos.where(
-        (log) => log.uploader != currentUserName
-      ).toList();
-      
+      final familyPhotos = maumLogResponse.maumLogDtos
+          .where((log) => log.uploader != currentUserName)
+          .toList();
+
       final hasFamilyPhotos = familyPhotos.isNotEmpty;
-      
+
       if (hasFamilyPhotos) {
         // 가족들이 사진을 올렸으면 photo_update_popup 보여주기
         await _showPhotoUpdatePopup();
@@ -70,7 +78,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
         // 가족들이 사진을 올리지 않았으면 photo_remind_popup 보여주기
         await _showPhotoRemindPopup();
       }
-      
+
       // 팝업이 닫힌 후 화면 종료
       if (mounted) {
         Navigator.of(context).pop();
@@ -79,9 +87,9 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
       print('가족 사진 상태 확인 중 오류: $e');
       // 오류 발생 시 기본 완료 메시지 표시
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('기록이 저장되었습니다!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('기록이 저장되었습니다!')));
         Navigator.of(context).pop();
       }
     }
@@ -127,17 +135,26 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                        icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black87),
+                        icon: const Icon(
+                          Icons.arrow_back_ios_new_rounded,
+                          color: Colors.black87,
+                        ),
                         onPressed: () => Navigator.of(context).pop(),
                       ),
                       Row(
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.share_outlined, color: Colors.black54),
+                            icon: const Icon(
+                              Icons.share_outlined,
+                              color: Colors.black54,
+                            ),
                             onPressed: () {},
                           ),
                           IconButton(
-                            icon: const Icon(Icons.more_vert, color: Colors.black54),
+                            icon: const Icon(
+                              Icons.more_vert,
+                              color: Colors.black54,
+                            ),
                             onPressed: () {},
                           ),
                         ],
@@ -149,7 +166,10 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                 // 날짜 오버레이
                 Container(
                   margin: const EdgeInsets.only(top: 0, bottom: 12),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.ongiOrange,
                     borderRadius: BorderRadius.circular(32),
@@ -210,7 +230,10 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                                 child: Padding(
                                   padding: const EdgeInsets.only(bottom: 12),
                                   child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 6,
+                                    ),
                                     decoration: BoxDecoration(
                                       color: Colors.white,
                                       borderRadius: BorderRadius.circular(20),
@@ -225,7 +248,11 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                                     child: Row(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
-                                        Icon(Icons.place, color: AppColors.ongiOrange, size: 18),
+                                        Icon(
+                                          Icons.place,
+                                          color: AppColors.ongiOrange,
+                                          size: 18,
+                                        ),
                                         const SizedBox(width: 4),
                                         Text(
                                           widget.address!,
@@ -267,18 +294,26 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                       FutureBuilder<List<Emotion>>(
                         future: _emotionsFuture,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return const Center(child: CircularProgressIndicator());
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
                           }
                           if (snapshot.hasError) {
-                            return Text('감정 불러오기 실패: ${snapshot.error}', style: TextStyle(color: Colors.red));
+                            return Text(
+                              '감정 불러오기 실패: ${snapshot.error}',
+                              style: TextStyle(color: Colors.red),
+                            );
                           }
                           final emotions = snapshot.data ?? [];
                           return Wrap(
                             spacing: 8,
                             runSpacing: 8,
                             children: emotions.map((e) {
-                              final selected = _selectedEmotionCodes.contains(e.code);
+                              final selected = _selectedEmotionCodes.contains(
+                                e.code,
+                              );
                               return GestureDetector(
                                 onTap: () {
                                   setState(() {
@@ -290,9 +325,14 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                                   });
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                    vertical: 8,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: selected ? AppColors.ongiOrange : AppColors.ongiGrey,
+                                    color: selected
+                                        ? AppColors.ongiOrange
+                                        : AppColors.ongiGrey,
                                     borderRadius: BorderRadius.circular(18),
                                   ),
                                   child: Text(
@@ -322,12 +362,17 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                     children: [
                       CircleAvatar(
                         radius: 22,
-                        backgroundImage: AssetImage('assets/images/users/elderly_woman.png'),
+                        backgroundImage: AssetImage(
+                          'assets/images/users/elderly_woman.png',
+                        ),
                       ),
                       const SizedBox(width: 10),
                       Expanded(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(18),
@@ -353,11 +398,12 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 18),
                   child: SizedBox(
                     width: double.infinity,
-                    height: 56,
+                    height: 65,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.ongiOrange,
                         foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
@@ -369,40 +415,51 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                       ),
                       onPressed: () async {
                         try {
-                          final selectedEmotionCodes = _selectedEmotionCodes.toList();
+                          final selectedEmotionCodes = _selectedEmotionCodes
+                              .toList();
                           final comment = _commentController.text.trim();
-                          final accessToken = await PrefsManager.getAccessToken();
-                          
+                          final accessToken =
+                              await PrefsManager.getAccessToken();
+
                           if (accessToken == null) {
                             throw Exception('로그인이 필요합니다. 다시 로그인해주세요.');
                           }
-                          
+
                           print('🔐저장된 토큰: $accessToken');
-                          
+
                           // 사용자 UUID 가져오기
                           final userUuid = await PrefsManager.getUuid();
                           if (userUuid == null) {
                             throw Exception('사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
                           }
-                          
-                          final service = MaumlogService(baseUrl: _emotionApiBaseUrl);
-                          
+
+                          final service = MaumlogService(
+                            baseUrl: _emotionApiBaseUrl,
+                          );
+
                           final presignedData = await service.getPresignedUrls(
                             accessToken: accessToken,
                           );
-                          
-                          final frontFileName = presignedData['frontFileName'] as String;
-                          final frontPresignedUrl = presignedData['frontPresignedUrl'] as String;
-                          final backFileName = presignedData['backFileName'] as String;
-                          final backPresignedUrl = presignedData['backPresignedUrl'] as String;
-                          
+
+                          final frontFileName =
+                              presignedData['frontFileName'] as String;
+                          final frontPresignedUrl =
+                              presignedData['frontPresignedUrl'] as String;
+                          final backFileName =
+                              presignedData['backFileName'] as String;
+                          final backPresignedUrl =
+                              presignedData['backPresignedUrl'] as String;
+
                           await service.uploadFileToS3(
                             presignedUrl: backPresignedUrl,
                             file: File(widget.backImagePath),
                             uploaderUuid: userUuid,
                           );
-                          
-                          final actualFrontFileName = widget.frontImagePath != null ? frontFileName : backFileName;
+
+                          final actualFrontFileName =
+                              widget.frontImagePath != null
+                              ? frontFileName
+                              : backFileName;
                           if (widget.frontImagePath != null) {
                             await service.uploadFileToS3(
                               presignedUrl: frontPresignedUrl,
@@ -410,7 +467,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                               uploaderUuid: userUuid,
                             );
                           }
-                          
+
                           await service.uploadMaumLog(
                             frontFileName: actualFrontFileName,
                             backFileName: backFileName,
@@ -421,16 +478,35 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           );
 
                           if (!mounted) return;
-                          
+
                           // 기록 저장 후 가족들의 사진 업로드 상태 확인
                           await _checkFamilyPhotoStatusAndShowPopup();
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('업로드 실패: $e')),
+                            SnackBar(
+                              content: Text(
+                                '업로드 실패: $e',
+                                style: const TextStyle(
+                                  color: AppColors.ongiOrange,
+                                ),
+                              ),
+                              backgroundColor: Colors.white,
+                              behavior: SnackBarBehavior.floating,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              duration: const Duration(seconds: 2),
+                            ),
                           );
                         }
                       },
-                      child: const Text('기록하기'),
+                      child: const Text(
+                        '기록하기',
+                        style: TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
                     ),
                   ),
                 ),
