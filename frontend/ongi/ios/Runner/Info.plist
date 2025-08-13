@@ -58,5 +58,11 @@
         <string>마음 기록을 위해 오디오 권한이 필요합니다.</string>
         <key>NSLocationWhenInUseUsageDescription</key>
         <string>마음 기록을 위해 위치 권한이 필요합니다.</string>
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>This app needs access to location when open.</string>
+        <key>NSLocationAlwaysUsageDescription</key>
+        <string>This app needs access to location when in the background.</string>
+        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+        <string>This app needs access to location when in the background.</string>
 	</dict>
 </plist>

@@ -36,22 +36,24 @@ class ExerciseService {
 
   Future<Map<String, dynamic>?> getExerciseRecord({
     required String date,
+    String? parentId,
   }) async {
     final accessToken = await PrefsManager.getAccessToken();
-    final parentId = await PrefsManager.getUuid();
+    final defaultParentId = await PrefsManager.getUuid();
 
     if (accessToken == null) throw Exception('AccessToken이 없습니다.');
 
     try {
       String url = '$baseUrl/health/exercise/detail?date=$date';
-      if (parentId != null) {
-        url += '&parentId=$parentId';
+      final targetParentId = parentId ?? defaultParentId;
+      if (targetParentId != null) {
+        url += '&parentId=$targetParentId';
       }
 
       print('운동 기록 조회 요청:');
       print('URL: $url');
-      print('AccessToken: ${accessToken?.substring(0, 20)}...');
-      print('ParentId: $parentId');
+      print('AccessToken: ${accessToken.substring(0, 20)}...');
+      print('ParentId: $targetParentId');
 
       final response = await http.get(
         Uri.parse(url),

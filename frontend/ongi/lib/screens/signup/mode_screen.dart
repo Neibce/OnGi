@@ -4,6 +4,7 @@ import 'package:ongi/screens/signup/familyname_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ongi/services/signup_service.dart';
 import 'package:ongi/services/login_service.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class ModeScreen extends StatelessWidget {
   final String username;
@@ -61,6 +62,9 @@ class ModeScreen extends StatelessWidget {
 
       final loginService = LoginService();
       await loginService.login(email: email, password: password);
+      
+      // isParent 정보 저장
+      await PrefsManager.saveIsParent(isParent);
 
       if (!context.mounted) return;
 
