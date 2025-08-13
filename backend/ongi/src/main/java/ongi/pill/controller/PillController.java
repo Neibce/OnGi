@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,6 +56,14 @@ public class PillController {
         temperatureService.increaseTemperatureForParentMedInput(userDetails.getUser().getUuid(), familyId);
 
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @DeleteMapping("/record")
+    public ResponseEntity<Void> deletePillIntake(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody PillIntakeRecordRequest request) {
+        pillService.deletePillIntake(userDetails.getUser(), request);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
     @GetMapping
