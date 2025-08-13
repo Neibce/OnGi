@@ -682,7 +682,83 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     );
   }
 
+  Widget _buildNoParentView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // 아이콘 또는 이미지 (선택사항)
+            Icon(
+              Icons.family_restroom,
+              size: 80,
+              color: AppColors.ongiOrange.withOpacity(0.7),
+            ),
+            const SizedBox(height: 40),
+            
+            // 메인 메시지
+            const Text(
+              '아직 등록된\n부모 사용자가 없어요.',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                color: AppColors.ongiOrange,
+                height: 1.3,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
+            
+            // 서브 메시지
+            const Text(
+              '부모님을 초대해볼까요?',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w400,
+                color: AppColors.ongiOrange,
+                height: 1.3,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 40),
+            
+            // 새로고침 버튼 (선택사항)
+            OutlinedButton(
+              onPressed: () {
+                _loadParentMembers();
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.ongiOrange,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                side: BorderSide(
+                  color: AppColors.ongiOrange,
+                  width: 2,
+                ),
+              ),
+              child: const Text(
+                '새로고침',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildHomeView() {
+    // 자녀인데 부모가 없는 경우 안내 화면 표시
+    if (_isChild && _parentMembers.isEmpty && !_isLoadingParents) {
+      return _buildNoParentView();
+    }
+    
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 40),
       child: Column(
