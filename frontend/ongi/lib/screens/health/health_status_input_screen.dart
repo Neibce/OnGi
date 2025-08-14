@@ -224,10 +224,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           );
           break;
         case 'chest':
-          newBodyParts = newBodyParts.copyWith(upperBody: true);
+          newBodyParts = newBodyParts.copyWith(chest: true);
           break;
         case 'back':
-          newBodyParts = newBodyParts.copyWith(lowerBody: true);
+          newBodyParts = newBodyParts.copyWith(back: true);
           break;
         case 'arm':
           newBodyParts = newBodyParts.copyWith(
@@ -428,9 +428,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     if (bodyPartsString.contains('leftShoulder: true') ||
         bodyPartsString.contains('rightShoulder: true'))
       painAreas.add(PainArea.shoulder);
-    if (bodyPartsString.contains('upperBody: true'))
+    if (bodyPartsString.contains('chest: true'))
       painAreas.add(PainArea.chest);
-    if (bodyPartsString.contains('lowerBody: true'))
+    if (bodyPartsString.contains('back: true'))
       painAreas.add(PainArea.back);
     if (bodyPartsString.contains('leftUpperArm: true') ||
         bodyPartsString.contains('rightUpperArm: true') ||
