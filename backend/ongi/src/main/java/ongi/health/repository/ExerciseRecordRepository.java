@@ -12,6 +12,6 @@ import java.util.UUID;
 public interface ExerciseRecordRepository extends JpaRepository<ExerciseRecord, Long> {
     // 최근 7일간 운동 기록 조회
     List<ExerciseRecord> findByParentIdAndDateBetweenOrderByDateDesc(UUID parentId, LocalDate startDate, LocalDate endDate);
-    // date로 단일 ExerciseRecord 조회
+    // 특정 날짜의 통증 기록 조회
     java.util.Optional<ExerciseRecord> findByParentIdAndDate(UUID parentId, LocalDate date);
 } 
