@@ -37,12 +37,16 @@ public class HealthRecordController {
 
         FamilyInfo familyInfo = familyService.getFamily(userDetails.getUser());
         String familyId = familyInfo.code();
-
-        PainRecord record = healthRecordService.addPainRecord(
+        
+        // 여러 통증 부위를 한 번에 저장
+        List<PainRecord.PainArea> painAreas = request.painArea().stream()
+                .map(PainRecord.PainArea::valueOf)
+                .toList();
+        
+        PainRecord record = healthRecordService.addOrUpdatePainRecord(
                 userDetails.getUser().getUuid(),
                 request.date(),
-                PainRecord.PainArea.valueOf(request.painArea()),
-                PainRecord.PainLevel.valueOf(request.painLevel())
+                painAreas
         );
 
         // 온도 상승

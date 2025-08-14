@@ -18,15 +18,12 @@ public class HealthRecordService {
     private final PainRecordRepository painRecordRepository;
     private final ExerciseRecordRepository exerciseRecordRepository;
 
-    // 통증 기록 추가
+    // 통증 기록 추가/수정
     @Transactional
-    public PainRecord addPainRecord(UUID parentId, LocalDate date, PainRecord.PainArea area, PainRecord.PainLevel level) {
-        PainRecord record = PainRecord.builder()
-                .parentId(parentId)
-                .date(date)
-                .painArea(area)
-                .painLevel(level)
-                .build();
+    public PainRecord addOrUpdatePainRecord(UUID parentId, LocalDate date, List<PainRecord.PainArea> areas) {
+        PainRecord record = painRecordRepository.findByParentIdAndDate(parentId, date)
+                .orElse(PainRecord.builder().parentId(parentId).date(date).build());
+        record.setPainArea(areas);
         return painRecordRepository.save(record);
     }
 
@@ -60,4 +57,12 @@ public class HealthRecordService {
         return exerciseRecordRepository.findByParentIdAndDate(parentId, date)
                 .orElse(null);
     }
+
+    // 특정 날짜 통증 기록 조회
+    public PainRecord getParentPainRecordDetail(UUID parentId, LocalDate date) {
+        return painRecordRepository.findByParentIdAndDate(parentId, date)
+                .orElse(null);
+    }
+
+
 } 
