@@ -20,12 +20,11 @@ public class HealthRecordService {
 
     // 통증 기록 추가
     @Transactional
-    public PainRecord addPainRecord(UUID parentId, LocalDate date, PainRecord.PainArea area, PainRecord.PainLevel level) {
+    public PainRecord addPainRecord(UUID parentId, LocalDate date, PainRecord.PainArea area) {
         PainRecord record = PainRecord.builder()
                 .parentId(parentId)
                 .date(date)
                 .painArea(area)
-                .painLevel(level)
                 .build();
         return painRecordRepository.save(record);
     }

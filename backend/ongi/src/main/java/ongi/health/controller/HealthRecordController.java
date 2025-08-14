@@ -41,8 +41,7 @@ public class HealthRecordController {
         PainRecord record = healthRecordService.addPainRecord(
                 userDetails.getUser().getUuid(),
                 request.date(),
-                PainRecord.PainArea.valueOf(request.painArea()),
-                PainRecord.PainLevel.valueOf(request.painLevel())
+                PainRecord.PainArea.valueOf(request.painArea())
         );
 
         // 온도 상승

@@ -4,6 +4,5 @@ import java.time.LocalDate;
 
 public record PainRecordRequest(
     LocalDate date,
-    String painArea,
-    String painLevel
+    String painArea
 ) {} 

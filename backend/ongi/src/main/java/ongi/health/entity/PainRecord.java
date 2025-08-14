@@ -26,15 +26,9 @@ public class PainRecord {
     @Column(nullable = false)
     private PainArea painArea;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private PainLevel painLevel;
 
     public enum PainArea {
         HEAD, NECK, SHOULDER, CHEST, BACK, ARM, HAND, ABDOMEN, WAIST, LEG, KNEE, FOOT, NONE
     }
 
-    public enum PainLevel {
-        STRONG, MID_STRONG, MID_WEAK, WEAK
-    }
 } 
