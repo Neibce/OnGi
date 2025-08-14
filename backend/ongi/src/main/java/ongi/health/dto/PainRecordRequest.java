@@ -1,8 +1,9 @@
 package ongi.health.dto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public record PainRecordRequest(
     LocalDate date,
-    String painArea
+    List<String> painArea
 ) {} 
