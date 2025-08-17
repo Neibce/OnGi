@@ -3,6 +3,7 @@ import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/widgets/date_carousel.dart';
 import 'package:ongi/services/step_service.dart';
+import 'package:ongi/screens/health/cross_family_ranking_screen.dart';
 
 class FamilyStepTrackerScreen extends StatefulWidget {
   const FamilyStepTrackerScreen({super.key});
@@ -222,64 +223,74 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                 right: 20,
                                 top: 10,
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '오늘 우리 가족은',
-                                    style: const TextStyle(
-                                      fontFamily: 'Pretendard',
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 20,
-                                      height: 1.2,
-                                      color: Color(0xFFFD6C01),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const CrossFamilyRankingScreen(),
                                     ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  RichText(
-                                    text: TextSpan(
-                                      children: [
-                                        const TextSpan(
-                                          text: '총 ',
-                                          style: TextStyle(
-                                            fontFamily: 'Pretendard',
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 20,
-                                            color: Color(0xFFFD6C01),
-                                          ),
-                                        ),
-                                        TextSpan(
-                                          text: _isLoading
-                                              ? '0걸음'
-                                              : _totalSteps
-                                                        .toString()
-                                                        .replaceAllMapped(
-                                                          RegExp(
-                                                            r'(\d{1,3})(?=(\d{3})+(?!\d))',
-                                                          ),
-                                                          (m) => '${m[1]},',
-                                                        ) +
-                                                    '걸음',
-                                          style: const TextStyle(
-                                            fontFamily: 'Pretendard',
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 35,
-                                            color: Color(0xFFFD6C01),
-                                          ),
-                                        ),
-                                        const TextSpan(
-                                          text: ' 걸었어요!',
-                                          style: TextStyle(
-                                            fontFamily: 'Pretendard',
-                                            fontWeight: FontWeight.w600,
-                                            fontSize: 20,
-                                            color: Color(0xFFFD6C01),
-                                          ),
-                                        ),
-                                      ],
+                                  );
+                                },
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      '오늘 우리 가족은',
+                                      style: const TextStyle(
+                                        fontFamily: 'Pretendard',
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 20,
+                                        height: 1.2,
+                                        color: Color(0xFFFD6C01),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                    const SizedBox(height: 2),
+                                    RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          const TextSpan(
+                                            text: '총 ',
+                                            style: TextStyle(
+                                              fontFamily: 'Pretendard',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 20,
+                                              color: Color(0xFFFD6C01),
+                                            ),
+                                          ),
+                                          TextSpan(
+                                            text: _isLoading
+                                                ? '0걸음'
+                                                : _totalSteps
+                                                          .toString()
+                                                          .replaceAllMapped(
+                                                            RegExp(
+                                                              r'(\d{1,3})(?=(\d{3})+(?!\d))',
+                                                            ),
+                                                            (m) => '${m[1]},',
+                                                          ) +
+                                                      '걸음',
+                                            style: const TextStyle(
+                                              fontFamily: 'Pretendard',
+                                              fontWeight: FontWeight.w700,
+                                              fontSize: 35,
+                                              color: Color(0xFFFD6C01),
+                                            ),
+                                          ),
+                                          const TextSpan(
+                                            text: ' 걸었어요!',
+                                            style: TextStyle(
+                                              fontFamily: 'Pretendard',
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: 20,
+                                              color: Color(0xFFFD6C01),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -385,7 +396,7 @@ Widget _buildStepMember({
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        // 프로필 이미지 (pill 왼쪽)
+        // 프로필 이미지
         Stack(
           clipBehavior: Clip.none,
           children: [

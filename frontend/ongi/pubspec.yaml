@@ -87,6 +87,7 @@ flutter:
     - assets/images/body_selector_front.svg
     - assets/images/body_selector_back.svg
     - assets/images/location_icon.svg
+    - assets/images/cross_family_ranking_title_logo.png
 
   fonts:
     - family: Pretendard
