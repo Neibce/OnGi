@@ -73,7 +73,7 @@ class _TimeGridState extends State<TimeGrid> {
                 ),
                 for (int seg = 0; seg < 6; seg++)
                   GestureDetector(
-                    onTap: () {
+                    onTap: widget.onValueChanged != null ? () {
                       final idx = hour * 6 + seg;
                       setState(() {
                         if (_selected.contains(idx))
@@ -82,7 +82,7 @@ class _TimeGridState extends State<TimeGrid> {
                           _selected.add(idx);
                         widget.onValueChanged?.call(_selected.toList()..sort());
                       });
-                    },
+                    } : null,
                     child: Container(
                       margin: const EdgeInsets.symmetric(
                         horizontal: 2.0,

@@ -103,6 +103,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.ongiLigntgrey, // 정확한 앱 배경색 사용
       body: IndexedStack(index: _currentIndex, children: _screens),
       bottomNavigationBar: _buildCustomBottomNav(),
     );
@@ -110,7 +111,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   Widget _buildCustomBottomNav() {
     return Container(
-      height: 72,
+      height: 72, // 원래 높이로 복구
       margin: const EdgeInsets.fromLTRB(12, 0, 12, 24),
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
@@ -118,7 +119,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           _buildNavItem(
             0,
@@ -144,27 +145,45 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
             ),
             '건강 기록',
           ),
-          GestureDetector(
-            onTap: () => _onAddRecordTapped(),
-            child: Container(
-              width: 56,
-              height: 56,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [AppColors.ongiBlue, AppColors.ongiOrange],
-                ),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black12,
-                    blurRadius: 8,
-                    offset: Offset(0, 4),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              splashColor: Colors.transparent, // 리플 효과 끄기
+              highlightColor: Colors.transparent, // 하이라이트 효과 끄기
+              borderRadius: BorderRadius.circular(40),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AddRecordScreen(),
                   ),
-                ],
+                );
+              },
+              child: Container(
+                width: 72, // 터치 영역 확대
+                height: 72, // 터치 영역 확대
+                alignment: Alignment.center,
+                child: Container(
+                  width: 56,
+                  height: 56,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                      colors: [AppColors.ongiBlue, AppColors.ongiOrange],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black12,
+                        blurRadius: 8,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(Icons.add, color: Colors.white, size: 36),
+                ),
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 36),
             ),
           ),
           _buildNavItem(
@@ -198,27 +217,33 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
   Widget _buildNavItem(int index, Widget iconWidget, String text) {
     final isSelected = index == _currentIndex;
-    return GestureDetector(
-      onTap: () => _onTabTapped(index),
-      child: Container(
-        width: 56,
-        height: 56,
-        alignment: Alignment.center,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            iconWidget,
-            const SizedBox(height: 4),
-            Text(
-              text,
-              style: TextStyle(
-                fontSize: 12,
-                color: isSelected ? AppColors.ongiOrange : Colors.grey[300],
-                fontFamily: 'Pretendard',
-                fontWeight: FontWeight.w600,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        splashColor: Colors.transparent, // 리플 효과 끄기
+        highlightColor: Colors.transparent, // 하이라이트 효과 끄기
+        borderRadius: BorderRadius.circular(16),
+        onTap: () => _onTabTapped(index),
+        child: Container(
+          width: 72, // 터치 영역 확대
+          height: 72, // 터치 영역 확대
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              iconWidget,
+              const SizedBox(height: 4),
+              Text(
+                text,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isSelected ? AppColors.ongiOrange : Colors.grey[300],
+                  fontFamily: 'Pretendard',
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

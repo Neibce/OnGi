@@ -129,16 +129,57 @@ class PillService {
     }
   }
 
+  /// 약 복용 기록 삭제
+  static Future<Map<String, dynamic>> deletePillRecord({
+    required String pillId,
+    required String intakeTime,
+    required DateTime intakeDate,
+  }) async {
+    final accessToken = await PrefsManager.getAccessToken();
+
+    if (accessToken == null) {
+      throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
+    }
+
+    try {
+      final String intakeDateStr =
+          '${intakeDate.year.toString().padLeft(4, '0')}-${intakeDate.month.toString().padLeft(2, '0')}-${intakeDate.day.toString().padLeft(2, '0')}';
+
+      final response = await http.delete(
+        Uri.parse('$baseUrl/pills/record'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+        body: jsonEncode({
+          'pillId': int.tryParse(pillId) ?? pillId,
+          'intakeTime': _formatToHHmmss(intakeTime),
+          'intakeDate': intakeDateStr,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        return response.body.isNotEmpty
+            ? jsonDecode(response.body)
+            : <String, dynamic>{'status': 'ok'};
+      } else {
+        throw Exception('약 복용 기록 삭제에 실패했습니다. 상태 코드: ${response.statusCode}');
+      }
+    } catch (e) {
+      throw Exception('약 복용 기록 삭제 중 오류가 발생했습니다: $e');
+    }
+  }
+
   /// 오늘의 약 복용 예정 조회
-  static Future<List<Map<String, dynamic>>> getTodayPillSchedule() async {
-    return getPillScheduleByDate(DateTime.now());
+  static Future<List<Map<String, dynamic>>> getTodayPillSchedule({String? parentUuid}) async {
+    return getPillScheduleByDate(DateTime.now(), parentUuid: parentUuid);
   }
 
   /// 특정 날짜의 약 복용 예정 조회
   static Future<List<Map<String, dynamic>>> getPillScheduleByDate(
-      DateTime date) async {
+      DateTime date, {String? parentUuid}) async {
     final accessToken = await PrefsManager.getAccessToken();
-    final parentId = await PrefsManager.getUuid();
+    final defaultParentId = await PrefsManager.getUuid();
 
     if (accessToken == null) {
       throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
@@ -148,8 +189,9 @@ class PillService {
       final String dateStr =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
+      final targetParentId = parentUuid ?? defaultParentId;
       final response = await http.get(
-        Uri.parse('$baseUrl/pills?parentUuid=$parentId&date=$dateStr'),
+        Uri.parse('$baseUrl/pills?parentUuid=$targetParentId&date=$dateStr'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
@@ -171,9 +213,9 @@ class PillService {
 
   /// 특정 날짜의 약 복용 기록 조회
   static Future<List<Map<String, dynamic>>> getPillRecordsByDate(
-      DateTime date) async {
+      DateTime date, {String? parentUuid}) async {
     final accessToken = await PrefsManager.getAccessToken();
-    final parentId = await PrefsManager.getUuid();
+    final defaultParentId = await PrefsManager.getUuid();
 
     if (accessToken == null) {
       throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
@@ -183,8 +225,9 @@ class PillService {
       final String dateStr =
           '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
+      final targetParentId = parentUuid ?? defaultParentId;
       final response = await http.get(
-        Uri.parse('$baseUrl/pills/records?parentUuid=$parentId&date=$dateStr'),
+        Uri.parse('$baseUrl/pills/records?parentUuid=$targetParentId&date=$dateStr'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
