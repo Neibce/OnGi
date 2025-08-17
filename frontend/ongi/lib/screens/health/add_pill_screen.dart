@@ -299,7 +299,9 @@ class _AddPillScreenState extends State<AddPillScreen> {
                                   ),
                                   child: _pillImage != null
                                       ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(20),
+                                          borderRadius: BorderRadius.circular(
+                                            20,
+                                          ),
                                           child: Image.file(
                                             File(_pillImage!.path),
                                             width: 120,
@@ -589,6 +591,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
                             height: 28,
                             width: 28,
                             child: CircularProgressIndicator(
+                              color: AppColors.ongiOrange,
                               strokeWidth: 3,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 Colors.white,

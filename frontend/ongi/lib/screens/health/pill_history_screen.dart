@@ -36,8 +36,9 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
         final dynamic idRaw = pill['id'] ?? pill['pillId'] ?? pill['pillID'];
         final String pillId = idRaw?.toString() ?? '';
         if (pillId.isEmpty) continue;
-        final Map<String, dynamic> status =
-            Map<String, dynamic>.from(pill['dayIntakeStatus'] ?? {});
+        final Map<String, dynamic> status = Map<String, dynamic>.from(
+          pill['dayIntakeStatus'] ?? {},
+        );
         for (final String scheduled in status.keys) {
           final String hhmm = scheduled.length >= 5
               ? scheduled.substring(0, 5)
@@ -200,7 +201,11 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
               right: 0,
               bottom: 0,
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.ongiOrange,
+                      ),
+                    )
                   : RefreshIndicator(
                       onRefresh: _fetchTodaySchedule,
                       child: ListView.builder(
@@ -335,8 +340,8 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                                         children: times.map((timeStr) {
                                           final String key =
                                               '$pillId|${_displayTime(timeStr)}';
-                                          final bool taken =
-                                              _takenKeys.contains(key);
+                                          final bool taken = _takenKeys
+                                              .contains(key);
                                           return GestureDetector(
                                             onTap: taken || pillId.isEmpty
                                                 ? null
@@ -393,8 +398,11 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
               right: 0,
               child: DateCarousel(
                 onDateChanged: (date) {
-                  final DateTime justDate =
-                      DateTime(date.year, date.month, date.day);
+                  final DateTime justDate = DateTime(
+                    date.year,
+                    date.month,
+                    date.day,
+                  );
                   if (justDate.isAtSameMomentAs(_selectedDate)) return;
                   _selectedDate = justDate;
                   _takenKeys.clear();
