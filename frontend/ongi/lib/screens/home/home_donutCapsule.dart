@@ -50,11 +50,18 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
 
   // 전체 데이터 새로고침
   void refreshAllData() {
+    print('HomeCapsuleSection 전체 데이터 새로고침');
     fetchTodayTemperature();
     _buttonColumnKey.currentState?.refreshData();
     if (widget.onRefresh != null) {
       widget.onRefresh!();
     }
+  }
+
+  // 약물 데이터만 빠르게 새로고침
+  void refreshPillDataOnly() {
+    print('HomeCapsuleSection 약물 데이터만 새로고침');
+    _buttonColumnKey.currentState?.refreshPillDataOnly();
   }
 
   Future<void> fetchTodayTemperature() async {
@@ -281,7 +288,7 @@ class ButtonColumn extends StatefulWidget {
   State<ButtonColumn> createState() => _ButtonColumnState();
 }
 
-class _ButtonColumnState extends State<ButtonColumn> {
+class _ButtonColumnState extends State<ButtonColumn> with WidgetsBindingObserver {
   int selectedIdx = -1; // 초기값을 -1로 (아무것도 선택되지 않은 상태)
 
   // API 데이터 상태
@@ -303,7 +310,26 @@ class _ButtonColumnState extends State<ButtonColumn> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    // 앱이 다시 포그라운드로 돌아올 때 즉시 약물 데이터만 새로고침
+    if (state == AppLifecycleState.resumed) {
+      print('앱이 다시 포그라운드로 돌아옴 - 약물 데이터 즉시 새로고침');
+      // 약물 데이터만 빠르게 새로고침
+      _loadPillData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -333,13 +359,37 @@ class _ButtonColumnState extends State<ButtonColumn> {
   Future<void> _loadPillData() async {
     try {
       print('약물 데이터 로딩 시작');
-      final pillSchedule = await PillService.getTodayPillSchedule();
+      
+      // 현재 사용자의 UUID 가져오기
+      final userInfo = await PrefsManager.getUserInfo();
+      final parentUuid = userInfo['uuid'];
+      
+      if (parentUuid == null) {
+        print('사용자 UUID가 없습니다');
+        setState(() {
+          pillText = '사용자 정보 없음';
+        });
+        return;
+      }
+      
+      print('사용자 UUID: $parentUuid');
+      
+      // 타임아웃을 5초로 설정하여 더 빠른 응답
+      final pillSchedule = await PillService.getTodayPillSchedule(parentUuid: parentUuid)
+          .timeout(const Duration(seconds: 5));
+      
       print('약물 데이터 응답: $pillSchedule');
+      print('약물 데이터 개수: ${pillSchedule.length}');
+      
       if (pillSchedule.isNotEmpty) {
         // 첫 번째 약물 정보 사용
         final pill = pillSchedule.first;
         final pillName = pill['name'] ?? '약물';
         final intakeTimes = pill['intakeTimes'] as List<dynamic>? ?? [];
+        
+        print('약물 이름: $pillName');
+        print('복용 시간들: $intakeTimes');
+        print('복용 시간 타입: ${intakeTimes.runtimeType}');
 
         if (intakeTimes.isNotEmpty) {
           // 다음 복용 시간 찾기
@@ -348,17 +398,25 @@ class _ButtonColumnState extends State<ButtonColumn> {
 
           TimeOfDay? nextIntakeTime;
           for (final timeStr in intakeTimes) {
-            final time = TimeOfDay(
-              hour: int.parse(timeStr.split(':')[0]),
-              minute: int.parse(timeStr.split(':')[1]),
-            );
+            try {
+              // 시간 문자열 파싱
+              final timeParts = timeStr.toString().split(':');
+              if (timeParts.length >= 2) {
+                final time = TimeOfDay(
+                  hour: int.parse(timeParts[0]),
+                  minute: int.parse(timeParts[1]),
+                );
 
-            // 현재 시간보다 늦은 시간 찾기
-            if (time.hour > currentTime.hour ||
-                (time.hour == currentTime.hour &&
-                    time.minute > currentTime.minute)) {
-              nextIntakeTime = time;
-              break;
+                // 현재 시간보다 늦은 시간 찾기
+                if (time.hour > currentTime.hour ||
+                    (time.hour == currentTime.hour &&
+                        time.minute > currentTime.minute)) {
+                  nextIntakeTime = time;
+                  break;
+                }
+              }
+            } catch (timeParseError) {
+              print('시간 파싱 오류: $timeParseError, 시간: $timeStr');
             }
           }
 
@@ -393,7 +451,7 @@ class _ButtonColumnState extends State<ButtonColumn> {
     } catch (e) {
       print('약물 데이터 로딩 오류: $e');
       setState(() {
-        pillText = '오늘의 복용 약'; // 기본값
+        pillText = '약물 정보 로드 실패';
       });
     }
   }
@@ -488,7 +546,14 @@ class _ButtonColumnState extends State<ButtonColumn> {
 
   // 외부에서 호출할 수 있는 새로고침 메서드
   void refreshData() {
+    print('ButtonColumn 강제 새로고침 호출됨');
     _loadData();
+  }
+
+  // 약물 데이터만 빠르게 새로고침
+  void refreshPillDataOnly() {
+    print('약물 데이터만 빠르게 새로고침');
+    _loadPillData();
   }
 
   @override

@@ -309,17 +309,22 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                         itemBuilder: (context, index) {
                           if (index == _todaySchedule.length) {
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => AddPillScreen(
                                       targetParentId: _selectedParentId,
                                     ),
                                   ),
-                                ).then((_) {
+                                );
+                                
+                                // 약 추가 성공 시 즉시 새로고침
+                                if (result == true) {
+                                  print('약 추가 성공 - 즉시 데이터 새로고침');
+                                  // 즉시 새로고침 (지연 없이)
                                   _fetchTodaySchedule();
-                                });
+                                }
                               },
                               child: Container(
                                 margin: const EdgeInsets.symmetric(
