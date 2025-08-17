@@ -41,7 +41,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     }
   }
 
-  // 5일간 온도 총합 데이터
+  // 5일간 온도 총합 데이터 
   List<Map<String, dynamic>> dailyTemperatures = [];
 
   List<FlSpot> get spots {
@@ -68,15 +68,17 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   }
 
   double get minY {
-    if (dailyTemperatures.isEmpty) return 36.5;
+    if (dailyTemperatures.isEmpty) return 36.0;
     final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
-    return temps.reduce((a, b) => a < b ? a : b);
+    final minTemp = temps.reduce((a, b) => a < b ? a : b);
+    return minTemp - 0.5;
   }
 
   double get maxY {
-    if (dailyTemperatures.isEmpty) return 36.5;
+    if (dailyTemperatures.isEmpty) return 38.0;
     final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
-    return temps.reduce((a, b) => a > b ? a : b);
+    final maxTemp = temps.reduce((a, b) => a > b ? a : b);
+    return maxTemp + 0.5;
   }
 
   double get horizontalInterval {
