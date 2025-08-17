@@ -29,14 +29,22 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     if (userInfo['familycode'] == null || userInfo['familycode']!.isEmpty) {
       final token = await PrefsManager.getAccessToken();
       if (token == null) return;
-      final url = Uri.parse('https://ongi-1049536928483.asia-northeast3.run.app/family');
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      });
+      final url = Uri.parse(
+        'https://ongi-1049536928483.asia-northeast3.run.app/family',
+      );
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
-        await PrefsManager.saveFamilyCodeAndName(data['code'] ?? '', data['name'] ?? '');
+        await PrefsManager.saveFamilyCodeAndName(
+          data['code'] ?? '',
+          data['name'] ?? '',
+        );
       }
     }
   }
@@ -47,7 +55,10 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   List<FlSpot> get spots {
     return List.generate(
       dailyTemperatures.length,
-          (i) => FlSpot(i.toDouble(), dailyTemperatures[i]['totalTemperature'] ?? 36.5),
+      (i) => FlSpot(
+        i.toDouble(),
+        dailyTemperatures[i]['totalTemperature'] ?? 36.5,
+      ),
     );
   }
 
@@ -61,7 +72,9 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
 
   double get yCenter {
     if (dailyTemperatures.isEmpty) return 36.5;
-    final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
+    final temps = dailyTemperatures
+        .map((e) => (e['totalTemperature'] ?? 36.5) as double)
+        .toList();
     final minTemp = temps.reduce((a, b) => a < b ? a : b);
     final maxTemp = temps.reduce((a, b) => a > b ? a : b);
     return (minTemp + maxTemp) / 2;
@@ -69,13 +82,17 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
 
   double get minY {
     if (dailyTemperatures.isEmpty) return 36.5;
-    final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
+    final temps = dailyTemperatures
+        .map((e) => (e['totalTemperature'] ?? 36.5) as double)
+        .toList();
     return temps.reduce((a, b) => a < b ? a : b);
   }
 
   double get maxY {
     if (dailyTemperatures.isEmpty) return 36.5;
-    final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
+    final temps = dailyTemperatures
+        .map((e) => (e['totalTemperature'] ?? 36.5) as double)
+        .toList();
     return temps.reduce((a, b) => a > b ? a : b);
   }
 
@@ -94,13 +111,23 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
       final familyCode = userInfo['familycode'];
       final token = await PrefsManager.getAccessToken();
       if (familyCode == null) throw Exception('가족 코드가 없습니다.');
-      final service = TemperatureService(baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app');
-      final dailyResp = await service.fetchFamilyTemperatureDaily(familyCode, token: token);
-      final contribResp = await service.fetchFamilyTemperatureContributions(familyCode, token: token);
+      final service = TemperatureService(
+        baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app',
+      );
+      final dailyResp = await service.fetchFamilyTemperatureDaily(
+        familyCode,
+        token: token,
+      );
+      final contribResp = await service.fetchFamilyTemperatureContributions(
+        familyCode,
+        token: token,
+      );
       if (!mounted) return;
       setState(() {
         dailyTemperatures = dailyResp;
-        contributions = contribResp.map((e) => Contribution.fromJson(e)).toList();
+        contributions = contribResp
+            .map((e) => Contribution.fromJson(e))
+            .toList();
         isLoading = false;
       });
     } catch (e) {
@@ -160,7 +187,11 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   ),
                   padding: const EdgeInsets.all(20),
                   child: isLoading
-                      ? const Center(child: CircularProgressIndicator())
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            color: AppColors.ongiOrange,
+                          ),
+                        )
                       : errorMsg != null
                       ? Center(child: Text(errorMsg!))
                       : showHistory

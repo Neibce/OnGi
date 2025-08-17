@@ -599,6 +599,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
                             height: 28,
                             width: 28,
                             child: CircularProgressIndicator(
+                              color: AppColors.ongiOrange,
                               strokeWidth: 3,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 Colors.white,

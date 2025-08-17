@@ -297,7 +297,9 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
                             return const Center(
-                              child: CircularProgressIndicator(),
+                              child: CircularProgressIndicator(
+                                color: AppColors.ongiOrange,
+                              ),
                             );
                           }
                           if (snapshot.hasError) {

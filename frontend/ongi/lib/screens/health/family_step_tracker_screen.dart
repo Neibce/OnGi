@@ -319,7 +319,9 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8),
                                 child: Center(
-                                  child: CircularProgressIndicator(),
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.ongiOrange,
+                                  ),
                                 ),
                               )
                             else
