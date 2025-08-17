@@ -4,6 +4,7 @@ import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/models/maum_log.dart';
 import 'package:ongi/services/maum_log_service.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 import 'dart:ui'; // Added for ImageFilter
 
 class PhotoDateScreen extends StatefulWidget {
@@ -20,11 +21,14 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
   MaumLogResponse? _maumLogResponse;
   bool _isLoading = true;
   String? _error;
+  String _userName = '사용자';
+  String? _currentUserUuid;
 
   @override
   void initState() {
     super.initState();
     _loadMaumLogData();
+    _loadUserName();
   }
 
   @override
@@ -57,6 +61,24 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _loadUserName() async {
+    String? savedUsername = await PrefsManager.getUserName();
+    String? savedUuid = await PrefsManager.getUuid();
+    if (savedUsername != null) {
+      setState(() {
+        _userName = savedUsername;
+        _currentUserUuid = savedUuid;
+      });
+    }
+  }
+
+  String _getUploaderDisplayName(String uploader) {
+    if (_currentUserUuid != null && uploader == _currentUserUuid) {
+      return _userName;
+    }
+    return '가족';
   }
 
   @override
@@ -290,6 +312,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                   ),
                 ),
               ),
+              
               // 하단 오버레이
               Positioned(
                 left: 0,
@@ -325,20 +348,35 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                           Image.asset("assets/images/users/elderly_woman.png", width: 30),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              maumLog.comment,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontFamily: 'Pretendard',
-                                fontWeight: FontWeight.w500,
-                              ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  _getUploaderDisplayName(maumLog.uploader),
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 12,
+                                    fontFamily: 'Pretendard',
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  maumLog.comment,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontFamily: 'Pretendard',
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // 위치 버튼 스타일
+                      // 위치 버튼
                       Align(
                         alignment: Alignment.center,
                         child: Container(

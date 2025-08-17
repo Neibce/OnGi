@@ -29,6 +29,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   DateTime selectedDate = DateTime.now();
   bool isFrontView = true;
   
+  // 가슴과 등만 별도로 관리하는 상태
+  bool _chestSelected = false;
+  bool _backSelected = false;
+  
   // 통증 기록 조회 관련 상태
   List<Map<String, dynamic>> _painRecords = [];
   bool _isLoadingPainRecords = false;
@@ -193,6 +197,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     if (_painRecords.isEmpty) {
       setState(() {
         _bodyParts = const BodyParts();
+        // 가슴/등 상태 초기화
+        _chestSelected = false;
+        _backSelected = false;
         // 자녀인 경우 항상 읽기 전용
         _isInputMode = !_isChild;
       });
@@ -204,8 +211,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       _isInputMode = false;
     });
 
-    // 통증 기록을 BodyParts로 변환
     BodyParts newBodyParts = const BodyParts();
+    
+    // 가슴/등 상태 초기화
+    _chestSelected = false;
+    _backSelected = false;
     
     for (final record in _painRecords) {
       final painArea = record['painArea']?.toString().toLowerCase() ?? '';
@@ -217,17 +227,19 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         case 'neck':
           newBodyParts = newBodyParts.copyWith(neck: true);
           break;
-        case 'shoulder':
-          newBodyParts = newBodyParts.copyWith(
-            leftShoulder: true,
-            rightShoulder: true,
-          );
+        case 'left_shoulder':
+          newBodyParts = newBodyParts.copyWith(leftShoulder: true);
+          break;
+        case 'right_shoulder':
+          newBodyParts = newBodyParts.copyWith(rightShoulder: true);
           break;
         case 'chest':
-          newBodyParts = newBodyParts.copyWith(chest: true);
+          // 가슴은 별도 상태로 관리
+          _chestSelected = true;
           break;
         case 'back':
-          newBodyParts = newBodyParts.copyWith(back: true);
+          // 등은 별도 상태로 관리
+          _backSelected = true;
           break;
         case 'arm':
           newBodyParts = newBodyParts.copyWith(
@@ -274,9 +286,26 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       }
     }
     
+    // 현재 뷰에 따라 가슴/등 표시 업데이트
+    _updateBodyPartsDisplay();
+    
     setState(() {
       _bodyParts = newBodyParts;
     });
+  }
+
+  // 현재 뷰에 따라 가슴/등 표시 업데이트
+  void _updateBodyPartsDisplay() {
+    if (isFrontView && _chestSelected) {
+      // 앞면이고 가슴이 선택된 경우
+      _bodyParts = _bodyParts.copyWith(upperBody: true);
+    } else if (!isFrontView && _backSelected) {
+      // 뒷면이고 등이 선택된 경우  
+      _bodyParts = _bodyParts.copyWith(upperBody: true);
+    } else {
+      // 선택되지 않은 경우 해당 부위 해제
+      _bodyParts = _bodyParts.copyWith(upperBody: false);
+    }
   }
 
   // 날짜 변경 처리
@@ -291,16 +320,28 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     final painAreaMap = {
       'head': '머리',
       'neck': '목',
-      'shoulder': '어깨',
+      'left_shoulder': '왼쪽 어깨',
+      'right_shoulder': '오른쪽 어깨',
       'chest': '가슴',
       'back': '등',
-      'arm': '팔',
-      'hand': '손',
-      'abdomen': '복부',
+      'left_upper_arm': '왼쪽 윗팔',
+      'right_upper_arm': '오른쪽 윗팔',
+      'left_forearm': '왼쪽 아랫팔',
+      'right_forearm': '오른쪽 아랫팔',
+      'left_hand': '왼쪽 손',
+      'right_hand': '오른쪽 손',
+      'abdomen': '배',
       'waist': '허리',
-      'leg': '다리',
-      'knee': '무릎',
-      'foot': '발',
+      'pelvis': '골반',
+      'hip': '엉덩이',
+      'left_thigh': '왼쪽 허벅지',
+      'right_thigh': '오른쪽 허벅지',
+      'left_calf': '왼쪽 종아리',
+      'right_calf': '오른쪽 종아리',
+      'left_knee': '왼쪽 무릎',
+      'right_knee': '오른쪽 무릎',
+      'left_foot': '왼쪽 발',
+      'right_foot': '오른쪽 발',
       'none': '없음',
     };
     return painAreaMap[painArea.toLowerCase()] ?? painArea;
@@ -400,6 +441,21 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         _isInputMode = true;
       });
     }
+    
+    // 가슴/등 선택 상태 업데이트
+    final partsString = parts.toString();
+    if (isFrontView && partsString.contains('upperBody: true')) {
+      _chestSelected = true;
+    } else if (isFrontView && !partsString.contains('upperBody: true')) {
+      _chestSelected = false;
+    }
+    
+    if (!isFrontView && partsString.contains('upperBody: true')) {
+      _backSelected = true;
+    } else if (!isFrontView && !partsString.contains('upperBody: true')) {
+      _backSelected = false;
+    }
+    
     setState(() {
       _bodyParts = parts;
     });
@@ -407,13 +463,15 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
 
   // 선택된 부위가 있는지 확인
   bool get hasSelectedParts {
-    return _bodyParts.toString().contains('true');
+    return _bodyParts.toString().contains('true') || _chestSelected || _backSelected;
   }
 
   // 앞/뒤 전환 메서드
   void toggleView() {
     setState(() {
       isFrontView = !isFrontView;
+      // 뷰 전환 시 가슴/등 표시 업데이트
+      _updateBodyPartsDisplay();
     });
   }
 
@@ -422,77 +480,132 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
 
     // BodyParts를 API enum으로 매핑
     final bodyPartsString = _bodyParts.toString();
-
-    if (bodyPartsString.contains('head: true')) painAreas.add(PainArea.head);
-    if (bodyPartsString.contains('neck: true')) painAreas.add(PainArea.neck);
-    if (bodyPartsString.contains('leftShoulder: true') ||
-        bodyPartsString.contains('rightShoulder: true'))
-      painAreas.add(PainArea.shoulder);
-    if (bodyPartsString.contains('chest: true'))
-      painAreas.add(PainArea.chest);
-    if (bodyPartsString.contains('back: true'))
-      painAreas.add(PainArea.back);
-    if (bodyPartsString.contains('leftUpperArm: true') ||
-        bodyPartsString.contains('rightUpperArm: true') ||
-        bodyPartsString.contains('leftElbow: true') ||
-        bodyPartsString.contains('rightElbow: true') ||
-        bodyPartsString.contains('leftLowerArm: true') ||
-        bodyPartsString.contains('rightLowerArm: true'))
-      painAreas.add(PainArea.arm);
-    if (bodyPartsString.contains('leftHand: true') ||
-        bodyPartsString.contains('rightHand: true'))
-      painAreas.add(PainArea.hand);
-    if (bodyPartsString.contains('abdomen: true'))
-      painAreas.add(PainArea.abdomen);
-    if (bodyPartsString.contains('vestibular: true'))
-      painAreas.add(PainArea.waist); // vestibular를 waist로 매핑
-    if (bodyPartsString.contains('leftUpperLeg: true') ||
-        bodyPartsString.contains('rightUpperLeg: true') ||
-        bodyPartsString.contains('leftLowerLeg: true') ||
-        bodyPartsString.contains('rightLowerLeg: true'))
-      painAreas.add(PainArea.leg);
-    if (bodyPartsString.contains('leftKnee: true') ||
-        bodyPartsString.contains('rightKnee: true'))
-      painAreas.add(PainArea.knee);
-    if (bodyPartsString.contains('leftFoot: true') ||
-        bodyPartsString.contains('rightFoot: true'))
-      painAreas.add(PainArea.foot);
+    //
+    // if (bodyPartsString.contains('head: true'))
+    //   painAreas.add(PainArea.head);
+    // if (bodyPartsString.contains('neck: true'))
+    //   painAreas.add(PainArea.neck);
+    //
+    // // 어깨 (좌우 구분)
+    // if (bodyPartsString.contains('leftShoulder: true'))
+    //   painAreas.add(PainArea.leftShoulder);
+    // if (bodyPartsString.contains('rightShoulder: true'))
+    //   painAreas.add(PainArea.rightShoulder);
+    //
+    // // 가슴과 등을 별도 상태로 확인
+    // if (_chestSelected)
+    //   painAreas.add(PainArea.chest);
+    // if (_backSelected)
+    //   painAreas.add(PainArea.back);
+    //
+    // // 팔 (좌우, 윗팔/아랫팔 구분)
+    // if (bodyPartsString.contains('leftUpperArm: true'))
+    //   painAreas.add(PainArea.leftUpperArm);
+    // if (bodyPartsString.contains('rightUpperArm: true'))
+    //   painAreas.add(PainArea.rightUpperArm);
+    // if (bodyPartsString.contains('leftLowerArm: true'))
+    //   painAreas.add(PainArea.leftForearm);
+    // if (bodyPartsString.contains('rightLowerArm: true'))
+    //   painAreas.add(PainArea.rightForearm);
+    //
+    // // 손 (좌우 구분)
+    // if (bodyPartsString.contains('leftHand: true'))
+    //   painAreas.add(PainArea.leftHand);
+    // if (bodyPartsString.contains('rightHand: true'))
+    //   painAreas.add(PainArea.rightHand);
+    //
+    // if (bodyPartsString.contains('abdomen: true'))
+    //   painAreas.add(PainArea.abdomen);
+    //
+    // // 허리/골반/엉덩이 (vestibular 속성 공유)
+    // if (bodyPartsString.contains('vestibular: true'))
+    //   painAreas.add(PainArea.waist);
+    // if (bodyPartsString.contains('vestibular: true'))
+    //   painAreas.add(PainArea.pelvis);
+    // if (bodyPartsString.contains('vestibular: true'))
+    //   painAreas.add(PainArea.hip);
+    //
+    // // 다리 (좌우, 허벅지/종아리 구분)
+    // if (bodyPartsString.contains('leftUpperLeg: true'))
+    //   painAreas.add(PainArea.leftThigh);
+    // if (bodyPartsString.contains('rightUpperLeg: true'))
+    //   painAreas.add(PainArea.rightThigh);
+    // if (bodyPartsString.contains('leftLowerLeg: true'))
+    //   painAreas.add(PainArea.leftCalf);
+    // if (bodyPartsString.contains('rightLowerLeg: true'))
+    //   painAreas.add(PainArea.rightCalf);
+    //
+    // // 무릎 (좌우 구분)
+    // if (bodyPartsString.contains('leftKnee: true'))
+    //   painAreas.add(PainArea.leftKnee);
+    // if (bodyPartsString.contains('rightKnee: true'))
+    //   painAreas.add(PainArea.rightKnee);
+    //
+    // // 발 (좌우 구분)
+    // if (bodyPartsString.contains('leftFoot: true'))
+    //   painAreas.add(PainArea.leftFoot);
+    // if (bodyPartsString.contains('rightFoot: true'))
+    //   painAreas.add(PainArea.rightFoot);
 
     // 중복 제거
     return painAreas.toSet().toList();
   }
 
   // 선택된 통증 부위를 한국어로 변환
-  String _getPainAreaInKorean(PainArea painArea) {
-    switch (painArea) {
-      case PainArea.head:
-        return '머리';
-      case PainArea.neck:
-        return '목';
-      case PainArea.shoulder:
-        return '어깨';
-      case PainArea.chest:
-        return '가슴';
-      case PainArea.back:
-        return '등';
-      case PainArea.arm:
-        return '팔';
-      case PainArea.hand:
-        return '손';
-      case PainArea.abdomen:
-        return '복부';
-      case PainArea.waist:
-        return '허리';
-      case PainArea.leg:
-        return '다리';
-      case PainArea.knee:
-        return '무릎';
-      case PainArea.foot:
-        return '발';
-      case PainArea.none:
-        return '없음';
-    }
-  }
+  // String _getPainAreaInKorean(PainArea painArea) {
+  //   switch (painArea) {
+  //     case PainArea.head:
+  //       return '머리';
+  //     case PainArea.neck:
+  //       return '목';
+  //     case PainArea.leftShoulder:
+  //       return '왼쪽 어깨';
+  //     case PainArea.rightShoulder:
+  //       return '오른쪽 어깨';
+  //     case PainArea.chest:
+  //       return '가슴';
+  //     case PainArea.back:
+  //       return '등';
+  //     case PainArea.leftUpperArm:
+  //       return '왼쪽 윗팔';
+  //     case PainArea.rightUpperArm:
+  //       return '오른쪽 윗팔';
+  //     case PainArea.leftForearm:
+  //       return '왼쪽 아랫팔';
+  //     case PainArea.rightForearm:
+  //       return '오른쪽 아랫팔';
+  //     case PainArea.leftHand:
+  //       return '왼쪽 손';
+  //     case PainArea.rightHand:
+  //       return '오른쪽 손';
+  //     case PainArea.abdomen:
+  //       return '복부';
+  //     case PainArea.waist:
+  //       return '허리';
+  //     case PainArea.pelvis:
+  //       return '골반';
+  //     case PainArea.hip:
+  //       return '엉덩이';
+  //     case PainArea.leftThigh:
+  //       return '왼쪽 허벅지';
+  //     case PainArea.rightThigh:
+  //       return '오른쪽 허벅지';
+  //     case PainArea.leftCalf:
+  //       return '왼쪽 종아리';
+  //     case PainArea.rightCalf:
+  //       return '오른쪽 종아리';
+  //     case PainArea.leftKnee:
+  //       return '왼쪽 무릎';
+  //     case PainArea.rightKnee:
+  //       return '오른쪽 무릎';
+  //     case PainArea.leftFoot:
+  //       return '왼쪽 발';
+  //     case PainArea.rightFoot:
+  //       return '오른쪽 발';
+  //     case PainArea.none:
+  //       return '없음';
+  //   }
+  // }
 
   // 확인 다이얼로그 표시
   void showConfirmationDialog() {
@@ -516,8 +629,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       return;
     }
 
-    final koreanPainAreas = painAreas.map(_getPainAreaInKorean).toList();
-    final painAreasText = koreanPainAreas.join(', ');
+    // final koreanPainAreas = painAreas.map(_getPainAreaInKorean).toList();
+    // final painAreasText = koreanPainAreas.join(', ');
 
     showDialog(
       context: context,
@@ -563,10 +676,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                       fontWeight: FontWeight.w600,
                       height: 1.2,
                     ),
-                    children: [
-                      TextSpan(text: painAreasText),
-                      const TextSpan(text: '\n불편하신가요?'),
-                    ],
+                    // children: [
+                    //   TextSpan(text: painAreasText),
+                    //   const TextSpan(text: '\n불편하신가요?'),
+                    // ],
                   ),
                 ),
 
