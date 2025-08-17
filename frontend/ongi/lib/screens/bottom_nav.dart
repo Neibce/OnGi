@@ -247,14 +247,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               splashColor: Colors.transparent,
               highlightColor: Colors.transparent,
               borderRadius: BorderRadius.circular(40),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddRecordScreen(),
-                  ),
-                );
-              },
+              onTap: () => _onAddRecordTapped(),
               child: Container(
                 width: 72,
                 height: 72,
