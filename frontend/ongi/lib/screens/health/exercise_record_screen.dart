@@ -10,7 +10,10 @@ import 'package:ongi/services/exercise_service.dart';
 enum _TriggerSource { none, button, swipe }
 
 class ExerciseRecordScreen extends StatefulWidget {
-  const ExerciseRecordScreen({super.key});
+  final String? selectedParentId;
+  final bool? isChild;
+
+  const ExerciseRecordScreen({super.key, this.selectedParentId, this.isChild});
 
   @override
   State<ExerciseRecordScreen> createState() => _ExerciseRecordScreenState();
@@ -33,11 +36,19 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
   // SharedPreferences key
   static const String _exerciseTimesKey = 'exercise_times';
 
+  // 자녀용 상태 관리
+  bool _isChild = false;
+  String? _selectedParentId;
+
   @override
   void initState() {
     super.initState();
     referenceDate = _dateOnly(DateTime.now());
     selectedDate = referenceDate;
+
+    // 위젯에서 전달받은 자녀/부모 정보 설정
+    _isChild = widget.isChild ?? false;
+    _selectedParentId = widget.selectedParentId;
 
     _exercisePageController = PageController(
       initialPage: _pageFromDate(selectedDate),
@@ -96,7 +107,12 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final exerciseService = ExerciseService();
 
-      final serverData = await exerciseService.getExerciseRecord(date: dateKey);
+      // 자녀인 경우 선택된 부모의 데이터 조회
+      final targetUserId = _isChild ? _selectedParentId : null;
+      final serverData = await exerciseService.getExerciseRecord(
+        date: dateKey,
+        parentId: targetUserId,
+      );
 
       if (serverData != null && serverData['grid'] != null) {
         final List<List<int>> serverGrid = (serverData['grid'] as List)
@@ -242,9 +258,6 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final circleSize = screenWidth * 1.56;
-    final exerciseTime = getExerciseTime(selectedDate);
-    final hours = exerciseTime['hours'] ?? 0;
-    final minutes = exerciseTime['minutes'] ?? 0;
 
     return Scaffold(
       backgroundColor: AppColors.ongiLigntgrey,
@@ -335,8 +348,8 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                                 return;
                                               _updateFromSwipe(index);
                                             },
-                                            itemCount:
-                                                10000, // large buffer for infinite feel
+                                            itemCount: 10000,
+                                            // large buffer for infinite feel
                                             itemBuilder: (context, index) {
                                               final date = _dateFromPage(index);
                                               final exerciseTimeForDate =
@@ -350,18 +363,20 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
 
                                               return GestureDetector(
                                                 onTap: () async {
-                                                  final result =
-                                                      await Navigator.push(
-                                                        context,
-                                                        MaterialPageRoute(
-                                                          builder: (_) =>
-                                                              ExerciseRecordDetailScreen(
-                                                                date: date,
-                                                                hours: h,
-                                                                minutes: m,
-                                                              ),
-                                                        ),
-                                                      );
+                                                  final result = await Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (_) =>
+                                                          ExerciseRecordDetailScreen(
+                                                            date: date,
+                                                            hours: h,
+                                                            minutes: m,
+                                                            selectedParentId:
+                                                                _selectedParentId,
+                                                            isChild: _isChild,
+                                                          ),
+                                                    ),
+                                                  );
 
                                                   // detail 화면에서 돌아온 후 서버 데이터 다시 조회
                                                   if (result != null &&

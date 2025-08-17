@@ -7,6 +7,8 @@ import 'package:ongi/services/temperature_service.dart';
 import 'package:ongi/services/health_service.dart';
 import 'package:ongi/services/pill_service.dart';
 import 'package:ongi/services/step_service.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class HomeCapsuleSection extends StatefulWidget {
   final VoidCallback? onGraphTap;
@@ -29,6 +31,23 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
     fetchTodayTemperature();
   }
 
+  Future<void> ensureFamilyCode() async {
+    final userInfo = await PrefsManager.getUserInfo();
+    if (userInfo['familycode'] == null || userInfo['familycode']!.isEmpty) {
+      final token = await PrefsManager.getAccessToken();
+      if (token == null) return;
+      final url = Uri.parse('https://ongi-1049536928483.asia-northeast3.run.app/family');
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        await PrefsManager.saveFamilyCodeAndName(data['code'] ?? '', data['name'] ?? '');
+      }
+    }
+  }
+
   // 전체 데이터 새로고침
   void refreshAllData() {
     fetchTodayTemperature();
@@ -43,9 +62,15 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
       isLoading = true;
     });
     try {
+      // 가족 코드가 없으면 먼저 조회
+      await ensureFamilyCode();
+      
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
-      if (familyCode == null) throw Exception('가족 코드가 없습니다.');
+      if (familyCode == null || familyCode.isEmpty) {
+        throw Exception('가족 코드를 가져올 수 없습니다.');
+      }
+      
       final token = await PrefsManager.getAccessToken();
       final service = TemperatureService(
         baseUrl: 'https://ongi-1049536928483.asia-northeast3.run.app',
@@ -67,6 +92,7 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
         isLoading = false;
       });
     } catch (e) {
+      print('온도 조회 실패: $e');
       setState(() {
         todayTemperature = 36.5;
         isLoading = false;

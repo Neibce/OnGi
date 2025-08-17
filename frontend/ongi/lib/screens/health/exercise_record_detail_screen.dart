@@ -8,12 +8,16 @@ class ExerciseRecordDetailScreen extends StatefulWidget {
   final DateTime date;
   final int hours;
   final int minutes;
+  final String? selectedParentId;
+  final bool? isChild;
 
   const ExerciseRecordDetailScreen({
     super.key,
     required this.date,
     required this.hours,
     required this.minutes,
+    this.selectedParentId,
+    this.isChild,
   });
 
   @override
@@ -30,12 +34,20 @@ class _ExerciseRecordDetailScreenState
   late final DateTime referenceDate;
   DateTime selectedDate = DateTime.now();
   late final PageController _dateCarouselController;
+  
+  // 자녀용 상태 관리
+  bool _isChild = false;
+  String? _selectedParentId;
 
   @override
   void initState() {
     super.initState();
     referenceDate = _dateOnly(DateTime.now());
     selectedDate = _dateOnly(widget.date);
+    
+    // 위젯에서 전달받은 자녀/부모 정보 설정
+    _isChild = widget.isChild ?? false;
+    _selectedParentId = widget.selectedParentId;
 
     _dateCarouselController = PageController(
       initialPage: _pageFromDate(selectedDate),
@@ -130,7 +142,12 @@ class _ExerciseRecordDetailScreenState
           "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
       final exerciseService = ExerciseService();
 
-      final serverData = await exerciseService.getExerciseRecord(date: dateKey);
+      // 자녀인 경우 선택된 부모의 데이터 조회
+      final targetUserId = _isChild ? _selectedParentId : null;
+      final serverData = await exerciseService.getExerciseRecord(
+        date: dateKey,
+        parentId: targetUserId,
+      );
 
       if (serverData != null && serverData['grid'] != null) {
         final List<List<int>> serverGrid = (serverData['grid'] as List)
@@ -380,7 +397,7 @@ class _ExerciseRecordDetailScreenState
                               cellColor: Colors.white,
                               cellSelectedColor: AppColors.ongiOrange,
                               borderColor: AppColors.ongiOrange,
-                              onValueChanged: (newList) {
+                              onValueChanged: _isChild ? null : (newList) {
                                 setState(() => selected = newList);
                               },
                             ),

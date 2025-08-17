@@ -6,7 +6,14 @@ import 'package:ongi/widgets/date_carousel.dart';
 import 'add_pill_screen.dart';
 
 class PillHistoryScreen extends StatefulWidget {
-  const PillHistoryScreen({super.key});
+  final String? selectedParentId;
+  final bool? isChild;
+  
+  const PillHistoryScreen({
+    super.key,
+    this.selectedParentId,
+    this.isChild,
+  });
 
   @override
   State<PillHistoryScreen> createState() => _PillHistoryScreenState();
@@ -17,10 +24,39 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
   List<Map<String, dynamic>> _todaySchedule = <Map<String, dynamic>>[];
   final Set<String> _takenKeys = <String>{};
   DateTime _selectedDate = DateTime.now();
+  
+  // 자녀 사용자 관련 상태
+  bool _isChild = false;
+  String? _selectedParentId;
 
   @override
   void initState() {
     super.initState();
+    _initializeScreen();
+  }
+
+  @override
+  void didUpdateWidget(PillHistoryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // 부모가 변경되었을 때 데이터 다시 로드
+    if (widget.selectedParentId != oldWidget.selectedParentId) {
+      setState(() {
+        _selectedParentId = widget.selectedParentId;
+      });
+      _fetchTodaySchedule();
+    }
+  }
+
+  Future<void> _initializeScreen() async {
+    // 이전 화면에서 전달받은 정보가 있으면 사용
+    if (widget.isChild != null && widget.selectedParentId != null) {
+      setState(() {
+        _isChild = widget.isChild!;
+        _selectedParentId = widget.selectedParentId;
+      });
+    }
+    
     _fetchTodaySchedule();
   }
 
@@ -29,8 +65,9 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
       _isLoading = true;
     });
     try {
+      // 자녀인 경우 선택된 부모의 약 정보 조회
       final List<Map<String, dynamic>> schedule =
-          await PillService.getPillScheduleByDate(_selectedDate);
+          await PillService.getPillScheduleByDate(_selectedDate, parentUuid: _selectedParentId);
       final Set<String> taken = <String>{};
       for (final pill in schedule) {
         final dynamic idRaw = pill['id'] ?? pill['pillId'] ?? pill['pillID'];
@@ -88,6 +125,13 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
     required String pillId,
     required String intakeTime,
   }) async {
+    final String key = '$pillId|${_displayTime(intakeTime)}';
+    
+    // 즉시 UI 업데이트 (서버 응답 전)
+    setState(() {
+      _takenKeys.add(key);
+    });
+    
     try {
       await PillService.addPillRecord(
         pillId: pillId,
@@ -95,10 +139,6 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
         intakeDate: _selectedDate,
       );
       if (!mounted) return;
-      final String key = '$pillId|${_displayTime(intakeTime)}';
-      setState(() {
-        _takenKeys.add(key);
-      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: const Text(
@@ -115,10 +155,69 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
       );
     } catch (e) {
       if (!mounted) return;
+      // 서버 요청 실패 시 UI 상태 롤백
+      setState(() {
+        _takenKeys.remove(key);
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             '복용 기록 추가 실패: $e',
+            style: const TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  Future<void> _deleteRecord({
+    required String pillId,
+    required String intakeTime,
+  }) async {
+    final String key = '$pillId|${_displayTime(intakeTime)}';
+    
+    // 즉시 UI 업데이트 (서버 응답 전)
+    setState(() {
+      _takenKeys.remove(key);
+    });
+    
+    try {
+      await PillService.deletePillRecord(
+        pillId: pillId,
+        intakeTime: intakeTime,
+        intakeDate: _selectedDate,
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text(
+            '복용 기록이 취소되었습니다.',
+            style: TextStyle(color: AppColors.ongiOrange),
+          ),
+          backgroundColor: Colors.white,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      // 서버 요청 실패 시 UI 상태 롤백
+      setState(() {
+        _takenKeys.add(key);
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            '복용 기록 취소 실패: $e',
             style: const TextStyle(color: AppColors.ongiOrange),
           ),
           backgroundColor: Colors.white,
@@ -214,7 +313,9 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const AddPillScreen(),
+                                    builder: (context) => AddPillScreen(
+                                      targetParentId: _selectedParentId,
+                                    ),
                                   ),
                                 ).then((_) {
                                   _fetchTodaySchedule();
@@ -268,7 +369,17 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                               <dynamic>[];
                           final List<String> times = timesDyn
                               .map((e) => e.toString())
-                              .toList();
+                              .toList()
+                              ..sort((a, b) {
+                                // 시간 문자열을 DateTime으로 변환해서 정렬
+                                try {
+                                  final timeA = DateTime.parse('2000-01-01 $a:00');
+                                  final timeB = DateTime.parse('2000-01-01 $b:00');
+                                  return timeA.compareTo(timeB);
+                                } catch (e) {
+                                  return a.compareTo(b);
+                                }
+                              });
                           final int timesCount = times.length;
 
                           // 카드
@@ -329,49 +440,60 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                                         ),
                                       ),
                                       const SizedBox(height: 8),
-                                      Wrap(
-                                        spacing: 12,
-                                        runSpacing: 8,
+                                      Row(
                                         children: times.map((timeStr) {
                                           final String key =
                                               '$pillId|${_displayTime(timeStr)}';
                                           final bool taken =
                                               _takenKeys.contains(key);
-                                          return GestureDetector(
-                                            onTap: taken || pillId.isEmpty
-                                                ? null
-                                                : () => _addRecord(
-                                                    pillId: pillId,
-                                                    intakeTime: timeStr,
-                                                  ),
-                                            child: Container(
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 27,
-                                                    vertical: 6,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: taken
-                                                    ? Colors.white
-                                                    : AppColors.ongiOrange,
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
+                                          return Expanded(
+                                            child: Padding(
+                                              padding: const EdgeInsets.only(
+                                                right: 8,
                                               ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Text(
-                                                    _displayTime(timeStr),
-                                                    style: TextStyle(
-                                                      color: taken
-                                                          ? Colors.black
-                                                          : Colors.white,
-                                                      fontSize: 11,
-                                                      fontWeight:
-                                                          FontWeight.w600,
+                                              child: GestureDetector(
+                                                onTap: (_isChild || pillId.isEmpty)
+                                                    ? null
+                                                    : () {
+                                                        if (taken) {
+                                                          _deleteRecord(
+                                                            pillId: pillId,
+                                                            intakeTime: timeStr,
+                                                          );
+                                                        } else {
+                                                          _addRecord(
+                                                            pillId: pillId,
+                                                            intakeTime: timeStr,
+                                                          );
+                                                        }
+                                                      },
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 6,
+                                                      ),
+                                                  decoration: BoxDecoration(
+                                                    color: taken
+                                                        ? Colors.white
+                                                        : AppColors.ongiOrange,
+                                                    borderRadius:
+                                                        BorderRadius.circular(20),
+                                                  ),
+                                                  child: Center(
+                                                    child: Text(
+                                                      _displayTime(timeStr),
+                                                      style: TextStyle(
+                                                        color: taken
+                                                            ? Colors.black
+                                                            : Colors.white,
+                                                        fontSize: 11,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                     ),
                                                   ),
-                                                ],
+                                                ),
                                               ),
                                             ),
                                           );

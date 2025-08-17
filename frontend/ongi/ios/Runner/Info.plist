@@ -64,5 +64,11 @@
         <string>이 앱은 사진을 선택하기 위해 갤러리 접근 권한이 필요합니다.</string>
         <key>NSPhotoLibraryAddUsageDescription</key>
         <string>이 앱은 사진을 저장하기 위해 갤러리 쓰기 권한이 필요합니다.</string>
+        <key>NSLocationWhenInUseUsageDescription</key>
+        <string>This app needs access to location when open.</string>
+        <key>NSLocationAlwaysUsageDescription</key>
+        <string>This app needs access to location when in the background.</string>
+        <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+        <string>This app needs access to location when in the background.</string>
 	</dict>
 </plist>

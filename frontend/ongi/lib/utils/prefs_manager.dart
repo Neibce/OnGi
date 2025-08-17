@@ -60,6 +60,11 @@ class PrefsManager {
     final prefs = await _prefs;
     await prefs.remove(_accessTokenKey);
     await prefs.remove(_userNameKey);
+    await prefs.remove(_uuidKey);
+    await prefs.remove(_userFamilyCodeKey);
+    await prefs.remove(_userFamilyNameKey);
+    await prefs.remove(_userProfileImageKey);
+    await prefs.remove(_isParent);
   }
 
   static Future<Map<String, String?>> getUserInfo() async {
@@ -78,5 +83,15 @@ class PrefsManager {
     final prefs = await _prefs;
     await prefs.setString(_userFamilyCodeKey, code);
     await prefs.setString(_userFamilyNameKey, name);
+  }
+
+  static Future<void> saveIsParent(bool isParent) async {
+    final prefs = await _prefs;
+    await prefs.setBool(_isParent, isParent);
+  }
+
+  static Future<bool> getIsParent() async {
+    final prefs = await _prefs;
+    return prefs.getBool(_isParent) ?? false;
   }
 }

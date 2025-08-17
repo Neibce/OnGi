@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface PainRecordRepository extends JpaRepository<PainRecord, Long> {
     // 최근 7일간 통증 기록 조회
     List<PainRecord> findByParentIdAndDateBetweenOrderByDateDesc(UUID parentId, LocalDate startDate, LocalDate endDate);
+    // 특정 날짜의 통증 기록 조회
+    java.util.Optional<PainRecord> findByParentIdAndDate(UUID parentId, LocalDate date);
 } 
