@@ -78,12 +78,12 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
     if (dailyTemperatures.isEmpty) return 38.0;
     final temps = dailyTemperatures.map((e) => (e['totalTemperature'] ?? 36.5) as double).toList();
     final maxTemp = temps.reduce((a, b) => a > b ? a : b);
-    return maxTemp + 0.5;
+    return maxTemp + 0.3;
   }
 
   double get horizontalInterval {
     if ((maxY - minY) == 0) return 0.1;
-    return (maxY - minY) / 9;
+    return (maxY - minY) / 10;
   }
 
   Future<void> fetchAllTemperatureData() async {
