@@ -151,14 +151,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
               splashColor: Colors.transparent, // 리플 효과 끄기
               highlightColor: Colors.transparent, // 하이라이트 효과 끄기
               borderRadius: BorderRadius.circular(40),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const AddRecordScreen(),
-                  ),
-                );
-              },
+              onTap: () => _onAddRecordTapped(),
               child: Container(
                 width: 72, // 터치 영역 확대
                 height: 72, // 터치 영역 확대
