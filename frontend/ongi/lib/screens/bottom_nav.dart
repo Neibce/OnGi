@@ -7,6 +7,8 @@ import 'package:ongi/screens/photo/photo_calendar_screen.dart';
 import 'package:ongi/screens/mypage/mypage_screen.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/services/maum_log_service.dart';
+import 'package:ongi/services/health_record_status_service.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 import 'package:intl/intl.dart';
 
 class BottomNavScreen extends StatefulWidget {
@@ -19,6 +21,9 @@ class BottomNavScreen extends StatefulWidget {
 
 class _BottomNavScreenState extends State<BottomNavScreen> {
   late int _currentIndex;
+  bool _showTooltip = false;
+  bool _isCheckingHealthRecord = false;
+  bool _isParent = false;
 
   final List<Widget> _screens = [
     const HomeScreen(),
@@ -31,12 +36,61 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    _checkUserTypeAndHealthRecord();
+  }
+
+  Future<void> _checkUserTypeAndHealthRecord() async {
+    if (_isCheckingHealthRecord) return;
+
+    setState(() {
+      _isCheckingHealthRecord = true;
+    });
+
+    try {
+      final isParent = await PrefsManager.getIsParent();
+      _isParent = isParent;
+
+      if (_isParent) {
+        final hasRecord =
+            await HealthRecordStatusService.hasTodayHealthRecord();
+        if (mounted) {
+          setState(() {
+            _showTooltip = !hasRecord;
+            _isCheckingHealthRecord = false;
+          });
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _showTooltip = false;
+            _isCheckingHealthRecord = false;
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _showTooltip = false;
+          _isCheckingHealthRecord = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _checkHealthRecordStatus() async {
+    if (!_isParent) return;
+
+    await _checkUserTypeAndHealthRecord();
   }
 
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
     });
+
+    if (index == 0 || index == 1) {
+      _checkHealthRecordStatus();
+    }
   }
 
   Future<void> _onAddRecordTapped() async {
@@ -83,19 +137,27 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
         }
       } else {
         if (mounted) {
-          Navigator.push(
+          final result = await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const AddRecordScreen()),
           );
+
+          if (result == true) {
+            _checkHealthRecordStatus();
+          }
         }
       }
     } catch (e) {
       print('마음로그 확인 중 에러: $e');
       if (mounted) {
-        Navigator.push(
+        final result = await Navigator.push(
           context,
           MaterialPageRoute(builder: (context) => const AddRecordScreen()),
         );
+
+        if (result == true) {
+          _checkHealthRecordStatus();
+        }
       }
     }
   }
@@ -103,9 +165,43 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.ongiLigntgrey, // 정확한 앱 배경색 사용
-      body: IndexedStack(index: _currentIndex, children: _screens),
+      backgroundColor: AppColors.ongiLigntgrey,
+      body: Stack(
+        children: [
+          IndexedStack(index: _currentIndex, children: _screens),
+          if (_showTooltip) _buildTooltip(),
+        ],
+      ),
       bottomNavigationBar: _buildCustomBottomNav(),
+    );
+  }
+
+  Widget _buildTooltip() {
+    return Positioned(
+      bottom: 0,
+      left: -150,
+      right: 0,
+      child: Center(
+        child: AnimatedOpacity(
+          opacity: _showTooltip ? 1.0 : 0.0,
+          duration: const Duration(milliseconds: 300),
+          child: GestureDetector(
+            onTap: () {
+              setState(() {
+                _showTooltip = false;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
+              child: SvgPicture.asset(
+                'assets/images/record_tooltip.svg',
+                width: 112,
+                height: 50,
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -148,8 +244,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
           Material(
             color: Colors.transparent,
             child: InkWell(
-              splashColor: Colors.transparent, // 리플 효과 끄기
-              highlightColor: Colors.transparent, // 하이라이트 효과 끄기
+              splashColor: Colors.transparent,
+              highlightColor: Colors.transparent,
               borderRadius: BorderRadius.circular(40),
               onTap: () {
                 Navigator.push(
@@ -160,8 +256,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
                 );
               },
               child: Container(
-                width: 72, // 터치 영역 확대
-                height: 72, // 터치 영역 확대
+                width: 72,
+                height: 72,
                 alignment: Alignment.center,
                 child: Container(
                   width: 56,
@@ -220,13 +316,13 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        splashColor: Colors.transparent, // 리플 효과 끄기
-        highlightColor: Colors.transparent, // 하이라이트 효과 끄기
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
         borderRadius: BorderRadius.circular(16),
         onTap: () => _onTabTapped(index),
         child: Container(
-          width: 72, // 터치 영역 확대
-          height: 72, // 터치 영역 확대
+          width: 72,
+          height: 72,
           alignment: Alignment.center,
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
