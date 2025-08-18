@@ -6,6 +6,7 @@ import 'package:ongi/models/maumlog.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/screens/photo/photo_remind_popup.dart';
 import 'package:ongi/screens/photo/photo_update_popup.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../services/maum_log_service.dart';
 
@@ -86,36 +87,19 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 10),
-                // 상단 아이콘들
+                // 뒤로가기
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      IconButton(
-                        icon: const Icon(
-                          Icons.arrow_back_ios_new_rounded,
-                          color: Colors.black87,
+                      GestureDetector(
+                        onTap: () => Navigator.of(context).pop(),
+                        child: SizedBox(
+                          width: 36,
+                          height: 36,
+                          child: SvgPicture.asset('assets/images/back_icon_black.svg'),
                         ),
-                        onPressed: () => Navigator.of(context).pop(),
-                      ),
-                      Row(
-                        children: [
-                          IconButton(
-                            icon: const Icon(
-                              Icons.share_outlined,
-                              color: Colors.black54,
-                            ),
-                            onPressed: () {},
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.more_vert,
-                              color: Colors.black54,
-                            ),
-                            onPressed: () {},
-                          ),
-                        ],
                       ),
                     ],
                   ),

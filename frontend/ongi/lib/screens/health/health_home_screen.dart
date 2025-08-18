@@ -410,7 +410,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
           ),
           SizedBox(height: 3),
           Text(
-            '입력되지 않았어요!',
+            '입력되지 \n않았어요!',
             style: TextStyle(
               fontSize: 38,
               fontWeight: FontWeight.w600,
@@ -539,54 +539,65 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     if (_isChild && !_isLoadingParents) {
       // 자녀인 경우 드롭다운 표시
       return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black38,
-                  blurRadius: 4,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedParentId,
-                icon: const SizedBox.shrink(),
-                dropdownColor: Colors.white,
-                isDense: false,
-                itemHeight: 65,
-                borderRadius: BorderRadius.circular(20),
-                style: const TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.ongiOrange,
-                ),
-                items: _parentMembers.map((parent) {
-                  return DropdownMenuItem<String>(
-                    value: parent['uuid'],
-                    child: Text(
-                      _formatNameForDisplay(parent['name']),
-                      style: const TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.ongiOrange,
+          Flexible(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black38,
+                    blurRadius: 4,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedParentId,
+                  icon: const SizedBox.shrink(),
+                  dropdownColor: Colors.white,
+                  isDense: false,
+                  itemHeight: 80, // 높이 증가로 폰트 클리핑 방지
+                  borderRadius: BorderRadius.circular(20),
+                  isExpanded: false, // 내용에 맞는 너비
+                  style: const TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.ongiOrange,
+                    height: 1.1, // 줄 높이 조정으로 클리핑 방지
+                  ),
+                  items: _parentMembers.map((parent) {
+                    return DropdownMenuItem<String>(
+                      value: parent['uuid'],
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _formatNameForDisplay(parent['name']),
+                          style: const TextStyle(
+                            fontSize: 60,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ongiOrange,
+                            height: 1.1, // 줄 높이 조정
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    _onParentSelected(newValue);
-                  }
-                },
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      _onParentSelected(newValue);
+                    }
+                  },
+                ),
               ),
             ),
           ),
+          const SizedBox(width: 8), // 간격 추가
           const Text(
             '님의',
             style: TextStyle(

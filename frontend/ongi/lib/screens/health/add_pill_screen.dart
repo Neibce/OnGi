@@ -260,10 +260,22 @@ class _AddPillScreenState extends State<AddPillScreen> {
       );
 
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const PillUpdatePopup()),
-      );
+      
+      // 즉시 홈으로 돌아가면서 성공 결과 전달
+      Navigator.pop(context, true);
+      
+      // 성공 팝업을 약간 지연 후 표시 (홈 화면이 먼저 업데이트되도록)
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext context) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: const PillUpdatePopup(),
+          ),
+        );
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(

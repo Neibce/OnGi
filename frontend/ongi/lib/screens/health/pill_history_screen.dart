@@ -28,6 +28,9 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
   // 자녀 사용자 관련 상태
   bool _isChild = false;
   String? _selectedParentId;
+  
+  // 약 복용 상태 관련
+  int _todayPillCount = 0;
 
   @override
   void initState() {
@@ -83,16 +86,41 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
           taken.add('$pillId|$hhmm');
         }
       }
+      // 약 복용 카운트 계산
+      int totalIntakes = 0;
+      int takenIntakes = 0;
+      
+      for (var pill in schedule) {
+        final List<dynamic> intakeTimes = pill['intakeTimes'] ?? [];
+        final Map<String, dynamic> dayIntakeStatus = pill['dayIntakeStatus'] ?? {};
+        
+        totalIntakes += intakeTimes.length;
+        
+        // dayIntakeStatus에서 실제 복용한 시간들을 확인
+        for (var intakeTime in intakeTimes) {
+          final timeKey = intakeTime.toString().substring(0, 5); // "08:00:00" -> "08:00"
+          if (dayIntakeStatus.containsKey(timeKey)) {
+            takenIntakes++;
+          }
+        }
+      }
+      
+      // 남은 복용 횟수
+      int remainingIntakes = totalIntakes - takenIntakes;
+      if (remainingIntakes < 0) remainingIntakes = 0;
+
       setState(() {
         _todaySchedule = schedule;
         _takenKeys
           ..clear()
           ..addAll(taken);
+        _todayPillCount = remainingIntakes;
         _isLoading = false;
       });
     } catch (e) {
       setState(() {
         _todaySchedule = <Map<String, dynamic>>[];
+        _todayPillCount = 0;
         _isLoading = false;
       });
     }
@@ -122,6 +150,54 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
     }
   }
 
+  Widget _buildPillStatusText() {
+    if (_todayPillCount == 0) {
+      return const Column(
+        children: [
+          Text(
+            '오늘의 약을',
+            style: TextStyle(
+              fontSize: 25,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              height: 1,
+            ),
+          ),
+          Text(
+            '모두 섭취하셨어요!',
+            style: TextStyle(
+              fontSize: 40,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Column(
+        children: [
+          Text(
+            _isChild ? '오늘 ${_todayPillCount}개의 약을' : '오늘 복용해야 할 약,',
+            style: const TextStyle(
+              fontSize: 25,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+              height: 1,
+            ),
+          ),
+          Text(
+            _isChild ? '섭취하지 않으셨어요!' : '다 섭취 하셨나요?',
+            style: const TextStyle(
+              fontSize: 40,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      );
+    }
+  }
+
   Future<void> _addRecord({
     required String pillId,
     required String intakeTime,
@@ -131,6 +207,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
     // 즉시 UI 업데이트 (서버 응답 전)
     setState(() {
       _takenKeys.add(key);
+      if (_todayPillCount > 0) _todayPillCount--;
     });
     
     try {
@@ -159,6 +236,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
       // 서버 요청 실패 시 UI 상태 롤백
       setState(() {
         _takenKeys.remove(key);
+        _todayPillCount++;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -186,6 +264,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
     // 즉시 UI 업데이트 (서버 응답 전)
     setState(() {
       _takenKeys.remove(key);
+      _todayPillCount++;
     });
     
     try {
@@ -214,6 +293,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
       // 서버 요청 실패 시 UI 상태 롤백
       setState(() {
         _takenKeys.add(key);
+        if (_todayPillCount > 0) _todayPillCount--;
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -264,23 +344,7 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                           maxHeight: double.infinity,
                           child: Column(
                             children: [
-                              const Text(
-                                '오늘 복용해야 할 약,',
-                                style: TextStyle(
-                                  fontSize: 25,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1,
-                                ),
-                              ),
-                              const Text(
-                                '다 섭취 하셨나요?',
-                                style: TextStyle(
-                                  fontSize: 40,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
+                              _buildPillStatusText(),
                               Image.asset(
                                 'assets/images/pill_history_title_logo.png',
                                 width: circleSize * 0.26,
@@ -314,17 +378,22 @@ class _PillHistoryScreenState extends State<PillHistoryScreen> {
                         itemBuilder: (context, index) {
                           if (index == _todaySchedule.length) {
                             return GestureDetector(
-                              onTap: () {
-                                Navigator.push(
+                              onTap: () async {
+                                final result = await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => AddPillScreen(
                                       targetParentId: _selectedParentId,
                                     ),
                                   ),
-                                ).then((_) {
+                                );
+                                
+                                // 약 추가 성공 시 즉시 새로고침
+                                if (result == true) {
+                                  print('약 추가 성공 - 즉시 데이터 새로고침');
+                                  // 즉시 새로고침
                                   _fetchTodaySchedule();
-                                });
+                                }
                               },
                               child: Container(
                                 margin: const EdgeInsets.symmetric(
