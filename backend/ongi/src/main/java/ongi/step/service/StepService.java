@@ -1,12 +1,13 @@
 package ongi.step.service;
 
 import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import ongi.exception.EntityNotFoundException;
 import ongi.family.entity.Family;
 import ongi.family.repository.FamilyRepository;
-import ongi.step.dto.FamilyStepRankingResponse;
+import ongi.step.dto.FamilyStepRankResponse;
 import ongi.step.dto.FamilyStepResponse;
 import ongi.step.dto.FamilyStepResponse.MemberStepInfo;
 import ongi.step.dto.StepUpsertRequest;
@@ -50,6 +51,7 @@ public class StepService {
         }
     }
 
+    @Transactional
     public FamilyStepResponse getFamilySteps(User user, LocalDate date) {
         Family family = familyRepository.findByMembersContains(user.getUuid())
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
@@ -57,14 +59,13 @@ public class StepService {
         List<Step> familySteps = stepRepository.findByFamilyAndDate(family, date);
         Integer totalSteps = stepRepository.getTotalStepsByFamilyAndDate(family, date);
 
-
         List<MemberStepInfo> memberSteps = family.getMembers().stream().map(uuid ->
                 new MemberStepInfo(uuid, userRepository.findByUuid(uuid).get().getName(),
-                familySteps.stream()
-                        .filter(step -> step.getCreatedBy().getUuid().equals(uuid))
-                        .findFirst()
-                        .map(Step::getSteps)
-                        .orElse(0))).toList();
+                        familySteps.stream()
+                                .filter(step -> step.getCreatedBy().getUuid().equals(uuid))
+                                .findFirst()
+                                .map(Step::getSteps)
+                                .orElse(0))).toList();
 
         return new FamilyStepResponse(
                 totalSteps,
@@ -73,26 +74,25 @@ public class StepService {
         );
     }
 
-
-    /// TODO ///
-    public List<FamilyStepRankingResponse> getFamilyStepRanking(User user, LocalDate date) {
-        Family family = familyRepository.findByMembersContains(user.getUuid())
+    @Transactional
+    public List<FamilyStepRankResponse> getFamilyStepRank(User user, LocalDate date) {
+        Family ourFamily = familyRepository.findByMembersContains(user.getUuid())
                 .orElseThrow(() -> new EntityNotFoundException("가족을 찾을 수 없습니다."));
 
-        // TODO
-        return null;
-    }
+        return stepRepository.findStepsAndSizeBetween(getThisWeekMonday(date), date).stream()
+                .map(v -> {
+                    long cnt = v.getMemberCount();
+                    long total = v.getTotalSteps() ;
+                    int perMemberWeeklyTotal = (cnt == 0) ? 0 : (int)Math.round((double) total / cnt);
 
-    private int get7DaysAverageSteps(Family family) {
-        LocalDate today = LocalDate.now();
-        List<Step> familySteps = stepRepository.findByFamilyAndDateBetween(family, today,
-                getThisWeekMonday(today));
-
-        int totalSteps = familySteps.stream()
-                .mapToInt(Step::getSteps)
-                .sum();
-
-        return totalSteps / family.getMembers().size();
+                    return new FamilyStepRankResponse(
+                            v.getFamilyName(),
+                            perMemberWeeklyTotal,
+                            v.getFamilyCode().equals(ourFamily.getCode())
+                    );
+                })
+                .sorted(Comparator.comparingInt(FamilyStepRankResponse::averageSteps).reversed())
+                .toList();
     }
 
     public LocalDate getThisWeekMonday(LocalDate date) {
