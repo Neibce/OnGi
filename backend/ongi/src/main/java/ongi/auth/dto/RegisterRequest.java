@@ -17,7 +17,10 @@ public record RegisterRequest(
         String name,
 
         @NotNull(message = "부모 여부는 필수 입력값입니다.")
-        Boolean isParent
+        Boolean isParent,
+
+        @NotNull(message = "프로필 이미지 ID는 필수 입력값입니다.")
+        Integer profileImageId
 
 ) {
 

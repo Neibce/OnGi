@@ -113,8 +113,8 @@ class FamilyControllerUnitTest {
         void getFamilyMembers_Success() {
             // given
             List<UserInfo> expectedMembers = Arrays.asList(
-                    new UserInfo(UUID.randomUUID(), "test@example.com", "홍길동", true, LocalDateTime.now(), LocalDateTime.now()),
-                    new UserInfo(UUID.randomUUID(), "member@example.com", "김철수", false, LocalDateTime.now(), LocalDateTime.now())
+                    new UserInfo(UUID.randomUUID(), "test@example.com", "홍길동", true, 1, LocalDateTime.now(), LocalDateTime.now()),
+                    new UserInfo(UUID.randomUUID(), "member@example.com", "김철수", false, 1, LocalDateTime.now(), LocalDateTime.now())
             );
             given(familyService.getFamilyMembers(customUserDetails.getUser())).willReturn(expectedMembers);
 
