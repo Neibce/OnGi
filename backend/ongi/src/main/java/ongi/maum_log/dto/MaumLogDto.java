@@ -2,9 +2,9 @@ package ongi.maum_log.dto;
 
 import java.net.URL;
 import java.util.List;
-import java.util.UUID;
 import ongi.maum_log.entity.MaumLog;
 import ongi.maum_log.enums.Emotion;
+import ongi.user.dto.UserInfo;
 
 public record MaumLogDto(
         URL frontPresignedUrl,
@@ -12,8 +12,7 @@ public record MaumLogDto(
         String comment,
         String location,
         List<Emotion> emotions,
-        UUID uploader,
-        String uploaderName
+        UserInfo uploader
 ) {
     public static MaumLogDto of(URL frontPresignedUrl, URL backPresignedUrl, MaumLog maumLog) {
         return new MaumLogDto(
@@ -22,8 +21,7 @@ public record MaumLogDto(
                 maumLog.getComment(),
                 maumLog.getLocation(),
                 maumLog.getEmotions(),
-                maumLog.getCreatedBy().getUuid(),
-                maumLog.getCreatedBy().getName()
+                new UserInfo(maumLog.getCreatedBy())
         );
     }
 }
