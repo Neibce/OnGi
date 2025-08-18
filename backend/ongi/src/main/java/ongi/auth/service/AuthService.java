@@ -32,6 +32,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.password()))
                 .name(request.name())
                 .isParent(request.isParent())
+                .profileImageId(request.profileImageId())
                 .build();
 
         return new UserInfo(userRepository.save(newUser));
