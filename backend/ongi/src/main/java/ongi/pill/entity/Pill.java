@@ -44,6 +44,8 @@ public class Pill extends BaseEntity {
     @Column(nullable = false)
     private Set<DayOfWeek> intakeDays;
 
+    private String fileName;
+
     @ManyToOne(fetch = FetchType.LAZY)
     private User owner;
 }

@@ -16,6 +16,7 @@ public record PillCreateRequest(
         @NotNull IntakeDetail intakeDetail,
         @NotNull List<LocalTime> intakeTimes,
         @NotNull Set<DayOfWeek> intakeDays,
-        @NotNull UUID parentUuid
+        @NotNull UUID parentUuid,
+        String fileName
 ) {
 } 

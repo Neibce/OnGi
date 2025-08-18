@@ -1,5 +1,6 @@
 package ongi.pill.service;
 
+import java.net.URL;
 import java.time.LocalDate;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -10,12 +11,14 @@ import ongi.pill.dto.PillCreateRequest;
 import ongi.pill.dto.PillInfo;
 import ongi.pill.dto.PillInfoWithIntakeStatus;
 import ongi.pill.dto.PillIntakeRecordRequest;
+import ongi.pill.dto.PillPresignedResponseDto;
 import ongi.pill.entity.Pill;
 import ongi.pill.entity.PillIntakeRecord;
 import ongi.pill.repository.PillIntakeRecordRepository;
 import ongi.pill.repository.PillRepository;
 import ongi.user.entity.User;
 import ongi.user.repository.UserRepository;
+import ongi.util.S3FileService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +35,9 @@ public class PillService {
     private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
     private final PillIntakeRecordRepository pillIntakeRecordRepository;
+    private final S3FileService s3FileService;
+
+    private static final String DIR_NAME = "pill-photos";
 
     @Transactional
     public PillInfo createPill(User child, PillCreateRequest request) {
@@ -49,6 +55,12 @@ public class PillService {
             throw new IllegalArgumentException("가족에 속하지 않은 사용자입니다.");
         }
 
+        if(request.fileName() != null) {
+            if (!s3FileService.objectExists(DIR_NAME, request.fileName())) {
+                throw new IllegalArgumentException("S3에 파일이 존재하지 않습니다.");
+            }
+        }
+
         Pill pill = Pill.builder()
                 .name(request.name())
                 .times(request.times())
@@ -56,6 +68,7 @@ public class PillService {
                 .intakeTimes(request.intakeTimes())
                 .intakeDays(request.intakeDays())
                 .owner(parent)
+                .fileName(request.fileName())
                 .build();
 
         Pill savedPill = pillRepository.save(pill);
@@ -143,8 +156,15 @@ public class PillService {
                 .collect(Collectors.groupingBy(record -> record.getPill().getId()));
 
         return pills.stream()
-                .map(pill -> new PillInfoWithIntakeStatus(pill,
+                .map(pill -> new PillInfoWithIntakeStatus(pill, s3FileService.createSignedGetUrl(DIR_NAME, pill.getFileName()),
                         intakeRecordsMap.getOrDefault(pill.getId(), List.of())))
                 .toList();
+    }
+
+    public PillPresignedResponseDto getPresignedPutUrl(User user) {
+        String fileName = UUID.randomUUID().toString();
+        URL signedGetUrl = s3FileService.createSignedPutUrl(user, DIR_NAME, fileName);
+
+        return new PillPresignedResponseDto(signedGetUrl, fileName);
     }
 }
