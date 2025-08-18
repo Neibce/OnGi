@@ -304,11 +304,18 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CircleAvatar(
-                        radius: 22,
-                        backgroundImage: AssetImage(
-                          'assets/images/users/elderly_woman.png',
-                        ),
+                      FutureBuilder<Map<String, dynamic>>(
+                        future: PrefsManager.getUserInfo(),
+                        builder: (context, snapshot) {
+                          final userInfo = snapshot.data ?? {};
+                          final profileImageId = userInfo['profileImageId'] ?? 0;
+                          final profileImagePath = PrefsManager.getProfileImagePath(profileImageId);
+                          
+                          return CircleAvatar(
+                            radius: 22,
+                            backgroundImage: AssetImage(profileImagePath),
+                          );
+                        },
                       ),
                       const SizedBox(width: 10),
                       Expanded(

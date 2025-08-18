@@ -3,6 +3,8 @@ import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/widgets/date_carousel.dart';
 import 'package:ongi/services/step_service.dart';
+import 'package:ongi/services/family_service.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class FamilyStepTrackerScreen extends StatefulWidget {
   const FamilyStepTrackerScreen({super.key});
@@ -54,22 +56,29 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     });
     try {
       final String dateStr = _formatDate(date);
-      final Map<String, dynamic>? result = await _stepService.getSteps(
-        date: dateStr,
-      );
+      
+      // 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
+      final List<Future> futures = [
+        _stepService.getSteps(date: dateStr),
+        FamilyService.getFamilyMembers(),
+      ];
+      
+      final results = await Future.wait(futures);
+      final Map<String, dynamic>? stepResult = results[0] as Map<String, dynamic>?;
+      final List<Map<String, dynamic>> familyMembers = results[1] as List<Map<String, dynamic>>;
 
       int parsedTotal = 0;
       final List<_MemberStep> parsedMembers = [];
-      if (result != null) {
-        if (result['totalSteps'] is int) {
-          parsedTotal = result['totalSteps'] as int;
-        } else if (result['steps'] is int) {
-          parsedTotal = result['steps'] as int;
-        } else if (result['total'] is int) {
-          parsedTotal = result['total'] as int;
+      if (stepResult != null) {
+        if (stepResult['totalSteps'] is int) {
+          parsedTotal = stepResult['totalSteps'] as int;
+        } else if (stepResult['steps'] is int) {
+          parsedTotal = stepResult['steps'] as int;
+        } else if (stepResult['total'] is int) {
+          parsedTotal = stepResult['total'] as int;
         }
 
-        final dynamic members = result['memberSteps'];
+        final dynamic members = stepResult['memberSteps'];
         if (members is List) {
           for (final dynamic item in members) {
             if (item is Map<String, dynamic>) {
@@ -78,12 +87,16 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
               final int steps = (item['steps'] is int)
                   ? item['steps'] as int
                   : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
+              
+              // 실제 가족 구성원의 프로필 이미지 가져오기
+              final profileImagePath = await PrefsManager.getProfileImagePathByUserId(userId, familyMembers);
+              
               parsedMembers.add(
                 _MemberStep(
                   userId: userId,
                   userName: userName.isEmpty ? '이름없음' : userName,
                   steps: steps,
-                  imageAsset: 'assets/images/users/elderly_woman.png',
+                  imageAsset: profileImagePath,
                 ),
               );
             }

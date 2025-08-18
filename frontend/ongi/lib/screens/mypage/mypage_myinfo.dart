@@ -5,9 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-class Myinfo extends StatelessWidget {
-  const Myinfo({Key? key}) : super(key: key);
+class Myinfo extends StatefulWidget {
+  const Myinfo({super.key});
 
+  @override
+  State<Myinfo> createState() => _MyinfoState();
+}
+
+class _MyinfoState extends State<Myinfo> {
   Future<Map<String, String>> fetchFamilyInfo() async {
     final token = await PrefsManager.getAccessToken();
     if (token == null) throw Exception('로그인 필요');
@@ -57,14 +62,13 @@ class Myinfo extends StatelessWidget {
         // 기존 PrefsManager.getUserInfo()에서 불러오던 나머지 정보는 그대로 사용
         // (예: name, profileImage, isParent 등)
         // 아래는 예시로 name 등은 PrefsManager에서 계속 불러오도록 유지
-        return FutureBuilder<Map<String, String?>>(
+        return FutureBuilder<Map<String, dynamic>>(
           future: PrefsManager.getUserInfo(),
           builder: (context, userSnapshot) {
             final userInfo = userSnapshot.data ?? {};
             final name = userInfo['name'] ?? '사용자';
-            final profileImage =
-                userInfo['profileImage'] ??
-                'assets/images/users/elderly_woman.png';
+            final profileImageId = userInfo['profileImageId'] ?? 0;
+            final profileImagePath = PrefsManager.getProfileImagePath(profileImageId);
             final isParent = userInfo['isParent'] == 'true';
             final roleText = isParent ? '부모' : '자녀';
             return Padding(
@@ -78,7 +82,7 @@ class Myinfo extends StatelessWidget {
                   // 프로필 이미지
                   ClipOval(
                     child: Image.asset(
-                      profileImage,
+                      profileImagePath,
                       width: screenWidth * 0.3, // 112/375
                       height: screenWidth * 0.4,
                       fit: BoxFit.contain,

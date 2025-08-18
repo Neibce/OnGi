@@ -31,6 +31,11 @@ class LoginService {
         await PrefsManager.saveIsParent(responseJson["userInfo"]["isParent"]);
       }
       
+      // profileImageId 정보도 저장
+      if (responseJson["userInfo"]["profileImageId"] != null) {
+        await PrefsManager.saveProfileImageId(responseJson["userInfo"]["profileImageId"]);
+      }
+      
       // 로그인 성공 후 FCM 토큰 업로드
       try {
         await FCMService.initializeAndUploadFCMToken();

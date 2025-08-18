@@ -32,6 +32,7 @@ class ModeScreen extends StatelessWidget {
       final email = prefs.getString('signup_email') ?? '';
       final password = prefs.getString('signup_password') ?? '';
       final name = prefs.getString('signup_username') ?? '';
+      final profileImageId = prefs.getInt('signup_profileImageId') ?? 0;
       final isParent = mode == 'parent';
 
       if (email.isEmpty || password.isEmpty || name.isEmpty) {
@@ -58,11 +59,12 @@ class ModeScreen extends StatelessWidget {
         password: password,
         name: name,
         isParent: isParent,
+        profileImageId: profileImageId,
       );
 
       final loginService = LoginService();
       await loginService.login(email: email, password: password);
-      
+
       // isParent 정보 저장
       await PrefsManager.saveIsParent(isParent);
 
@@ -112,7 +114,7 @@ class ModeScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: index != 4
                           ? AppColors.ongiOrange
-                          : AppColors.ongiOrange.withOpacity(0.4),
+                          : AppColors.ongiOrange.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
