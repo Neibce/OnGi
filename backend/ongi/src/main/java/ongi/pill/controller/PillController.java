@@ -8,6 +8,7 @@ import ongi.pill.dto.PillCreateRequest;
 import ongi.pill.dto.PillInfo;
 import ongi.pill.dto.PillInfoWithIntakeStatus;
 import ongi.pill.dto.PillIntakeRecordRequest;
+import ongi.pill.dto.PillPresignedResponseDto;
 import ongi.pill.service.PillService;
 import ongi.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
@@ -36,6 +37,14 @@ public class PillController {
     private final PillService pillService;
     private final FamilyService familyService;
     private final TemperatureService temperatureService;
+
+    @GetMapping("/presigned-url")
+    public ResponseEntity<PillPresignedResponseDto> getPillPresignedUrl(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        PillPresignedResponseDto presignedResponse =
+                pillService.getPresignedPutUrl(userDetails.getUser());
+        return ResponseEntity.ok(presignedResponse);
+    }
 
     @PostMapping
     public ResponseEntity<PillInfo> createPill(
