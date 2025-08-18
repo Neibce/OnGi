@@ -400,7 +400,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
           ),
           SizedBox(height: 3),
           Text(
-            '입력되지 않았어요!',
+            '입력되지 \n않았어요!',
             style: TextStyle(
               fontSize: 38,
               fontWeight: FontWeight.w600,
