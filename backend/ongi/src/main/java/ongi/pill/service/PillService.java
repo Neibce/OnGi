@@ -63,6 +63,21 @@ public class PillService {
     }
 
     @Transactional
+    public void deletePill(User user, Long pillId) {
+        Pill pill = pillRepository.findById(pillId)
+                .orElseThrow(() -> new EntityNotFoundException("약 정보를 찾을 수 없습니다."));
+
+        Family family = familyRepository.findByMembersContains(user.getUuid())
+                .orElseThrow(() -> new EntityNotFoundException("가족 정보를 찾을 수 없습니다."));
+
+        if (!family.getMembers().contains(pill.getOwner().getUuid())) {
+            throw new IllegalArgumentException("해당 약은 이 사용자의 소유가 아닙니다.");
+        }
+
+        pillRepository.delete(pill);
+    }
+
+    @Transactional
     public void recordPillIntake(User user, PillIntakeRecordRequest request) {
         if (!user.getIsParent()) {
             throw new IllegalArgumentException("해당 사용자는 부모가 아닙니다.");
