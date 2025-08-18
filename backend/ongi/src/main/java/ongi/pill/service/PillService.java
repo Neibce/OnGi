@@ -156,7 +156,8 @@ public class PillService {
                 .collect(Collectors.groupingBy(record -> record.getPill().getId()));
 
         return pills.stream()
-                .map(pill -> new PillInfoWithIntakeStatus(pill, s3FileService.createSignedGetUrl(DIR_NAME, pill.getFileName()),
+                .map(pill -> new PillInfoWithIntakeStatus(pill,
+                        pill.getFileName() != null ? s3FileService.createSignedGetUrl(DIR_NAME, pill.getFileName()) : null,
                         intakeRecordsMap.getOrDefault(pill.getId(), List.of())))
                 .toList();
     }
