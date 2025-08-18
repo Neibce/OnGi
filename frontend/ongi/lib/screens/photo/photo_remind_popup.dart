@@ -75,7 +75,7 @@ class PhotoRemindPopup extends StatelessWidget {
                       Padding(
                         padding: const EdgeInsets.only(
                           left: 10,
-                          top: 170,
+                          top: 190,
                           right: 10,
                         ),
                         child: Column(
@@ -104,6 +104,18 @@ class PhotoRemindPopup extends StatelessWidget {
                               onPressed: () async {
                                 try {
                                   Navigator.of(context).pop();
+                                  WidgetsBinding.instance.addPostFrameCallback((
+                                    _,
+                                  ) {
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (_) => const BottomNavScreen(
+                                          initialIndex: 2,
+                                        ),
+                                      ),
+                                      (route) => route.isFirst,
+                                    );
+                                  });
 
                                   // TODO: 실제 API 호출로 대체
                                   await Future.delayed(

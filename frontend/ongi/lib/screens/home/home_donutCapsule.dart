@@ -153,7 +153,9 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
                   bottom: 0,
                   child: Center(
                     child: isLoading
-                        ? const CircularProgressIndicator()
+                        ? const CircularProgressIndicator(
+                            color: AppColors.ongiOrange,
+                          )
                         : Row(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [

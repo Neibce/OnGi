@@ -36,7 +36,7 @@ public class UserController {
         return ResponseEntity.ok(new UserExistsResponse(userExists));
     }
 
-    @PostMapping("fcm-token")
+    @PostMapping("/fcm-token")
     public ResponseEntity<Void> updateUserFcmToken(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody FcmTokenUpdateRequestDto request) {

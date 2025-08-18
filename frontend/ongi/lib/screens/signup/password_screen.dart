@@ -12,6 +12,7 @@ class PasswordScreen extends StatefulWidget {
 
 class _PasswordScreenState extends State<PasswordScreen> {
   final TextEditingController _passwordCtrl = TextEditingController();
+  bool _obscureText = true;
 
   @override
   Widget build(BuildContext context) {
@@ -26,17 +27,18 @@ class _PasswordScreenState extends State<PasswordScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
-                  5, (index) => Container(
-                  width: 58,
-                  height: 7.5,
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
-                  decoration: BoxDecoration(
-                    color: index == 0 || index == 1
-                        ? AppColors.ongiOrange
-                        : AppColors.ongiOrange.withOpacity(0.4),
-                    borderRadius: BorderRadius.circular(4),
+                  5,
+                  (index) => Container(
+                    width: 58,
+                    height: 7.5,
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      color: index == 0 || index == 1
+                          ? AppColors.ongiOrange
+                          : AppColors.ongiOrange.withOpacity(0.4),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
-                ),
                 ),
               ),
             ),
@@ -73,32 +75,52 @@ class _PasswordScreenState extends State<PasswordScreen> {
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w300,
-                  color: Colors.grey
-                )
-              )
+                  color: Colors.grey,
+                ),
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 40, right: 40, top: 10),
               child: TextField(
+                obscureText: _obscureText,
                 controller: _passwordCtrl,
                 keyboardType: TextInputType.visiblePassword,
-                style: const TextStyle(fontSize: 25, color: AppColors.ongiOrange),
+                style: const TextStyle(
+                  fontSize: 25,
+                  color: AppColors.ongiOrange,
+                ),
                 decoration: InputDecoration(
                   hintText: 'PASSWORD',
-                  hintStyle:
-                  TextStyle(color: Colors.grey),
+                  hintStyle: TextStyle(color: Colors.grey),
                   contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 24, vertical: 13),
+                    horizontal: 24,
+                    vertical: 13,
+                  ),
                   filled: true,
                   fillColor: Colors.transparent,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureText ? Icons.visibility_off : Icons.visibility,
+                      color: AppColors.ongiOrange,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
                   enabledBorder: OutlineInputBorder(
-                    borderSide:
-                    const BorderSide(color: AppColors.ongiOrange, width: 1),
+                    borderSide: const BorderSide(
+                      color: AppColors.ongiOrange,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   focusedBorder: OutlineInputBorder(
-                    borderSide:
-                    const BorderSide(color: AppColors.ongiOrange, width: 1),
+                    borderSide: const BorderSide(
+                      color: AppColors.ongiOrange,
+                      width: 1,
+                    ),
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
@@ -174,7 +196,7 @@ class _PasswordScreenState extends State<PasswordScreen> {
                 ),
               ),
             ),
-          ]
+          ],
         ),
       ),
     );
