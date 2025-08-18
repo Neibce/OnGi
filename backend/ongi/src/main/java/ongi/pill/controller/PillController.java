@@ -8,6 +8,7 @@ import ongi.pill.dto.PillCreateRequest;
 import ongi.pill.dto.PillInfo;
 import ongi.pill.dto.PillInfoWithIntakeStatus;
 import ongi.pill.dto.PillIntakeRecordRequest;
+import ongi.pill.dto.PillPresignedResponseDto;
 import ongi.pill.service.PillService;
 import ongi.security.CustomUserDetails;
 import org.springframework.http.HttpStatus;
@@ -16,6 +17,7 @@ import org.springframework.lang.Nullable;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,12 +38,28 @@ public class PillController {
     private final FamilyService familyService;
     private final TemperatureService temperatureService;
 
+    @GetMapping("/presigned-url")
+    public ResponseEntity<PillPresignedResponseDto> getPillPresignedUrl(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        PillPresignedResponseDto presignedResponse =
+                pillService.getPresignedPutUrl(userDetails.getUser());
+        return ResponseEntity.ok(presignedResponse);
+    }
+
     @PostMapping
     public ResponseEntity<PillInfo> createPill(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody PillCreateRequest request) {
         PillInfo pillInfo = pillService.createPill(userDetails.getUser(), request);
         return ResponseEntity.ok(pillInfo);
+    }
+
+    @DeleteMapping("/{pillId}")
+    public ResponseEntity<PillInfo> deletePill(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long pillId) {
+        pillService.deletePill(userDetails.getUser(), pillId);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/record")

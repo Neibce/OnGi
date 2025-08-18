@@ -7,6 +7,7 @@ import 'package:ongi/services/temperature_service.dart';
 import 'package:ongi/services/health_service.dart';
 import 'package:ongi/services/pill_service.dart';
 import 'package:ongi/services/step_service.dart';
+import 'package:ongi/services/family_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
@@ -50,11 +51,18 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
 
   // 전체 데이터 새로고침
   void refreshAllData() {
+    print('HomeCapsuleSection 전체 데이터 새로고침');
     fetchTodayTemperature();
     _buttonColumnKey.currentState?.refreshData();
     if (widget.onRefresh != null) {
       widget.onRefresh!();
     }
+  }
+
+  // 약물 데이터만 빠르게 새로고침
+  void refreshPillDataOnly() {
+    print('HomeCapsuleSection 약물 데이터만 새로고침');
+    _buttonColumnKey.currentState?.refreshPillDataOnly();
   }
 
   Future<void> fetchTodayTemperature() async {
@@ -283,7 +291,7 @@ class ButtonColumn extends StatefulWidget {
   State<ButtonColumn> createState() => _ButtonColumnState();
 }
 
-class _ButtonColumnState extends State<ButtonColumn> {
+class _ButtonColumnState extends State<ButtonColumn> with WidgetsBindingObserver {
   int selectedIdx = -1; // 초기값을 -1로 (아무것도 선택되지 않은 상태)
 
   // API 데이터 상태
@@ -291,6 +299,10 @@ class _ButtonColumnState extends State<ButtonColumn> {
   String painText = '';
   String stepText = '';
   bool isLoading = true;
+  
+  // 자녀 사용자 관련 상태
+  bool _isChild = false;
+  List<Map<String, dynamic>> _parentMembers = [];
 
   String _formatRemaining(Duration d) {
     if (d.inMinutes <= 0) return '곧';
@@ -305,7 +317,136 @@ class _ButtonColumnState extends State<ButtonColumn> {
   @override
   void initState() {
     super.initState();
-    _loadData();
+    WidgetsBinding.instance.addObserver(this);
+    _checkUserType();
+  }
+
+  Future<void> _checkUserType() async {
+    try {
+      final isParent = await PrefsManager.getIsParent();
+      _isChild = !isParent;
+      
+      if (_isChild) {
+        await _loadParentMembers();
+      }
+      
+      _loadData();
+    } catch (e) {
+      print('사용자 타입 확인 실패: $e');
+      _loadData(); // 오류 시 기본 동작
+    }
+  }
+
+  Future<void> _loadParentMembers() async {
+    try {
+      final members = await FamilyService.getFamilyMembers();
+      final parents = members.where((member) => member['isParent'] == true).toList();
+      setState(() {
+        _parentMembers = parents;
+      });
+    } catch (e) {
+      print('부모 멤버 로드 실패: $e');
+    }
+  }
+
+  Future<void> _loadNearestParentPillInfo() async {
+    try {
+      final now = DateTime.now();
+      final currentTime = TimeOfDay.fromDateTime(now);
+      
+      String? nearestParentName;
+      String? nearestPillName;
+      Duration? shortestDuration;
+      
+      for (final parent in _parentMembers) {
+        try {
+          final parentUuid = parent['uuid'];
+          final parentName = parent['name'] ?? '부모님';
+          
+          if (parentUuid != null) {
+            final pillSchedule = await PillService.getTodayPillSchedule(parentUuid: parentUuid)
+                .timeout(const Duration(seconds: 5));
+            
+            for (final pill in pillSchedule) {
+              final pillName = pill['name'] ?? '약물';
+              final intakeTimes = pill['intakeTimes'] as List<dynamic>? ?? [];
+              
+              for (final timeStr in intakeTimes) {
+                try {
+                  final timeParts = timeStr.toString().split(':');
+                  if (timeParts.length >= 2) {
+                    final time = TimeOfDay(
+                      hour: int.parse(timeParts[0]),
+                      minute: int.parse(timeParts[1]),
+                    );
+
+                    // 현재 시간보다 늦은 시간인지 확인
+                    if (time.hour > currentTime.hour ||
+                        (time.hour == currentTime.hour && time.minute > currentTime.minute)) {
+                      
+                      final nextDateTime = DateTime(
+                        now.year,
+                        now.month,
+                        now.day,
+                        time.hour,
+                        time.minute,
+                      );
+                      final difference = nextDateTime.difference(now);
+                      
+                      // 가장 가까운 시간인지 확인
+                      if (shortestDuration == null || difference < shortestDuration) {
+                        shortestDuration = difference;
+                        nearestParentName = parentName;
+                        nearestPillName = pillName;
+                      }
+                    }
+                  }
+                } catch (timeParseError) {
+                  print('시간 파싱 오류: $timeParseError, 시간: $timeStr');
+                }
+              }
+            }
+          }
+        } catch (e) {
+          print('부모 ${parent['name']} 약물 데이터 로딩 오류: $e');
+        }
+      }
+      
+      // 결과 설정
+      if (nearestParentName != null && nearestPillName != null && shortestDuration != null) {
+        final remain = _formatRemaining(shortestDuration);
+        setState(() {
+          pillText = '$nearestParentName님은 $remain $nearestPillName을 먹어야 해요';
+        });
+      } else {
+        setState(() {
+          pillText = '부모님 약 복용 시간을 확인해봐요';
+        });
+      }
+    } catch (e) {
+      print('가장 가까운 부모 약물 정보 로딩 오류: $e');
+      setState(() {
+        pillText = '부모님 약 복용 시간을 확인해봐요';
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    
+    // 앱이 다시 포그라운드로 돌아올 때 즉시 약물 데이터만 새로고침
+    if (state == AppLifecycleState.resumed) {
+      print('앱이 다시 포그라운드로 돌아옴 - 약물 데이터 즉시 새로고침');
+      // 약물 데이터만 빠르게 새로고침
+      _loadPillData();
+    }
   }
 
   Future<void> _loadData() async {
@@ -335,13 +476,42 @@ class _ButtonColumnState extends State<ButtonColumn> {
   Future<void> _loadPillData() async {
     try {
       print('약물 데이터 로딩 시작');
-      final pillSchedule = await PillService.getTodayPillSchedule();
+      
+      if (_isChild) {
+        // 자녀 화면: 가장 가까운 시간에 약을 복용해야 하는 부모 찾기
+        await _loadNearestParentPillInfo();
+        return;
+      }
+      
+      // 부모 화면: 기존 로직 유지
+      final userInfo = await PrefsManager.getUserInfo();
+      final parentUuid = userInfo['uuid'];
+      
+      if (parentUuid == null) {
+        print('사용자 UUID가 없습니다');
+        setState(() {
+          pillText = '사용자 정보 없음';
+        });
+        return;
+      }
+      
+      print('사용자 UUID: $parentUuid');
+      
+      final pillSchedule = await PillService.getTodayPillSchedule(parentUuid: parentUuid)
+          .timeout(const Duration(seconds: 5));
+      
       print('약물 데이터 응답: $pillSchedule');
+      print('약물 데이터 개수: ${pillSchedule.length}');
+      
       if (pillSchedule.isNotEmpty) {
-        // 첫 번째 약물 정보 사용
+        // 첫 번째 약물 정보 사용ㅅㄹ
         final pill = pillSchedule.first;
         final pillName = pill['name'] ?? '약물';
         final intakeTimes = pill['intakeTimes'] as List<dynamic>? ?? [];
+        
+        print('약물 이름: $pillName');
+        print('복용 시간들: $intakeTimes');
+        print('복용 시간 타입: ${intakeTimes.runtimeType}');
 
         if (intakeTimes.isNotEmpty) {
           // 다음 복용 시간 찾기
@@ -350,17 +520,25 @@ class _ButtonColumnState extends State<ButtonColumn> {
 
           TimeOfDay? nextIntakeTime;
           for (final timeStr in intakeTimes) {
-            final time = TimeOfDay(
-              hour: int.parse(timeStr.split(':')[0]),
-              minute: int.parse(timeStr.split(':')[1]),
-            );
+            try {
+              // 시간 문자열 파싱
+              final timeParts = timeStr.toString().split(':');
+              if (timeParts.length >= 2) {
+                final time = TimeOfDay(
+                  hour: int.parse(timeParts[0]),
+                  minute: int.parse(timeParts[1]),
+                );
 
-            // 현재 시간보다 늦은 시간 찾기
-            if (time.hour > currentTime.hour ||
-                (time.hour == currentTime.hour &&
-                    time.minute > currentTime.minute)) {
-              nextIntakeTime = time;
-              break;
+                // 현재 시간보다 늦은 시간 찾기
+                if (time.hour > currentTime.hour ||
+                    (time.hour == currentTime.hour &&
+                        time.minute > currentTime.minute)) {
+                  nextIntakeTime = time;
+                  break;
+                }
+              }
+            } catch (timeParseError) {
+              print('시간 파싱 오류: $timeParseError, 시간: $timeStr');
             }
           }
 
@@ -395,7 +573,7 @@ class _ButtonColumnState extends State<ButtonColumn> {
     } catch (e) {
       print('약물 데이터 로딩 오류: $e');
       setState(() {
-        pillText = '오늘의 복용 약'; // 기본값
+        pillText = '약물 정보 로드 실패';
       });
     }
   }
@@ -431,6 +609,50 @@ class _ButtonColumnState extends State<ButtonColumn> {
   Future<void> _loadPainData() async {
     try {
       print('통증 데이터 로딩 시작');
+      
+      if (_isChild) {
+        // 자녀 화면: 부모들의 통증 기록 확인
+        final today = DateTime.now();
+        final todayStr = '${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}';
+        
+        List<String> painfulParents = [];
+        
+        for (final parent in _parentMembers) {
+          try {
+            final parentId = parent['uuid'];
+            if (parentId != null) {
+              final painRecords = await HealthService.fetchPainRecords(parentId);
+              final todayPainRecords = painRecords
+                  .where((record) => record['date'] == todayStr)
+                  .toList();
+              
+              if (todayPainRecords.isNotEmpty) {
+                final parentName = parent['name'] ?? '부모님';
+                final koreanAreas = todayPainRecords
+                    .map((record) => _convertPainAreaToKorean(record['painArea'].toString()))
+                    .toSet()
+                    .join(', ');
+                painfulParents.add('$parentName님이 $koreanAreas가 아파요');
+              }
+            }
+          } catch (e) {
+            print('부모 ${parent['name']} 통증 데이터 로딩 오류: $e');
+          }
+        }
+        
+        if (painfulParents.isNotEmpty) {
+          setState(() {
+            painText = painfulParents.first; // 첫 번째 부모의 통증 정보만 표시
+          });
+        } else {
+          setState(() {
+            painText = '오늘은 아픈 곳이 없으시네요';
+          });
+        }
+        return;
+      }
+      
+      // 부모 화면: 기존 로직 유지
       final userInfo = await PrefsManager.getUserInfo();
       final userId = userInfo['uuid'];
       print('사용자 ID: $userId');
@@ -466,7 +688,7 @@ class _ButtonColumnState extends State<ButtonColumn> {
     } catch (e) {
       print('통증 데이터 로딩 오류: $e');
       setState(() {
-        painText = '오늘의 통증 부위'; // 기본값
+        painText = _isChild ? '통증 정보 확인 중...' : '오늘의 통증 부위'; // 기본값
       });
     }
   }
@@ -477,20 +699,30 @@ class _ButtonColumnState extends State<ButtonColumn> {
       final totalSteps = await StepService.getTodayTotalSteps();
       print('걸음 수 응답: $totalSteps');
       setState(() {
-        stepText =
-            '${totalSteps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} 걸음';
+        if (_isChild) {
+          stepText = '오늘 ${totalSteps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} 걸음 걸었어요';
+        } else {
+          stepText = '${totalSteps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')} 걸음';
+        }
       });
     } catch (e) {
       print('걸음 수 데이터 로딩 오류: $e');
       setState(() {
-        stepText = '오늘의 걸음'; // 기본값
+        stepText = _isChild ? '내 걸음 수' : '오늘의 걸음'; // 기본값
       });
     }
   }
 
   // 외부에서 호출할 수 있는 새로고침 메서드
   void refreshData() {
+    print('ButtonColumn 강제 새로고침 호출됨');
     _loadData();
+  }
+
+  // 약물 데이터만 빠르게 새로고침
+  void refreshPillDataOnly() {
+    print('약물 데이터만 빠르게 새로고침');
+    _loadPillData();
   }
 
   @override

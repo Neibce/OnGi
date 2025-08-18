@@ -411,10 +411,7 @@ class CheckRecordScreenState extends State<CheckRecordScreen>
                 width: 28,
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => HomeScreen()),
-                );
+                Navigator.of(context).pop();
               },
               iconSize: 36,
             ),

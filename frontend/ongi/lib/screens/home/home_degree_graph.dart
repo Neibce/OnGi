@@ -97,8 +97,11 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
   }
 
   double get horizontalInterval {
-    if ((maxY - minY) == 0) return 0.1;
-    return (maxY - minY) / 9;
+    final range = maxY - minY;
+    if (range <= 0) return 0.1;
+
+    // 10개 라벨이 나오도록 9개 간격으로 나누기
+    return range / 9;
   }
 
   Future<void> fetchAllTemperatureData() async {
@@ -239,18 +242,27 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     showTitles: true,
                     interval: horizontalInterval,
                     getTitlesWidget: (value, meta) {
-                      if (value < minY || value > maxY)
+                      // 범위 밖 값만 제외
+                      if (value < minY || value > maxY) {
                         return const SizedBox.shrink();
+                      }
+
+                      // 경계값에서 약간 안쪽으로만 필터링
+                      final smallMargin = horizontalInterval * 0.1;
+                      if ((value - minY).abs() < smallMargin || (value - maxY).abs() < smallMargin) {
+                        return const SizedBox.shrink();
+                      }
+
                       return Text(
                         value.toStringAsFixed(1),
                         style: const TextStyle(
                           color: Colors.grey,
-                          fontSize: 13,
+                          fontSize: 11,
                           fontFamily: 'Pretendard',
                         ),
                       );
                     },
-                    reservedSize: 36,
+                    reservedSize: 40,
                   ),
                 ),
                 bottomTitles: AxisTitles(
