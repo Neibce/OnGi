@@ -12,7 +12,8 @@ public record MaumLogDto(
         String comment,
         String location,
         List<Emotion> emotions,
-        UUID uploader
+        UUID uploader,
+        String uploaderName
 ) {
     public static MaumLogDto of(URL frontPresignedUrl, URL backPresignedUrl, MaumLog maumLog) {
         return new MaumLogDto(
@@ -21,7 +22,8 @@ public record MaumLogDto(
                 maumLog.getComment(),
                 maumLog.getLocation(),
                 maumLog.getEmotions(),
-                maumLog.getCreatedBy().getUuid()
+                maumLog.getCreatedBy().getUuid(),
+                maumLog.getCreatedBy().getName()
         );
     }
 }
