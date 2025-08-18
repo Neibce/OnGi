@@ -44,6 +44,14 @@ public class PillController {
         return ResponseEntity.ok(pillInfo);
     }
 
+    @DeleteMapping
+    public ResponseEntity<PillInfo> deletePill(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam Long pillId) {
+        pillService.deletePill(userDetails.getUser(), pillId);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/record")
     public ResponseEntity<Void> recordPillIntake(
             @AuthenticationPrincipal CustomUserDetails userDetails,
