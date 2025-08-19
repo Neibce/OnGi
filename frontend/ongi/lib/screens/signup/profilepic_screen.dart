@@ -15,14 +15,16 @@ class ProfilepicScreen extends StatefulWidget {
 
 class _ProfilepicScreenState extends State<ProfilepicScreen> {
   String? _selectedAsset;
+  int? _selectedIndex;
 
-  Widget _buildSelectableIcon(String assetPath, {double size = 90}) {
+  Widget _buildSelectableIcon(String assetPath, int index, {double size = 90}) {
     final bool isSelected = _selectedAsset == assetPath;
 
     return GestureDetector(
       onTap: () {
         setState(() {
           _selectedAsset = assetPath;
+          _selectedIndex = index;
         });
       },
       child: Center(
@@ -87,7 +89,7 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
                     decoration: BoxDecoration(
                       color: index == 0 || index == 1 || index == 2
                           ? AppColors.ongiOrange
-                          : AppColors.ongiOrange.withOpacity(0.4),
+                          : AppColors.ongiOrange.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -131,38 +133,47 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
                 children: <Widget>[
                   _buildSelectableIcon(
                     'assets/images/users/mom_icon.png',
+                    0,
                     size: 107,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/dad_icon.png',
+                    1,
                     size: 110,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/daughter_icon.png',
+                    2,
                     size: 103,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/son_icon.png',
+                    3,
                     size: 98,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/black_woman_icon.png',
+                    4,
                     size: 90,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/black_man_icon.png',
+                    5,
                     size: 91,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/baby_icon.png',
+                    6,
                     size: 96,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/dog_icon.png',
+                    7,
                     size: 98,
                   ),
                   _buildSelectableIcon(
                     'assets/images/users/robot_icon.png',
+                    8,
                     size: 98,
                   ),
                 ],
@@ -182,8 +193,30 @@ class _ProfilepicScreenState extends State<ProfilepicScreen> {
                     ),
                   ),
                   onPressed: () async {
+                    if (_selectedIndex == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text(
+                            '프로필 아이콘을 선택해주세요.',
+                            style: TextStyle(color: AppColors.ongiOrange),
+                          ),
+                          backgroundColor: Colors.white,
+                          behavior: SnackBarBehavior.floating,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          duration: const Duration(seconds: 2),
+                        ),
+                      );
+                      return;
+                    }
+
                     final prefs = await SharedPreferences.getInstance();
                     await prefs.setString('signup_username', widget.username);
+                    await prefs.setInt(
+                      'signup_profileImageId',
+                      _selectedIndex!,
+                    );
                     Navigator.push(
                       context,
                       MaterialPageRoute(

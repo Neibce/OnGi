@@ -1,5 +1,6 @@
 package ongi.pill.dto;
 
+import java.net.URL;
 import java.time.temporal.ChronoUnit;
 import ongi.pill.entity.IntakeDetail;
 import ongi.pill.entity.Pill;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 public record PillInfoWithIntakeStatus(
         Long id,
         String name,
+        URL imageUrl,
         Integer times,
         IntakeDetail intakeDetail,
         List<LocalTime> intakeTimes,
@@ -24,10 +26,11 @@ public record PillInfoWithIntakeStatus(
         Map<LocalTime, LocalTime> dayIntakeStatus
 ) {
 
-    public PillInfoWithIntakeStatus(Pill pill, List<PillIntakeRecord> intakeRecords) {
+    public PillInfoWithIntakeStatus(Pill pill, URL imageUrl, List<PillIntakeRecord> intakeRecords) {
         this(
                 pill.getId(),
                 pill.getName(),
+                imageUrl,
                 pill.getTimes(),
                 pill.getIntakeDetail(),
                 pill.getIntakeTimes(),

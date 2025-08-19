@@ -35,6 +35,9 @@ public class User {
     @Column(nullable = false)
     private Boolean isParent;
 
+    @Column(nullable = false)
+    private Integer profileImageId;
+
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

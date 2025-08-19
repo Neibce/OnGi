@@ -9,6 +9,7 @@ public record UserInfo(
         String email,
         String name,
         Boolean isParent,
+        Integer profileImageId,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
 
@@ -19,6 +20,7 @@ public record UserInfo(
                 user.getEmail(),
                 user.getName(),
                 user.getIsParent(),
+                user.getProfileImageId(),
                 user.getCreatedAt(),
                 user.getUpdatedAt()
         );

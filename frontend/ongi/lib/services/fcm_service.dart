@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../utils/prefs_manager.dart';
 
 class FCMService {
-  static const String baseUrl = 'https://ongi-1049536928483.asia-northeast3.run.app';
+  static const String baseUrl =
+      'https://ongi-1049536928483.asia-northeast3.run.app';
 
   /// FCM 토큰을 서버에 업로드합니다.
   static Future<bool> uploadFCMToken(String fcmToken) async {
@@ -22,9 +24,7 @@ class FCMService {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
-        body: jsonEncode({
-          'fcmToken': fcmToken,
-        }),
+        body: jsonEncode({'fcmToken': fcmToken}),
       );
 
       if (response.statusCode == 201) {
@@ -40,20 +40,39 @@ class FCMService {
     }
   }
 
+  static Future<String?> getFirebaseToken() async {
+    String? fcmToken;
+    if (Platform.isIOS) {
+      String? apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+      if (apnsToken != null) {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      } else {
+        await Future<void>.delayed(const Duration(seconds: 3));
+        apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+        if (apnsToken != null) {
+          fcmToken = await FirebaseMessaging.instance.getToken();
+        }
+      }
+    } else {
+      fcmToken = await FirebaseMessaging.instance.getToken();
+    }
+    return fcmToken;
+  }
+
   /// FCM 토큰을 가져와서 자동으로 서버에 업로드합니다.
   static Future<void> initializeAndUploadFCMToken() async {
     try {
       final FirebaseMessaging messaging = FirebaseMessaging.instance;
-      
+
       // FCM 권한 상태 확인
       NotificationSettings settings = await messaging.getNotificationSettings();
-      
+
       if (settings.authorizationStatus == AuthorizationStatus.authorized ||
           settings.authorizationStatus == AuthorizationStatus.provisional) {
         print('사용자가 알림 권한을 허용했습니다');
-        
-        // FCM 토큰 가져오기
-        final fcmToken = await messaging.getToken();
+
+
+        final fcmToken = await getFirebaseToken();
         if (fcmToken != null) {
           print('FCM 토큰: $fcmToken');
           await uploadFCMToken(fcmToken);

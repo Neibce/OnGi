@@ -3,6 +3,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'dart:io';
+import 'dart:async';
 import 'package:ongi/screens/photo/check_record_screen.dart';
 
 class AddRecordScreen extends StatefulWidget {
@@ -12,7 +13,8 @@ class AddRecordScreen extends StatefulWidget {
   State<AddRecordScreen> createState() => AddRecordScreenState();
 }
 
-class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderStateMixin {
+class AddRecordScreenState extends State<AddRecordScreen>
+    with TickerProviderStateMixin {
   late CameraController controller;
   List<CameraDescription>? cameras;
   bool isInitialized = false;
@@ -28,6 +30,9 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
   late Animation<double> _frontAnimation;
   bool _isFrontAnimating = false;
   String? _animatingFrontImagePath;
+
+  int _countdown = 0;
+  Timer? _countdownTimer;
 
   @override
   void initState() {
@@ -52,6 +57,11 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
       cameras = await availableCameras();
 
       if (cameras != null && cameras!.isNotEmpty) {
+        final backIndex = cameras!.indexWhere(
+          (c) => c.lensDirection == CameraLensDirection.back,
+        );
+        currentCameraIndex = backIndex != -1 ? backIndex : 0;
+
         controller = CameraController(
           cameras![currentCameraIndex],
           ResolutionPreset.high,
@@ -78,8 +88,30 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
   }
 
   Future<void> _initializeFrontCamera() async {
+    // 전면 카메라 안전 검색
+    if (cameras == null || cameras!.isEmpty) return;
+
+    final front = cameras!.where(
+      (c) => c.lensDirection == CameraLensDirection.front,
+    );
+
+    if (front.isEmpty) return;
+
+    final frontDesc = front.first;
+
+    // 이미 초기화되어 있으면 재사용
+    if (frontCameraController?.description == frontDesc &&
+        frontCameraController?.value.isInitialized == true) {
+      setState(() {
+        showFrontCamera = true;
+      });
+      return;
+    }
+
+    frontCameraController?.dispose();
+
     frontCameraController = CameraController(
-      cameras![1],
+      frontDesc,
       ResolutionPreset.medium,
       enableAudio: false,
     );
@@ -100,9 +132,29 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
     });
 
     _frontAnimationController.forward().then((_) {
-      setState(() {
-        _isFrontAnimating = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isFrontAnimating = false;
+        });
+      }
+    });
+  }
+
+  void _startCountdown(int seconds) {
+    _countdownTimer?.cancel();
+    setState(() => _countdown = seconds);
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (!mounted) {
+        t.cancel();
+        return;
+      }
+      if (_countdown <= 1) {
+        t.cancel();
+        setState(() => _countdown = 0);
+      } else {
+        setState(() => _countdown -= 1);
+      }
     });
   }
 
@@ -111,15 +163,32 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
       setState(() {
         _isPhotoTaken = true;
       });
-      final XFile image = await controller.takePicture();
+
+      final XFile backImage = await controller.takePicture();
       setState(() {
-        backCapturedImagePath = image.path;
+        backCapturedImagePath = backImage.path;
       });
-      if (currentCameraIndex == 0 && cameras!.length > 1) {
+
+      final hasFront =
+          cameras != null &&
+          cameras!.any((c) => c.lensDirection == CameraLensDirection.front);
+
+      if (hasFront) {
         await _initializeFrontCamera();
+
+        _startCountdown(3);
+        await Future.delayed(const Duration(seconds: 3));
+
+        if (frontCameraController == null ||
+            !frontCameraController!.value.isInitialized) {
+          // 초기화가 풀렸다면 한 번 더 시도
+          await _initializeFrontCamera();
+        }
+
         final XFile frontImage = await frontCameraController!.takePicture();
         await _startFrontAnimation(frontImage.path);
 
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -131,7 +200,7 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
           ),
         );
       } else {
-        // 전면 카메라가 없으면 후면만 전달
+        if (!mounted) return;
         Navigator.push(
           context,
           MaterialPageRoute(
@@ -146,7 +215,9 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
     } catch (e) {
       setState(() {
         _isPhotoTaken = false;
+        _countdown = 0;
       });
+      _countdownTimer?.cancel();
     }
   }
 
@@ -155,6 +226,7 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
     controller.dispose();
     frontCameraController?.dispose();
     _frontAnimationController.dispose();
+    _countdownTimer?.cancel();
     super.dispose();
   }
 
@@ -225,7 +297,21 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const Padding(
+                  padding: EdgeInsets.only(right: 32),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '후면 사진 촬영 후 3초 뒤, 전면 사진이 촬영됩니다!',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.black45,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 7),
                 Center(
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -240,34 +326,62 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
                                 duration: const Duration(milliseconds: 300),
                                 child: backCapturedImagePath != null
                                     ? SizedBox.expand(
-                                  key: const ValueKey('captured_image'),
-                                  child: Image.file(
-                                    File(backCapturedImagePath!),
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
+                                        key: const ValueKey('captured_image'),
+                                        child: Image.file(
+                                          File(backCapturedImagePath!),
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
                                     : isInitialized
                                     ? SizedBox.expand(
-                                  key: const ValueKey('camera_preview'),
-                                  child: FittedBox(
-                                    fit: BoxFit.cover,
-                                    child: SizedBox(
-                                      width: controller.value.previewSize?.height ?? 100,
-                                      height: controller.value.previewSize?.width ?? 100,
-                                      child: CameraPreview(controller),
-                                    ),
-                                  ),
-                                )
+                                        key: const ValueKey('camera_preview'),
+                                        child: FittedBox(
+                                          fit: BoxFit.cover,
+                                          child: SizedBox(
+                                            width:
+                                                controller
+                                                    .value
+                                                    .previewSize
+                                                    ?.height ??
+                                                100,
+                                            height:
+                                                controller
+                                                    .value
+                                                    .previewSize
+                                                    ?.width ??
+                                                100,
+                                            child: CameraPreview(controller),
+                                          ),
+                                        ),
+                                      )
                                     : const SizedBox.expand(
-                                  key: ValueKey('camera_loading'),
-                                  child: Center(
-                                    child: CircularProgressIndicator(
+                                        key: ValueKey('camera_loading'),
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.ongiOrange,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                            ),
+
+                            if (_countdown > 0)
+                              Positioned.fill(
+                                child: Container(
+                                  padding: EdgeInsets.only(right: 30, top: 10),
+                                  alignment: Alignment.topRight,
+                                  color: Colors.black.withValues(alpha: 0.3),
+                                  child: Text(
+                                    '$_countdown',
+                                    style: const TextStyle(
+                                      fontSize: 70,
                                       color: AppColors.ongiOrange,
+                                      fontWeight: FontWeight.w800,
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
+
                             if (_animatingFrontImagePath != null)
                               AnimatedBuilder(
                                 animation: _frontAnimation,
@@ -290,10 +404,19 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
                                   final endWidth = 120.0;
                                   final endHeight = 144.0;
 
-                                  final currentTop = startTop + (endTop - startTop) * animationValue;
-                                  final currentLeft = startLeft + (endLeft - startLeft) * animationValue;
-                                  final currentWidth = startWidth + (endWidth - startWidth) * animationValue;
-                                  final currentHeight = startHeight + (endHeight - startHeight) * animationValue;
+                                  final currentTop =
+                                      startTop +
+                                      (endTop - startTop) * animationValue;
+                                  final currentLeft =
+                                      startLeft +
+                                      (endLeft - startLeft) * animationValue;
+                                  final currentWidth =
+                                      startWidth +
+                                      (endWidth - startWidth) * animationValue;
+                                  final currentHeight =
+                                      startHeight +
+                                      (endHeight - startHeight) *
+                                          animationValue;
 
                                   return Positioned(
                                     top: currentTop,
@@ -309,7 +432,9 @@ class AddRecordScreenState extends State<AddRecordScreen> with TickerProviderSta
                                         ),
                                       ),
                                       child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(22.5),
+                                        borderRadius: BorderRadius.circular(
+                                          22.5,
+                                        ),
                                         child: Image.file(
                                           File(_animatingFrontImagePath!),
                                           fit: BoxFit.cover,
