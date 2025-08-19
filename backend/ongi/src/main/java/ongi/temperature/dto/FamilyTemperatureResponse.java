@@ -14,8 +14,10 @@ import java.util.UUID;
 @AllArgsConstructor
 public class FamilyTemperatureResponse {
     private Double familyTemperature;
-    private Double totalContributedTemperature;
-    private List<MemberTemperatureInfo> memberTemperatures;
+    private Double totalFamilyDecreaseTemperature;
+    private Double totalFamilyIncreaseTemperature;
+    private Double totalMemberIncreaseTemperature;
+    private List<MemberTemperatureInfo> memberIncreaseTemperatures;
 
     @Getter
     @Builder
