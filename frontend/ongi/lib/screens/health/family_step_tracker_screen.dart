@@ -10,12 +10,10 @@ class FamilyStepTrackerScreen extends StatefulWidget {
   const FamilyStepTrackerScreen({super.key});
 
   @override
-  State<FamilyStepTrackerScreen> createState() =>
-      _FamilyStepTrackerScreenState();
+  State<FamilyStepTrackerScreen> createState() => _FamilyStepTrackerScreenState();
 }
 
 class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
-  Map<int, int> selectedDosages = {};
   late final PageController _dateCarouselController;
   DateTime selectedDate = DateTime.now();
   final StepService _stepService = StepService();
@@ -45,7 +43,6 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   }
 
   String _formatDate(DateTime date) {
-    // yyyy-MM-dd
     return date.toIso8601String().split('T').first;
   }
 
@@ -54,10 +51,10 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       _isLoading = true;
       _errorMessage = null;
     });
+
     try {
       final String dateStr = _formatDate(date);
 
-      // 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
       final List<Future> futures = [
         _stepService.getSteps(date: dateStr),
         FamilyService.getFamilyMembers(),
@@ -69,6 +66,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
 
       int parsedTotal = 0;
       final List<_MemberStep> parsedMembers = [];
+
       if (stepResult != null) {
         if (stepResult['totalSteps'] is int) {
           parsedTotal = stepResult['totalSteps'] as int;
@@ -88,7 +86,6 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                   ? item['steps'] as int
                   : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
 
-              // 실제 가족 구성원의 프로필 이미지 가져오기
               final profileImagePath = await PrefsManager.getProfileImagePathByUserId(userId, familyMembers);
 
               parsedMembers.add(
@@ -173,10 +170,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                 ),
                               ),
                               Container(
-                                margin: EdgeInsets.symmetric(
-                                  horizontal: 0,
-                                  vertical: 6,
-                                ),
+                                margin: const EdgeInsets.symmetric(vertical: 6),
                                 child: Image.asset(
                                   'assets/images/step_tracker_title_logo.png',
                                   width: circleSize * 0.2,
@@ -203,11 +197,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                   children: [
                     Positioned.fill(
                       child: Padding(
-                        padding: const EdgeInsets.only(
-                          left: 15,
-                          right: 15,
-                          bottom: 15,
-                        ),
+                        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
                         child: Container(
                           decoration: BoxDecoration(
                             color: Colors.white,
@@ -216,93 +206,68 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                         ),
                       ),
                     ),
-                    // 본문 내용
                     Padding(
-                      padding: const EdgeInsets.only(
-                        left: 20,
-                        right: 20,
-                        top: 15,
-                        bottom: 15,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.only(bottom: 20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Container(
-                              margin: const EdgeInsets.only(
-                                left: 20,
-                                right: 20,
-                                top: 10,
-                              ),
-                              child: GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const CrossFamilyRankingScreen(),
+                              margin: const EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    '오늘 우리 가족은',
+                                    style: TextStyle(
+                                      fontFamily: 'Pretendard',
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 20,
+                                      height: 1.2,
+                                      color: Color(0xFFFD6C01),
                                     ),
-                                  );
-                                },
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      '오늘 우리 가족은',
-                                      style: const TextStyle(
-                                        fontFamily: 'Pretendard',
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 20,
-                                        height: 1.2,
-                                        color: Color(0xFFFD6C01),
-                                      ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        const TextSpan(
+                                          text: '총 ',
+                                          style: TextStyle(
+                                            fontFamily: 'Pretendard',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 20,
+                                            color: Color(0xFFFD6C01),
+                                          ),
+                                        ),
+                                        TextSpan(
+                                          text: _isLoading
+                                              ? '0걸음'
+                                              : _totalSteps.toString().replaceAllMapped(
+                                            RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                                                (m) => '${m[1]},',
+                                          ) + '걸음',
+                                          style: const TextStyle(
+                                            fontFamily: 'Pretendard',
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 35,
+                                            color: Color(0xFFFD6C01),
+                                          ),
+                                        ),
+                                        const TextSpan(
+                                          text: ' 걸었어요!',
+                                          style: TextStyle(
+                                            fontFamily: 'Pretendard',
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 20,
+                                            color: Color(0xFFFD6C01),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    const SizedBox(height: 2),
-                                    RichText(
-                                      text: TextSpan(
-                                        children: [
-                                          const TextSpan(
-                                            text: '총 ',
-                                            style: TextStyle(
-                                              fontFamily: 'Pretendard',
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 20,
-                                              color: Color(0xFFFD6C01),
-                                            ),
-                                          ),
-                                          TextSpan(
-                                            text: _isLoading
-                                                ? '0걸음'
-                                                : _totalSteps
-                                                          .toString()
-                                                          .replaceAllMapped(
-                                                            RegExp(
-                                                              r'(\d{1,3})(?=(\d{3})+(?!\d))',
-                                                            ),
-                                                            (m) => '${m[1]},',
-                                                          ) +
-                                                      '걸음',
-                                            style: const TextStyle(
-                                              fontFamily: 'Pretendard',
-                                              fontWeight: FontWeight.w700,
-                                              fontSize: 35,
-                                              color: Color(0xFFFD6C01),
-                                            ),
-                                          ),
-                                          const TextSpan(
-                                            text: ' 걸었어요!',
-                                            style: TextStyle(
-                                              fontFamily: 'Pretendard',
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 20,
-                                              color: Color(0xFFFD6C01),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
                             const SizedBox(height: 10),
@@ -327,15 +292,10 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                             ),
                             if (_errorMessage != null)
                               Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                ),
+                                padding: const EdgeInsets.symmetric(vertical: 8),
                                 child: Text(
                                   _errorMessage!,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 14,
-                                  ),
+                                  style: const TextStyle(color: Colors.red, fontSize: 14),
                                 ),
                               )
                             else if (_isLoading && _memberSteps.isEmpty)
@@ -357,14 +317,11 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                       name: _memberSteps[i].userName,
                                       steps: _memberSteps[i].steps,
                                       image: _memberSteps[i].imageAsset,
-                                      isTop:
-                                          i == 0 && _memberSteps[i].steps > 0,
+                                      isTop: i == 0 && _memberSteps[i].steps > 0,
                                     ),
                                   if (_memberSteps.isEmpty)
                                     const Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        vertical: 8,
-                                      ),
+                                      padding: EdgeInsets.symmetric(vertical: 8),
                                       child: Text('가족 걸음 데이터가 없습니다.'),
                                     ),
                                 ],
@@ -382,6 +339,96 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       ),
     );
   }
+
+  Widget _buildStepMember({
+    required BuildContext context,
+    required String name,
+    required int steps,
+    required String image,
+    bool isTop = false,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              SizedBox(width: 70, height: 80, child: Image.asset(image)),
+              if (isTop)
+                Positioned(
+                  left: -12,
+                  top: -15,
+                  child: SizedBox(
+                    width: 42,
+                    height: 32,
+                    child: SvgPicture.asset('assets/images/step_tracker_crown.svg'),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFFD6C01),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    style: const TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      const Spacer(),
+                      Text(
+                        steps.toString().replaceAllMapped(
+                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                              (m) => '${m[1]},',
+                        ),
+                        style: const TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 40,
+                          height: 0.7,
+                          color: Colors.white,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(width: 4),
+                      const Text(
+                        '걸음',
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w600,
+                          fontSize: 20,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _MemberStep {
@@ -396,97 +443,4 @@ class _MemberStep {
     required this.steps,
     required this.imageAsset,
   });
-}
-
-Widget _buildStepMember({
-  required BuildContext context,
-  required String name,
-  required int steps,
-  required String image,
-  bool isTop = false,
-}) {
-  return Container(
-    margin: const EdgeInsets.only(left: 20, right: 20, bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        // 프로필 이미지
-        Stack(
-          clipBehavior: Clip.none,
-          children: [
-            SizedBox(width: 70, height: 80, child: Image.asset(image)),
-            if (isTop)
-              Positioned(
-                left: -12,
-                top: -15,
-                child: SizedBox(
-                  width: 42,
-                  height: 32,
-                  child: SvgPicture.asset(
-                    'assets/images/step_tracker_crown.svg',
-                  ),
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Container(
-            decoration: BoxDecoration(
-              color: Color(0xFFFD6C01),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: const TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: Colors.white,
-                  ),
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Spacer(),
-                    Text(
-                      steps.toString().replaceAllMapped(
-                        RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                        (m) => '${m[1]},',
-                      ),
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 40,
-                        height: 0.7,
-                        color: Colors.white,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      '걸음',
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 20,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
