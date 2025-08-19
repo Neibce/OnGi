@@ -60,8 +60,26 @@ public class TemperatureService {
         // 가족 온도 = 기본값 + 전체 기여 합
         double familyTemperature = BASE_TEMPERATURE + contributedSum;
 
-        // userId별로 온도 기여 합계 집계
+        // 가족 전체 단위 온도 변화 증가/감소 계산
+        double totalFamilyIncreaseTemperature = temperatures.stream()
+                .filter(t -> t.getUserId().equals(FAMILY_WIDE_USER_ID) && t.getTemperature() > 0)
+                .mapToDouble(Temperature::getTemperature)
+                .sum();
+        
+        double totalFamilyDecreaseTemperature = temperatures.stream()
+                .filter(t -> t.getUserId().equals(FAMILY_WIDE_USER_ID) && t.getTemperature() < 0)
+                .mapToDouble(Temperature::getTemperature)
+                .sum();
+
+        // 구성원별 증가 온도만 계산 (가족 전체 온도 제외)
+        double totalMemberIncreaseTemperature = temperatures.stream()
+                .filter(t -> t.getTemperature() > 0 && !t.getUserId().equals(FAMILY_WIDE_USER_ID))
+                .mapToDouble(Temperature::getTemperature)
+                .sum();
+
+        // userId별로 온도 기여 합계 집계 (가족 전체 온도 제외)
         Map<UUID, Double> userTemperatures = temperatures.stream()
+                .filter(t -> !t.getUserId().equals(FAMILY_WIDE_USER_ID))
                 .collect(Collectors.groupingBy(
                         Temperature::getUserId,
                         Collectors.summingDouble(Temperature::getTemperature)
@@ -73,13 +91,13 @@ public class TemperatureService {
                 .collect(Collectors.toMap(User::getUuid, user -> user));
 
         // 각 구성원별 기여도 및 퍼센트 계산
-        List<FamilyTemperatureResponse.MemberTemperatureInfo> memberTemperatures = userTemperatures.entrySet().stream()
+        List<FamilyTemperatureResponse.MemberTemperatureInfo> memberIncreaseTemperatures = userTemperatures.entrySet().stream()
                 .map(entry -> {
                     UUID userId = entry.getKey();
                     Double contributedTemperature = entry.getValue();
                     User user = users.get(userId);
                     // 전체 기여 합이 0일 때는 0%, 아니면 비율 계산
-                    double percentage = contributedSum > 0 ? (contributedTemperature / contributedSum) * 100 : 0.0;
+                    double percentage = totalMemberIncreaseTemperature > 0 ? (contributedTemperature / totalMemberIncreaseTemperature) * 100 : 0.0;
                     percentage = BigDecimal.valueOf(percentage).setScale(2, RoundingMode.HALF_UP).doubleValue();
                     return FamilyTemperatureResponse.MemberTemperatureInfo.builder()
                             .userId(userId)
@@ -92,8 +110,10 @@ public class TemperatureService {
 
         return FamilyTemperatureResponse.builder()
                 .familyTemperature(round(familyTemperature, 1))
-                .totalContributedTemperature(round(contributedSum, 1))
-                .memberTemperatures(memberTemperatures)
+                .totalFamilyDecreaseTemperature(round(totalFamilyDecreaseTemperature, 1))
+                .totalFamilyIncreaseTemperature(round(totalFamilyIncreaseTemperature, 1))
+                .totalMemberIncreaseTemperature(round(totalMemberIncreaseTemperature, 1))
+                .memberIncreaseTemperatures(memberIncreaseTemperatures)
                 .build();
     }
 
@@ -279,7 +299,7 @@ public class TemperatureService {
 
 
     // 매일 23:59:59에 당일의 가족별 보너스 온도 상승 처리
-    @Scheduled(cron = "59 37 15 * * *")
+    @Scheduled(cron = "59 59 23 * * *")
     @Transactional
     public void processFamilyBonusTemperature() {
         var families = familyRepository.findAll();
@@ -343,21 +363,22 @@ public class TemperatureService {
     @Transactional
     public void processWeeklyTemperatureDecrease() {
         var families = familyRepository.findAll();
+        java.time.LocalDate targetDate = getToday();
         for (var family : families) {
             String familyId = family.getCode();
-            decreaseTemperatureForInactiveParent(familyId);
-            decreaseTemperatureForInactiveChild(familyId);
+            decreaseTemperatureForInactiveParent(familyId, targetDate);
+            decreaseTemperatureForInactiveChild(familyId, targetDate);
         }
     }
     // 부모 1명 이상 일주일 동안 아무 활동 없을 시 온도 하락
-    public void decreaseTemperatureForInactiveParent(String familyId) {
+    public void decreaseTemperatureForInactiveParent(String familyId, LocalDate targetDate) {
 
         List<UUID> memberIds = familyRepository.findById(familyId).get().getMembers();
         List<User> users = userRepository.findAllById(memberIds);
         List<User> parents = users.stream()
                 .filter(User::getIsParent)
                 .toList();
-        LocalDateTime since = LocalDateTime.now().minusDays(6);
+        LocalDateTime since = targetDate.minusDays(6).atStartOfDay();
         boolean parentInactive = parents.stream()
                 .anyMatch(parent -> !temperatureRepository.existsByUserIdAndFamilyIdAndCreatedAtAfter(parent.getUuid(), familyId, since));
 
@@ -372,14 +393,14 @@ public class TemperatureService {
         }
     }
     // 자녀 1명 이상 일주일 동안 아무 활동 없을 시 온도 하락
-    public void decreaseTemperatureForInactiveChild(String familyId) {
+    public void decreaseTemperatureForInactiveChild(String familyId, LocalDate targetDate) {
 
         List<UUID> memberIds = familyRepository.findById(familyId).get().getMembers();
         List<User> users = userRepository.findAllById(memberIds);
         List<User> children = users.stream()
                 .filter(u -> !u.getIsParent())
                 .toList();
-        LocalDateTime since = LocalDateTime.now().minusDays(6);
+        LocalDateTime since = targetDate.minusDays(6).atStartOfDay();
         boolean childInactive = children.stream()
                 .anyMatch(child -> !temperatureRepository.existsByUserIdAndFamilyIdAndCreatedAtAfter(child.getUuid(), familyId, since));
         if (childInactive) {
@@ -399,15 +420,16 @@ public class TemperatureService {
     @Transactional
     public void processDailyTemperatureDecrease() {
         var families = familyRepository.findAll();
+        LocalDate targetDate = getToday();
         for (var family : families) {
             String familyId = family.getCode();
-            decreaseTemperatureForNoLogin(familyId);
+            decreaseTemperatureForNoLogin(familyId, targetDate);
         }
     }
     // 하루 동안 아무도 활동 없을 시 온도 하락
-    public void decreaseTemperatureForNoLogin(String familyId) {
+    public void decreaseTemperatureForNoLogin(String familyId, LocalDate targetDate) {
 
-        LocalDateTime since = LocalDate.now().atStartOfDay(); // 오늘 00:00~
+        LocalDateTime since = targetDate.atStartOfDay(); // 타겟 날짜 00:00~
         // 만보기(STEP_GOAL)를 제외한 가족 전체 활동 체크
         boolean noLogin = !temperatureRepository.existsByFamilyIdAndCreatedAtAfter(familyId, since);
         if (noLogin) {
