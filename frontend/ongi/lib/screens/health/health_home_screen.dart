@@ -317,21 +317,33 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   String _convertPainAreaToKorean(String painArea) {
     final painAreaMap = {
-      'head': '머리',
-      'neck': '목',
-      'shoulder': '어깨',
-      'chest': '가슴',
-      'back': '등',
-      'arm': '팔',
-      'hand': '손',
-      'abdomen': '복부',
-      'waist': '허리',
-      'leg': '다리',
-      'knee': '무릎',
-      'foot': '발',
-      'none': '없음',
+      'HEAD': '머리',
+      'NECK': '목',
+      'LEFT_SHOULDER': '왼쪽 어깨',
+      'RIGHT_SHOULDER': '오른쪽 어깨',
+      'CHEST': '가슴',
+      'BACK': '등',
+      'LEFT_UPPER_ARM': '왼쪽 윗팔',
+      'RIGHT_UPPER_ARM': '오른쪽 윗팔',
+      'LEFT_FOREARM': '왼쪽 아랫팔',
+      'RIGHT_FOREARM': '오른쪽 아랫팔',
+      'LEFT_HAND': '왼쪽 손',
+      'RIGHT_HAND': '오른쪽 손',
+      'ABDOMEN': '복부',
+      'WAIST': '허리',
+      'PELVIS': '골반',
+      'HIP': '엉덩이',
+      'LEFT_THIGH': '왼쪽 허벅지',
+      'RIGHT_THIGH': '오른쪽 허벅지',
+      'LEFT_CALF': '왼쪽 종아리',
+      'RIGHT_CALF': '오른쪽 종아리',
+      'LEFT_KNEE': '왼쪽 무릎',
+      'RIGHT_KNEE': '오른쪽 무릎',
+      'LEFT_FOOT': '왼쪽 발',
+      'RIGHT_FOOT': '오른쪽 발',
+      'NONE': '없음',
     };
-    return painAreaMap[painArea.toLowerCase()] ?? painArea;
+    return painAreaMap[painArea] ?? painArea;
   }
 
   Widget _buildPainText() {
@@ -362,10 +374,24 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     }
 
     if (_todayPainRecords.isNotEmpty) {
+      // 디버깅: 실제 painArea 값들 출력
+      for (var record in _todayPainRecords) {
+        print('home_screen 디버깅 - painArea 원본: ${record['painArea']}');
+        print('home_screen 디버깅 - painArea 타입: ${record['painArea'].runtimeType}');
+        print('home_screen 디버깅 - 한글 변환: ${_convertPainAreaToKorean(record['painArea'].toString())}');
+      }
+      
       final koreanAreas = _todayPainRecords
-          .map(
-            (record) => _convertPainAreaToKorean(record['painArea'].toString()),
-          )
+          .expand((record) {
+            final painArea = record['painArea'];
+            if (painArea is List) {
+              // painArea가 List인 경우 각 항목을 변환
+              return painArea.map((area) => _convertPainAreaToKorean(area.toString()));
+            } else {
+              // painArea가 단일 값인 경우
+              return [_convertPainAreaToKorean(painArea.toString())];
+            }
+          })
           .toSet()
           .join(', ');
 
