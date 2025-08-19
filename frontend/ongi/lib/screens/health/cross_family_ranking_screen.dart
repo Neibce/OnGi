@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/widgets/date_carousel.dart';
-import 'package:ongi/services/step_service.dart';
+import 'package:ongi/services/step_rank_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
 class CrossFamilyRankingScreen extends StatefulWidget {
@@ -14,103 +14,38 @@ class CrossFamilyRankingScreen extends StatefulWidget {
 }
 
 class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
-  Map<int, int> selectedDosages = {};
-  late final PageController _dateCarouselController;
-  DateTime selectedDate = DateTime.now();
-  final StepService _stepService = StepService();
   bool _isLoading = false;
-  int _totalSteps = 0;
   String? _errorMessage;
-  List<_MemberStep> _memberSteps = [];
-  String? _currentUserId;
-
+  List<FamilyStepRank> _familyRanks = [];
 
   @override
   void initState() {
     super.initState();
-    _dateCarouselController = PageController(initialPage: 5000);
-    _loadCurrentUserId();
-    _fetchStepsForDate(selectedDate);
+    _fetchFamilyRanks();
   }
 
-  Future<void> _loadCurrentUserId() async {
-    String? userId = await PrefsManager.getUuid();
-    setState(() {
-      _currentUserId = userId;
-    });
-  }
-
-  @override
-  void dispose() {
-    _dateCarouselController.dispose();
-    super.dispose();
-  }
-
-  void _updateFromDateCarousel(DateTime date) {
-    setState(() {
-      selectedDate = DateTime(date.year, date.month, date.day);
-    });
-    _fetchStepsForDate(selectedDate);
-  }
-
-  String _formatDate(DateTime date) {
-    // yyyy-MM-dd
-    return date.toIso8601String().split('T').first;
-  }
-
-  Future<void> _fetchStepsForDate(DateTime date) async {
+  Future<void> _fetchFamilyRanks() async {
     setState(() {
       _isLoading = true;
       _errorMessage = null;
     });
+
     try {
-      final String dateStr = _formatDate(date);
-      final Map<String, dynamic>? result = await _stepService.getSteps(
-        date: dateStr,
-      );
-
-      int parsedTotal = 0;
-      final List<_MemberStep> parsedMembers = [];
-      if (result != null) {
-        if (result['totalSteps'] is int) {
-          parsedTotal = result['totalSteps'] as int;
-        } else if (result['steps'] is int) {
-          parsedTotal = result['steps'] as int;
-        } else if (result['total'] is int) {
-          parsedTotal = result['total'] as int;
-        }
-
-        final dynamic members = result['memberSteps'];
-        if (members is List) {
-          for (final dynamic item in members) {
-            if (item is Map<String, dynamic>) {
-              final String userId = (item['userId'] ?? '').toString();
-              final String userName = (item['userName'] ?? '').toString();
-              final int steps = (item['steps'] is int)
-                  ? item['steps'] as int
-                  : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
-              parsedMembers.add(
-                _MemberStep(
-                  userId: userId,
-                  userName: userName.isEmpty ? '이름없음' : userName,
-                  steps: steps,
-                  imageAsset: 'assets/images/users/elderly_woman.png',
-                ),
-              );
-            }
-          }
-        }
+      final String? accessToken = await PrefsManager.getAccessToken();
+      if (accessToken == null) {
+        throw Exception('로그인이 필요합니다.');
       }
 
-      parsedMembers.sort((a, b) => b.steps.compareTo(a.steps));
+      final List<FamilyStepRank> ranks = await StepRankService.fetchFamilyStepRanks(accessToken);
 
       setState(() {
-        _totalSteps = parsedTotal;
-        _memberSteps = parsedMembers;
+        _familyRanks = ranks;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '걸음 수 조회 실패 ';
+        _errorMessage = e.toString().contains('Exception:') 
+            ? e.toString().replaceFirst('Exception: ', '')
+            : '가족 랭킹 조회 실패';
       });
     } finally {
       if (mounted) {
@@ -229,14 +164,18 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
                           TextSpan(
                             text: _isLoading
                                 ? '0걸음'
-                                : (_memberSteps.isNotEmpty 
-                                    ? (_memberSteps.map((e) => e.steps).reduce((a, b) => a + b) ~/ _memberSteps.length)
-                                        .toString()
-                                        .replaceAllMapped(
-                                      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                                      (m) => '${m[1]},',
-                                    ) + '걸음'
-                                    : '0걸음'),
+                                : (_familyRanks.isNotEmpty
+                                ? (_familyRanks.firstWhere((rank) => rank.isOurFamily, 
+                                    orElse: () => FamilyStepRank(familyName: '', averageSteps: 0, isOurFamily: false)).averageSteps)
+                                .toString()
+                                .replaceAllMapped(
+                              RegExp(
+                                r'(\d{1,3})(?=(\d{3})+(?!\d))',
+                              ),
+                                  (m) => '${m[1]},',
+                            ) +
+                                '걸음'
+                                : '0걸음'),
                             style: const TextStyle(
                               fontFamily: 'Pretendard',
                               fontWeight: FontWeight.w700,
@@ -299,29 +238,27 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
                             ),
                           ),
                         )
-                      else if (_isLoading && _memberSteps.isEmpty)
+                      else if (_isLoading && _familyRanks.isEmpty)
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 8),
-                          child: Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          child: Center(child: CircularProgressIndicator()),
                         )
                       else
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            for (int i = 0; i < _memberSteps.length; i++)
-                                                                  _buildRankingMember(
-                                      context: context,
-                                      rank: i + 1,
-                                      name: _memberSteps[i].userName,
-                                      steps: _memberSteps[i].steps,
-                                      isCurrentUser: _memberSteps[i].userId == _currentUserId,
-                                    ),
-                            if (_memberSteps.isEmpty)
+                            for (int i = 0; i < _familyRanks.length; i++)
+                              _buildRankingMember(
+                                context: context,
+                                rank: i + 1,
+                                name: _familyRanks[i].familyName,
+                                steps: _familyRanks[i].averageSteps,
+                                isCurrentUser: _familyRanks[i].isOurFamily,
+                              ),
+                            if (_familyRanks.isEmpty)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8),
-                                child: Text('가족 걸음 데이터가 없습니다.'),
+                                child: Text('가족 랭킹 데이터가 없습니다.'),
                               ),
                           ],
                         ),
@@ -333,24 +270,11 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
           ],
         ),
       ),
-
     );
   }
 }
 
-class _MemberStep {
-  final String userId;
-  final String userName;
-  final int steps;
-  final String imageAsset;
 
-  _MemberStep({
-    required this.userId,
-    required this.userName,
-    required this.steps,
-    required this.imageAsset,
-  });
-}
 
 Widget _buildRankingMember({
   required BuildContext context,
@@ -366,21 +290,20 @@ Widget _buildRankingMember({
       children: [
         // 메인 컨테이너
         Transform.translate(
-          offset: const Offset(30, 0),
+          offset: Offset(isCurrentUser ? 20 : 40, 0),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.7,
             decoration: BoxDecoration(
               color: isCurrentUser ? AppColors.ongiOrange : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              border: isCurrentUser ? null : Border.all(
-                color: AppColors.ongiOrange,
-                width: 1.5,
-              ),
+              border: isCurrentUser
+                  ? null
+                  : Border.all(color: AppColors.ongiOrange, width: 1.5),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                      child: Stack(
+            child: Stack(
               children: [
-                // 이름
+                //이름
                 Positioned(
                   top: 0,
                   left: 0,
@@ -390,7 +313,9 @@ Widget _buildRankingMember({
                       fontFamily: 'Pretendard',
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
-                      color: isCurrentUser ? Colors.white : AppColors.ongiOrange,
+                      color: isCurrentUser
+                          ? Colors.white
+                          : AppColors.ongiOrange,
                     ),
                   ),
                 ),
@@ -402,16 +327,17 @@ Widget _buildRankingMember({
                     textBaseline: TextBaseline.alphabetic,
                     children: [
                       Text(
-                        // steps.toString().replaceAllMapped(
-                        //   RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                        //   (m) => '${m[1]},',
-                        // ),
-                        '132,335',
+                        steps.toString().replaceAllMapped(
+                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                          (m) => '${m[1]},',
+                        ),
                         style: TextStyle(
                           fontFamily: 'Pretendard',
                           fontWeight: FontWeight.w800,
                           fontSize: 32,
-                          color: isCurrentUser ? Colors.white : AppColors.ongiOrange,
+                          color: isCurrentUser
+                              ? Colors.white
+                              : AppColors.ongiOrange,
                         ),
                       ),
                       const SizedBox(width: 4),
@@ -421,7 +347,9 @@ Widget _buildRankingMember({
                           fontFamily: 'Pretendard',
                           fontWeight: FontWeight.w500,
                           fontSize: 16,
-                          color: isCurrentUser ? Colors.white : AppColors.ongiOrange,
+                          color: isCurrentUser
+                              ? Colors.white
+                              : AppColors.ongiOrange,
                         ),
                       ),
                     ],
@@ -429,12 +357,28 @@ Widget _buildRankingMember({
                 ),
               ],
             ),
+          ),
         ),
-        ),
+        // 우리 가족 순위
+        if (isCurrentUser)
+          Positioned(
+            left: -25,
+            top: -25,
+            child: Container(
+              child: Center(
+                child: Text(
+                  '$rank',
+                  style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w800,
+                    fontSize: 64,
+                    color: AppColors.ongiOrange,
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     ),
   );
 }
-
-
-
