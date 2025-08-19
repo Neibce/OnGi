@@ -4,6 +4,7 @@ import 'package:ongi/core/app_light_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/models/maum_log.dart';
 import 'package:ongi/services/maum_log_service.dart';
+import 'package:ongi/services/family_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'dart:ui'; // Added for ImageFilter
 
@@ -19,16 +20,14 @@ class PhotoDateScreen extends StatefulWidget {
 class _PhotoDateScreenState extends State<PhotoDateScreen> {
   int _currentPage = 0;
   MaumLogResponse? _maumLogResponse;
+  List<Map<String, dynamic>> _familyMembers = [];
   bool _isLoading = true;
   String? _error;
-  String _userName = '사용자';
-  String? _currentUserUuid;
 
   @override
   void initState() {
     super.initState();
     _loadMaumLogData();
-    _loadUserName();
   }
 
   @override
@@ -46,10 +45,19 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
         _error = null;
       });
 
-      final response = await MaumLogService.getMaumLog(widget.date);
+      // 마음 기록과 가족 구성원 정보를 동시에 로드
+      final futures = [
+        MaumLogService.getMaumLog(widget.date),
+        FamilyService.getFamilyMembers(),
+      ];
+
+      final results = await Future.wait(futures);
+      final response = results[0] as MaumLogResponse;
+      final familyMembers = results[1] as List<Map<String, dynamic>>;
 
       setState(() {
         _maumLogResponse = response;
+        _familyMembers = familyMembers;
         _isLoading = false;
         if (response.maumLogDtos.isNotEmpty) {
           _currentPage = 0;
@@ -61,24 +69,6 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
         _isLoading = false;
       });
     }
-  }
-
-  Future<void> _loadUserName() async {
-    String? savedUsername = await PrefsManager.getUserName();
-    String? savedUuid = await PrefsManager.getUuid();
-    if (savedUsername != null) {
-      setState(() {
-        _userName = savedUsername;
-        _currentUserUuid = savedUuid;
-      });
-    }
-  }
-
-  String _getUploaderDisplayName(String uploader) {
-    if (_currentUserUuid != null && uploader == _currentUserUuid) {
-      return _userName;
-    }
-    return '가족';
   }
 
   @override
@@ -144,9 +134,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
   Widget _buildContent(double cardWidth, double cardHeight) {
     if (_isLoading) {
       return const Center(
-        child: CircularProgressIndicator(
-          color: AppColors.ongiOrange,
-        ),
+        child: CircularProgressIndicator(color: AppColors.ongiOrange),
       );
     }
 
@@ -234,50 +222,47 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                 borderRadius: BorderRadius.circular(32),
                 child: isActive
                     ? Image.network(
-                  maumLog.frontPresignedUrl,
-                  width: cardWidth,
-                  height: cardHeight,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: cardWidth,
-                      height: cardHeight,
-                      color: Colors.grey[300],
-                      child: const Icon(
-                        Icons.broken_image,
-                        color: Colors.grey,
-                        size: 48,
-                      ),
-                    );
-                  },
-                )
+                        maumLog.frontPresignedUrl,
+                        width: cardWidth,
+                        height: cardHeight,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            width: cardWidth,
+                            height: cardHeight,
+                            color: Colors.grey[300],
+                            child: const Icon(
+                              Icons.broken_image,
+                              color: Colors.grey,
+                              size: 48,
+                            ),
+                          );
+                        },
+                      )
                     : ImageFiltered(
-                  imageFilter: ImageFilter.blur(
-                    sigmaX: 8,
-                    sigmaY: 8,
-                  ),
-                  child: Opacity(
-                    opacity: 0.7,
-                    child: Image.network(
-                      maumLog.frontPresignedUrl,
-                      width: cardWidth,
-                      height: cardHeight,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          width: cardWidth,
-                          height: cardHeight,
-                          color: Colors.grey[300],
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: Colors.grey,
-                            size: 48,
+                        imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
+                        child: Opacity(
+                          opacity: 0.7,
+                          child: Image.network(
+                            maumLog.frontPresignedUrl,
+                            width: cardWidth,
+                            height: cardHeight,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: cardWidth,
+                                height: cardHeight,
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                  size: 48,
+                                ),
+                              );
+                            },
                           ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
+                        ),
+                      ),
               ),
               // 좌상단 서브(프로필) 사진
               Positioned(
@@ -287,10 +272,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                   width: 88,
                   height: 100,
                   decoration: BoxDecoration(
-                    border: Border.all(
-                      color: AppColors.ongiOrange,
-                      width: 3,
-                    ),
+                    border: Border.all(color: AppColors.ongiOrange, width: 3),
                     borderRadius: BorderRadius.circular(15),
                   ),
                   child: ClipRRect(
@@ -312,19 +294,13 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                   ),
                 ),
               ),
-              
               // 하단 오버레이
               Positioned(
                 left: 0,
                 right: 0,
                 bottom: 0,
                 child: Container(
-                  padding: const EdgeInsets.fromLTRB(
-                    20,
-                    16,
-                    20,
-                    24,
-                  ),
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                   decoration: BoxDecoration(
                     borderRadius: const BorderRadius.only(
                       bottomLeft: Radius.circular(32),
@@ -334,8 +310,8 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                       colors: [
-                        Colors.black.withOpacity(0.0),
-                        Colors.black.withOpacity(0.4),
+                        Colors.black.withValues(alpha: 0.0),
+                        Colors.black.withValues(alpha: 0.4),
                       ],
                     ),
                   ),
@@ -345,38 +321,34 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                     children: [
                       Row(
                         children: [
-                          Image.asset("assets/images/users/elderly_woman.png", width: 30),
+                          FutureBuilder<String>(
+                            future: PrefsManager.getProfileImagePathByUserName(
+                              maumLog.uploader,
+                              _familyMembers,
+                            ),
+                            builder: (context, snapshot) {
+                              final profileImagePath =
+                                  snapshot.data ??
+                                  PrefsManager.getProfileImagePath(0);
+                              return Image.asset(profileImagePath, width: 30);
+                            },
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _getUploaderDisplayName(maumLog.uploader),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontFamily: 'Pretendard',
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  maumLog.comment,
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 10,
-                                    fontFamily: 'Pretendard',
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
+                            child: Text(
+                              maumLog.comment,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontFamily: 'Pretendard',
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
-                      // 위치 버튼
+                      // 위치 버튼 스타일
                       Align(
                         alignment: Alignment.center,
                         child: Container(
@@ -391,7 +363,9 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              SvgPicture.asset('assets/images/location_icon.svg'),
+                              SvgPicture.asset(
+                                'assets/images/location_icon.svg',
+                              ),
                               const SizedBox(width: 4),
                               Text(
                                 maumLog.location,
@@ -433,8 +407,11 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
 
     List<Widget> rows = [];
     for (int i = 0; i < emotions.length; i += 4) {
-      final rowEmotions = emotions.sublist(i, i + 4 > emotions.length ? emotions.length : i + 4);
-      
+      final rowEmotions = emotions.sublist(
+        i,
+        i + 4 > emotions.length ? emotions.length : i + 4,
+      );
+
       rows.add(
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -446,16 +423,14 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
           ],
         ),
       );
-      
+
       // 마지막 행이 아니면 세로 간격 추가
       if (i + 4 < emotions.length) {
         rows.add(const SizedBox(height: 2));
       }
     }
 
-    return Column(
-      children: rows,
-    );
+    return Column(children: rows);
   }
 
   Widget _buildPageIndicators() {

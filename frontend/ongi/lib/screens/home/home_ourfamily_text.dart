@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class HomeOngiText extends StatelessWidget {
   final String username;
@@ -24,10 +25,19 @@ class HomeOngiText extends StatelessWidget {
         children: [
           Row(
             children: [
-              Image.asset(
-                'assets/images/users/elderly_woman.png',
-                width: iconSize,
-                height: iconSize,
+              FutureBuilder<Map<String, dynamic>>(
+                future: PrefsManager.getUserInfo(),
+                builder: (context, snapshot) {
+                  final userInfo = snapshot.data ?? {};
+                  final profileImageId = userInfo['profileImageId'] ?? 0;
+                  final profileImagePath = PrefsManager.getProfileImagePath(profileImageId);
+                  
+                  return Image.asset(
+                    profileImagePath,
+                    width: iconSize,
+                    height: iconSize,
+                  );
+                },
               ),
               const SizedBox(width: 8),
               Text(

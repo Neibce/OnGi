@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_colors.dart';
@@ -19,6 +21,8 @@ class AddPillScreen extends StatefulWidget {
 }
 
 class _AddPillScreenState extends State<AddPillScreen> {
+  XFile? _pillImage;
+  final ImagePicker picker = ImagePicker();
   final TextEditingController _nameController = TextEditingController();
   Set<String> selectedDays = <String>{};
   final List<String> days = ['일', '월', '화', '수', '목', '금', '토'];
@@ -95,6 +99,19 @@ class _AddPillScreenState extends State<AddPillScreen> {
   void dispose() {
     _nameController.dispose();
     super.dispose();
+  }
+
+  Future<void> getPillImage(ImageSource imageSource) async {
+    try {
+      final XFile? pickedFile = await picker.pickImage(source: imageSource);
+      if (pickedFile != null) {
+        setState(() {
+          _pillImage = XFile(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      print('Error picking image: $e');
+    }
   }
 
   int _frequencyToTimes(String frequency) {
@@ -243,10 +260,22 @@ class _AddPillScreenState extends State<AddPillScreen> {
       );
 
       if (!mounted) return;
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const PillUpdatePopup()),
-      );
+      
+      // 즉시 홈으로 돌아가면서 성공 결과 전달
+      Navigator.pop(context, true);
+      
+      // 성공 팝업을 약간 지연 후 표시 (홈 화면이 먼저 업데이트되도록)
+      Future.delayed(const Duration(milliseconds: 100), () {
+        if (!mounted) return;
+        showDialog(
+          context: context,
+          barrierDismissible: true,
+          builder: (BuildContext context) => Dialog(
+            backgroundColor: Colors.transparent,
+            child: const PillUpdatePopup(),
+          ),
+        );
+      });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -275,6 +304,67 @@ class _AddPillScreenState extends State<AddPillScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const SizedBox(height: 150),
+                      // 약 이미지 선택 영역
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 30),
+                        child: Center(
+                          child: Stack(
+                            children: [
+                              GestureDetector(
+                                onTap: () => getPillImage(ImageSource.gallery),
+                                child: Container(
+                                  width: 120,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.pillsItemBackground,
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: _pillImage != null
+                                      ? ClipRRect(
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: Image.file(
+                                            File(_pillImage!.path),
+                                            width: 120,
+                                            height: 120,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        )
+                                      : Padding(
+                                          padding: const EdgeInsets.all(30),
+                                          child: SvgPicture.asset(
+                                            'assets/images/pill_item_icon.svg',
+                                            fit: BoxFit.contain,
+                                          ),
+                                        ),
+                                ),
+                              ),
+                              Positioned(
+                                right: 8,
+                                bottom: 8,
+                                child: GestureDetector(
+                                  onTap: () =>
+                                      getPillImage(ImageSource.gallery),
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: Colors.transparent,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(6),
+                                      child: Icon(
+                                        Icons.photo_library_outlined,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
                       Padding(
                         padding: const EdgeInsets.only(
                           left: 40,
@@ -521,6 +611,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
                             height: 28,
                             width: 28,
                             child: CircularProgressIndicator(
+                              color: AppColors.ongiOrange,
                               strokeWidth: 3,
                               valueColor: AlwaysStoppedAnimation<Color>(
                                 Colors.white,

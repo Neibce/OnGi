@@ -53,7 +53,7 @@ class PillUpdatePopup extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(
                       left: 10,
-                      top: 180,
+                      top: 220,
                       right: 10,
                     ),
                     child: ElevatedButton(

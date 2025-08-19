@@ -235,7 +235,7 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
       _dateCarouselController.jumpToPage(targetPage);
     }
 
-    // 새로운 날짜의 서버 데이터 조회
+    //새로운 날짜의 서버 데이터 조회
     _loadExerciseFromServer(normalizedDate);
 
     Future.delayed(const Duration(milliseconds: 100), () {
@@ -642,9 +642,9 @@ class _ExerciseRecordScreenState extends State<ExerciseRecordScreen> {
                                   height: 1,
                                 ),
                               ),
-                              const Text(
-                                '다 채우셨나요?',
-                                style: TextStyle(
+                              Text(
+                                _isChild ? '다 채우셨을까요?' : '다 채우셨나요?',
+                                style: const TextStyle(
                                   fontSize: 40,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600,

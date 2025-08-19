@@ -29,11 +29,11 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
   bool _isLoadingExercise = true;
   int _todaySteps = 0;
   int _todayPillCount = 0;
-  
+
   // 통증 기록 관련 상태
   List<Map<String, dynamic>> _todayPainRecords = [];
   bool _isLoadingPain = true;
-  
+
   // 자녀 사용자 관련 상태
   bool _isChild = false;
   List<Map<String, dynamic>> _parentMembers = [];
@@ -50,9 +50,9 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     try {
       final isParent = await PrefsManager.getIsParent();
       _isChild = !isParent;
-      
+
       await _loadUserName();
-      
+
       if (_isChild) {
         await _loadParentMembers();
       } else {
@@ -81,18 +81,20 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
     try {
       final members = await FamilyService.getFamilyMembers();
-      final parents = members.where((member) => member['isParent'] == true).toList();
-      
+      final parents = members
+          .where((member) => member['isParent'] == true)
+          .toList();
+
       setState(() {
         _parentMembers = parents;
         _isLoadingParents = false;
-        
+
         // 첫 번째 부모를 기본 선택
         if (parents.isNotEmpty) {
           _selectedParentId = parents.first['uuid'];
         }
       });
-      
+
       // 선택된 부모의 데이터 로드
       if (_selectedParentId != null) {
         await _loadAllData();
@@ -150,8 +152,8 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
       // 자녀인 경우 선택된 부모의 데이터 조회
       final targetUserId = _isChild ? _selectedParentId : null;
       final serverData = await exerciseService.getExerciseRecord(
-        date: dateKey, 
-        parentId: targetUserId
+        date: dateKey,
+        parentId: targetUserId,
       );
 
       if (serverData != null && serverData['grid'] != null) {
@@ -233,31 +235,37 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     try {
       // 자녀인 경우 선택된 부모의 약 정보 조회
       final targetUserId = _isChild ? _selectedParentId : null;
-      final pillSchedule = await PillService.getTodayPillSchedule(parentUuid: targetUserId);
-      
+      final pillSchedule = await PillService.getTodayPillSchedule(
+        parentUuid: targetUserId,
+      );
+
       // 총 복용해야 할 횟수와 이미 복용한 횟수 계산
       int totalIntakes = 0;
       int takenIntakes = 0;
-      
+
       for (var pill in pillSchedule) {
         final List<dynamic> intakeTimes = pill['intakeTimes'] ?? [];
-        final Map<String, dynamic> dayIntakeStatus = pill['dayIntakeStatus'] ?? {};
-        
+        final Map<String, dynamic> dayIntakeStatus =
+            pill['dayIntakeStatus'] ?? {};
+
         totalIntakes += intakeTimes.length;
-        
+
         // dayIntakeStatus에서 실제 복용한 시간들을 확인
         for (var intakeTime in intakeTimes) {
-          final timeKey = intakeTime.toString().substring(0, 5); // "08:00:00" -> "08:00"
+          final timeKey = intakeTime.toString().substring(
+            0,
+            5,
+          ); // "08:00:00" -> "08:00"
           if (dayIntakeStatus.containsKey(timeKey)) {
             takenIntakes++;
           }
         }
       }
-      
+
       // 남은 복용 횟수
       int remainingIntakes = totalIntakes - takenIntakes;
       if (remainingIntakes < 0) remainingIntakes = 0;
-      
+
       setState(() {
         _todayPillCount = remainingIntakes;
       });
@@ -283,16 +291,16 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
         final userInfo = await PrefsManager.getUserInfo();
         targetUserId = userInfo['uuid'];
       }
-      
+
       if (targetUserId != null) {
         final painRecords = await HealthService.fetchPainRecords(targetUserId);
         final today = DateTime.now();
         final todayStr = DateFormat('yyyy-MM-dd').format(today);
-        
+
         final todayPainRecords = painRecords
             .where((record) => record['date'] == todayStr)
             .toList();
-            
+
         setState(() {
           _todayPainRecords = todayPainRecords;
           _isLoadingPain = false;
@@ -326,7 +334,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     return painAreaMap[painArea.toLowerCase()] ?? painArea;
   }
 
-    Widget _buildPainText() {
+  Widget _buildPainText() {
     if (_isLoadingPain) {
       return const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -355,7 +363,9 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
     if (_todayPainRecords.isNotEmpty) {
       final koreanAreas = _todayPainRecords
-          .map((record) => _convertPainAreaToKorean(record['painArea'].toString()))
+          .map(
+            (record) => _convertPainAreaToKorean(record['painArea'].toString()),
+          )
           .toSet()
           .join(', ');
 
@@ -400,7 +410,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
           ),
           SizedBox(height: 3),
           Text(
-            '입력되지 않았어요!',
+            '입력되지 \n않았어요!',
             style: TextStyle(
               fontSize: 38,
               fontWeight: FontWeight.w600,
@@ -529,54 +539,65 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     if (_isChild && !_isLoadingParents) {
       // 자녀인 경우 드롭다운 표시
       return Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(25),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black38,
-                  blurRadius: 4,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            child: DropdownButtonHideUnderline(
-              child: DropdownButton<String>(
-                value: _selectedParentId,
-                icon: const SizedBox.shrink(),
-                dropdownColor: Colors.white,
-                isDense: false,
-                itemHeight: 65,
-                borderRadius: BorderRadius.circular(20),
-                style: const TextStyle(
-                  fontSize: 60,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.ongiOrange,
-                ),
-                items: _parentMembers.map((parent) {
-                  return DropdownMenuItem<String>(
-                    value: parent['uuid'],
-                    child: Text(
-                      _formatNameForDisplay(parent['name']),
-                      style: const TextStyle(
-                        fontSize: 60,
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.ongiOrange,
+          Flexible(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(25),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black38,
+                    blurRadius: 4,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: _selectedParentId,
+                  icon: const SizedBox.shrink(),
+                  dropdownColor: Colors.white,
+                  isDense: false,
+                  itemHeight: 80, // 높이 증가로 폰트 클리핑 방지
+                  borderRadius: BorderRadius.circular(20),
+                  isExpanded: false, // 내용에 맞는 너비
+                  style: const TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.ongiOrange,
+                    height: 1.1, // 줄 높이 조정으로 클리핑 방지
+                  ),
+                  items: _parentMembers.map((parent) {
+                    return DropdownMenuItem<String>(
+                      value: parent['uuid'],
+                      child: Container(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          _formatNameForDisplay(parent['name']),
+                          style: const TextStyle(
+                            fontSize: 60,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.ongiOrange,
+                            height: 1.1, // 줄 높이 조정
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (String? newValue) {
-                  if (newValue != null) {
-                    _onParentSelected(newValue);
-                  }
-                },
+                    );
+                  }).toList(),
+                  onChanged: (String? newValue) {
+                    if (newValue != null) {
+                      _onParentSelected(newValue);
+                    }
+                  },
+                ),
               ),
             ),
           ),
+          const SizedBox(width: 8), // 간격 추가
           const Text(
             '님의',
             style: TextStyle(
@@ -650,30 +671,34 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
         HealthStatusInputScreen(
           selectedParentId: _selectedParentId,
           isChild: _isChild,
-        ), 
-        _buildBackButton()
+        ),
+        _buildBackButton(),
       ],
     );
   }
 
   Widget _buildPillHistoryView() {
-    return Stack(children: [
-      PillHistoryScreen(
-        selectedParentId: _selectedParentId,
-        isChild: _isChild,
-      ), 
-      _buildBackButton()
-    ]);
+    return Stack(
+      children: [
+        PillHistoryScreen(
+          selectedParentId: _selectedParentId,
+          isChild: _isChild,
+        ),
+        _buildBackButton(),
+      ],
+    );
   }
 
   Widget _buildExerciseView() {
-    return Stack(children: [
-      ExerciseRecordScreen(
-        selectedParentId: _selectedParentId,
-        isChild: _isChild,
-      ), 
-      _buildBackButton()
-    ]);
+    return Stack(
+      children: [
+        ExerciseRecordScreen(
+          selectedParentId: _selectedParentId,
+          isChild: _isChild,
+        ),
+        _buildBackButton(),
+      ],
+    );
   }
 
   Widget _buildStepTrackerView() {
@@ -696,7 +721,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
               color: AppColors.ongiOrange.withOpacity(0.7),
             ),
             const SizedBox(height: 40),
-            
+
             // 메인 메시지
             const Text(
               '아직 등록된\n부모 사용자가 없어요.',
@@ -709,7 +734,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
-            
+
             // 서브 메시지
             const Text(
               '부모님을 초대해볼까요?',
@@ -722,7 +747,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
-            
+
             // 새로고침 버튼 (선택사항)
             OutlinedButton(
               onPressed: () {
@@ -730,21 +755,18 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
               },
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppColors.ongiOrange,
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 16,
+                ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
                 ),
-                side: BorderSide(
-                  color: AppColors.ongiOrange,
-                  width: 2,
-                ),
+                side: BorderSide(color: AppColors.ongiOrange, width: 2),
               ),
               child: const Text(
                 '새로고침',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
               ),
             ),
           ],
@@ -758,7 +780,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     if (_isChild && _parentMembers.isEmpty && !_isLoadingParents) {
       return _buildNoParentView();
     }
-    
+
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 40),
       child: Column(
@@ -864,56 +886,58 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                           alignment: Alignment.topRight,
                           child: Text.rich(
                             TextSpan(
-                              children: _todayPillCount == 0 
-                                ? [
-                                    const TextSpan(
-                                      text: '오늘의 약을\n',
-                                      style: TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.2,
-                                        color: Colors.black,
+                              children: _todayPillCount == 0
+                                  ? [
+                                      const TextSpan(
+                                        text: '오늘의 약을\n',
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.2,
+                                          color: Colors.black,
+                                        ),
                                       ),
-                                    ),
-                                    const TextSpan(
-                                      text: '모두 섭취하셨어요!',
-                                      style: TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.2,
-                                        color: AppColors.ongiOrange,
+                                      const TextSpan(
+                                        text: '모두 섭취하셨어요!',
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.2,
+                                          color: AppColors.ongiOrange,
+                                        ),
                                       ),
-                                    ),
-                                  ]
-                                : [
-                                    const TextSpan(
-                                      text: '오늘 ',
-                                      style: TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.2,
-                                        color: Colors.black,
+                                    ]
+                                  : [
+                                      const TextSpan(
+                                        text: '오늘 약을 ',
+                                        style: TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.2,
+                                          color: Colors.black,
+                                        ),
                                       ),
-                                    ),
-                                    TextSpan(
-                                      text: '$_todayPillCount개의 약',
-                                      style: const TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.2,
-                                        color: AppColors.ongiOrange,
+                                      TextSpan(
+                                        text: '$_todayPillCount번',
+                                        style: const TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.2,
+                                          color: AppColors.ongiOrange,
+                                        ),
                                       ),
-                                    ),
-                                    TextSpan(
-                                      text: _isChild ? '을\n섭취하지 않으셨어요!' : '을\n더 섭취하셔야 해요!',
-                                      style: const TextStyle(
-                                        fontSize: 25,
-                                        fontWeight: FontWeight.w600,
-                                        height: 1.2,
-                                        color: Colors.black,
+                                      TextSpan(
+                                        text: _isChild
+                                            ? '\n섭취하지 않으셨어요!'
+                                            : '\n더 섭취하셔야 해요!',
+                                        style: const TextStyle(
+                                          fontSize: 25,
+                                          fontWeight: FontWeight.w600,
+                                          height: 1.2,
+                                          color: Colors.black,
+                                        ),
                                       ),
-                                    ),
-                                  ],
+                                    ],
                             ),
                             textAlign: TextAlign.right,
                           ),

@@ -20,11 +20,31 @@ public interface StepRepository extends JpaRepository<Step, Long> {
     Optional<Step> findByCreatedByAndDate(User user, LocalDate date);
 
     @Query("SELECT IFNULL(SUM(s.steps), 0) FROM Step s WHERE s.family = :family AND s.date = :date")
-    Integer getTotalStepsByFamilyAndDate(@Param("family") Family family, @Param("date") LocalDate date);
+    Integer getTotalStepsByFamilyAndDate(@Param("family") Family family,
+            @Param("date") LocalDate date);
 
-    List<Step> findByFamilyAndDateBetween(Family family, LocalDate startDate, LocalDate endDate);
+    @Query("""
+                select
+                    f.code   as familyCode,
+                    f.name as familyName,
+                    coalesce(sum(s.steps), 0) as totalSteps,
+                    count(distinct m)      as memberCount
+                from Family f
+                left join f.members m
+                left join Step s
+                    on s.family = f
+                   and s.date between :start and :end
+                group by f.code, f.name
+            """)
+    List<FamilyStepsAndSizeView> findStepsAndSizeBetween(
+            @Param("start") LocalDate start,
+            @Param("end") LocalDate end
+    );
 
-    List<Integer> getTotalStepsByDateBetween(LocalDate startDate, LocalDate endDate);
-
-    List<Step> findByFamily(Family family);
+    interface FamilyStepsAndSizeView {
+        String getFamilyCode();
+        String getFamilyName();
+        Long getTotalSteps();
+        Long getMemberCount();
+    }
 } 
