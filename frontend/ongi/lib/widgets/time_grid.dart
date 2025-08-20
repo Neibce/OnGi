@@ -25,11 +25,19 @@ class TimeGrid extends StatefulWidget {
 class _TimeGridState extends State<TimeGrid> {
   late Set<int> _selected;
   static const int _startHour = 6;
+  late ScrollController _scrollController;
 
   @override
   void initState() {
     super.initState();
     _selected = widget.initialSelected.toSet();
+    _scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   @override
@@ -52,6 +60,7 @@ class _TimeGridState extends State<TimeGrid> {
     final hours = List<int>.generate(24, (i) => (_startHour + i) % 24);
 
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Column(
         children: [
           for (var hour in hours)
@@ -75,12 +84,25 @@ class _TimeGridState extends State<TimeGrid> {
                   GestureDetector(
                     onTap: widget.onValueChanged != null ? () {
                       final idx = hour * 6 + seg;
+                      final currentScrollOffset = _scrollController.hasClients 
+                          ? _scrollController.offset 
+                          : 0.0;
+                      
                       setState(() {
-                        if (_selected.contains(idx))
+                        if (_selected.contains(idx)) {
                           _selected.remove(idx);
-                        else
+                        } else {
                           _selected.add(idx);
-                        widget.onValueChanged?.call(_selected.toList()..sort());
+                        }
+                      });
+                      
+                      widget.onValueChanged?.call(_selected.toList()..sort());
+                      
+                      // 스크롤 위치 복원
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (_scrollController.hasClients) {
+                          _scrollController.jumpTo(currentScrollOffset);
+                        }
                       });
                     } : null,
                     child: Container(

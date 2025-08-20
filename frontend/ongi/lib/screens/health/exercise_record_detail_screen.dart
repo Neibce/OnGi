@@ -390,9 +390,6 @@ class _ExerciseRecordDetailScreenState
                           bottom: 20,
                           child: Center(
                             child: TimeGrid(
-                              key: ValueKey(
-                                "${selectedDate.year}-${selectedDate.month}-${selectedDate.day}-${selected.length}-${selected.hashCode}",
-                              ),
                               initialSelected: selected,
                               cellColor: Colors.white,
                               cellSelectedColor: AppColors.ongiOrange,
