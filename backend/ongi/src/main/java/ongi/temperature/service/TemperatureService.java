@@ -298,12 +298,12 @@ public class TemperatureService {
     }
 
 
-    // 매일 23:59:59에 당일의 가족별 보너스 온도 상승 처리
-    @Scheduled(cron = "59 59 23 * * *")
+    // 매일 00:00:05에 전날의 가족별 보너스 온도 상승 처리
+    @Scheduled(cron = "5 0 0 * * *")
     @Transactional
     public void processFamilyBonusTemperature() {
         var families = familyRepository.findAll();
-        java.time.LocalDate targetDate = getToday(); // 오늘 날짜
+        java.time.LocalDate targetDate = getToday().minusDays(1); // 전날 기준으로 체크
         for (var family : families) {
             String familyId = family.getCode();
             processEmotionBonus(family, familyId, targetDate);
@@ -358,12 +358,12 @@ public class TemperatureService {
 
 
 
-    //// 매주 일요일 23:59:59에 일주일 미접속 온도 하락 처리
-    @Scheduled(cron = "59 59 23 * * 0")
+    //// 매주 월요일 00:00:05에 지난주 미접속 온도 하락 처리
+    @Scheduled(cron = "5 0 0 * * 1")
     @Transactional
     public void processWeeklyTemperatureDecrease() {
         var families = familyRepository.findAll();
-        java.time.LocalDate targetDate = getToday();
+        java.time.LocalDate targetDate = getToday().minusDays(1); // 전날 기준으로 체크
         for (var family : families) {
             String familyId = family.getCode();
             decreaseTemperatureForInactiveParent(familyId, targetDate);
@@ -415,12 +415,12 @@ public class TemperatureService {
     }
 
 
-    //// 매일 23:59:59에 하루 미접속 온도 하락 처리
-    @Scheduled(cron = "59 59 23 * * *")
+    //// 매일 00:00:05에 전날 하루 미접속 온도 하락 처리
+    @Scheduled(cron = "5 0 0 * * *")
     @Transactional
     public void processDailyTemperatureDecrease() {
         var families = familyRepository.findAll();
-        LocalDate targetDate = getToday();
+        LocalDate targetDate = getToday().minusDays(1); // 전날 기준으로 체크
         for (var family : families) {
             String familyId = family.getCode();
             decreaseTemperatureForNoLogin(familyId, targetDate);
