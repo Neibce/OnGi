@@ -661,8 +661,11 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
         return _buildExerciseView();
       case 'steps':
         return _buildStepTrackerView();
+      case 'familyStepTracker':
+        return Stack(
+          children: [const FamilyStepTrackerScreen(), _buildBackButton()],
+        );
       case 'crossFamilyRanking':
-        // crossFamilyRanking 화면에서만 뒤로가기 버튼 포함
         return Stack(
           children: [const CrossFamilyRankingScreen(), _buildBackButton()],
         );
@@ -1047,7 +1050,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () => _changeView('crossFamilyRanking'),
+                    onPressed: () => _changeView('familyStepTracker'),
                     child: Stack(
                       children: [
                         Positioned(
