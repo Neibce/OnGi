@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:ongi/utils/prefs_manager.dart';
 
@@ -36,6 +37,93 @@ class PillService {
     return trimmed;
   }
 
+  /// 약 사진 업로드용 Presigned URL 요청
+  static Future<Map<String, dynamic>> getPillPhotoPresignedUrl() async {
+    final accessToken = await PrefsManager.getAccessToken();
+
+    if (accessToken == null) {
+      throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/pills/presigned-url'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      } else {
+        throw Exception(
+          'Presigned URL 요청에 실패했습니다. 상태 코드: ${response.statusCode}, 응답: ${response.body}',
+        );
+      }
+    } catch (e) {
+      throw Exception('Presigned URL 요청 중 오류가 발생했습니다: $e');
+    }
+  }
+
+  /// S3에 약 사진 업로드
+  static Future<void> uploadPillPhotoToS3({
+    required String presignedUrl,
+    required File imageFile,
+    required String uploaderUuid,
+  }) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      
+      final response = await http.put(
+        Uri.parse(presignedUrl),
+        headers: {
+          'Content-Type': 'image/jpeg',
+          'x-amz-meta-uploader': uploaderUuid,
+        },
+        body: bytes,
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception(
+          'S3 업로드에 실패했습니다. 상태 코드: ${response.statusCode}',
+        );
+      }
+    } catch (e) {
+      throw Exception('S3 업로드 중 오류가 발생했습니다: $e');
+    }
+  }
+
+  /// 약 삭제
+  static Future<void> deletePill(String pillId) async {
+    final accessToken = await PrefsManager.getAccessToken();
+
+    if (accessToken == null) {
+      throw Exception('AccessToken이 없습니다. 로그인 먼저 하세요.');
+    }
+
+    try {
+      final response = await http.delete(
+        Uri.parse('$baseUrl/pills/$pillId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        // 삭제 성공
+        return;
+      } else {
+        throw Exception(
+          '약 삭제에 실패했습니다. 상태 코드: ${response.statusCode}, 응답: ${response.body}',
+        );
+      }
+    } catch (e) {
+      throw Exception('약 삭제 중 오류가 발생했습니다: $e');
+    }
+  }
+
   /// 약 추가
   static Future<Map<String, dynamic>> addPills({
     required String name,
@@ -44,6 +132,7 @@ class PillService {
     required List<String> intakeTimes,
     required List<String> intakeDays,
     required String parentUuid,
+    String? fileName, // 사진 파일명 추가
   }) async {
     final accessToken = await PrefsManager.getAccessToken();
     // final parentUuId = await PrefsManager.getUuid();
@@ -53,20 +142,27 @@ class PillService {
     }
 
     try {
+      final Map<String, dynamic> requestBody = {
+        'name': name,
+        'times': times,
+        'intakeDetail': intakeDetail,
+        'intakeTimes': intakeTimes,
+        'intakeDays': intakeDays,
+        'parentUuid': parentUuid,
+      };
+
+      // 파일명이 있으면 추가
+      if (fileName != null && fileName.isNotEmpty) {
+        requestBody['fileName'] = fileName;
+      }
+
       final response = await http.post(
         Uri.parse('$baseUrl/pills'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $accessToken',
         },
-        body: jsonEncode({
-          'name': name,
-          'times': times,
-          'intakeDetail': intakeDetail,
-          'intakeTimes': intakeTimes,
-          'intakeDays': intakeDays,
-          'parentUuid': parentUuid,
-        }),
+        body: jsonEncode(requestBody),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
