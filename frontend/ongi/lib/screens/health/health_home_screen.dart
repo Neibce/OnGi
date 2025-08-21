@@ -1117,9 +1117,9 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                 children: [
                                   SvgPicture.asset(
                                     'assets/images/step_ranking_icon.svg',
-                                    width: 10,
                                     height: 10,
-                                    color: Colors.black,
+                                    width: 10,
+                                    color: AppColors.ongiGrey,
                                   ),
                                   const SizedBox(width: 4),
                                   const Text(
