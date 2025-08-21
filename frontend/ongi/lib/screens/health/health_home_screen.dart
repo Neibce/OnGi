@@ -1078,10 +1078,8 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: '${_todaySteps.toString().replaceAllMapped(
-                                    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                                    (Match match) => '${match[1]},'
-                                  ).replaceAll(RegExp(r',$'), '')}',
+                                  text:
+                                      '${_todaySteps.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match match) => '${match[1]},').replaceAll(RegExp(r',$'), '')}',
                                   style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.w600,
@@ -1104,14 +1102,14 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                           ),
                         ),
                         Positioned(
-                          right: 10,
-                          bottom: 10,
+                          right: 0,
+                          bottom: 8,
                           child: GestureDetector(
                             onTap: () => _changeView('crossFamilyRanking'),
                             child: Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 2,
-                                vertical: 8,
+                                horizontal: 0,
+                                vertical: 3,
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -1122,20 +1120,33 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                 children: [
                                   SvgPicture.asset(
                                     'assets/images/step_ranking_icon.svg',
-                                    height: 10,
-                                    width: 10,
+                                    height: 18,
+                                    width: 18,
                                     color: AppColors.ongiGrey,
                                   ),
                                   const SizedBox(width: 4),
-                                  const Text(
-                                    '다른 가족들은 얼마나 걸었을까요?',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w400,
-                                      color: Colors.black,
-                                      height: 1.2,
+                                  Align(
+                                    alignment: Alignment.centerRight,
+                                    child: Container(
+                                      decoration: const BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            width: 0.6,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                      child: const Text(
+                                        '다른 가족들은 몇 걸음 걸었을까요?',
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w400,
+                                          color: Colors.black,
+                                          height: 1.2,
+                                        ),
+                                        textAlign: TextAlign.right,
+                                      ),
                                     ),
-                                    textAlign: TextAlign.right,
                                   ),
                                 ],
                               ),
