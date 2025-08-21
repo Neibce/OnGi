@@ -676,11 +676,13 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   Widget _buildBackButton() {
     return Positioned(
-      top: 40,
+      top: 60,
       left: 20,
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
-        onPressed: _goBackToHome,
+      child: Container(
+        child: IconButton(
+          icon: SvgPicture.asset('assets/images/back_icon_white.svg'),
+          onPressed: _goBackToHome,
+        ),
       ),
     );
   }
@@ -738,7 +740,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
             Icon(
               Icons.family_restroom,
               size: 80,
-              color: AppColors.ongiOrange.withOpacity(0.7),
+              color: AppColors.ongiOrange.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 40),
 
