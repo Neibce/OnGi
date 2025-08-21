@@ -91,6 +91,7 @@ flutter:
     - assets/images/location_icon.svg
     - assets/images/record_tooltip.svg
     - assets/images/cross_family_ranking_title_logo.png
+    - assets/images/step_ranking_icon.svg
   fonts:
     - family: Pretendard
       fonts:
