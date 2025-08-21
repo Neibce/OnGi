@@ -722,7 +722,7 @@ class _ButtonColumnState extends State<ButtonColumn> with WidgetsBindingObserver
                 })
                     .toSet()
                     .join(', ');
-                painfulParents.add('$parentName님이 $koreanAreas가 아파요');
+                painfulParents.add('$parentName님이 $koreanAreas이/가 아파요');
               }
             }
           } catch (e) {

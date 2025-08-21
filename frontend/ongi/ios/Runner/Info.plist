@@ -70,5 +70,23 @@
         <string>This app needs access to location when in the background.</string>
         <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
         <string>This app needs access to location when in the background.</string>
+        <key>NSAppTransportSecurity</key>
+        <dict>
+            <key>NSAllowsArbitraryLoads</key>
+            <true/>
+        </dict>
+        <!-- url_launcher를 위한 URL 스킴 설정 -->
+        <key>LSApplicationQueriesSchemes</key>
+        <array>
+            <string>https</string>
+            <string>http</string>
+            <string>youtube</string>
+            <string>youtu.be</string>
+        </array>
+        <!-- 네트워크 관련 설정 (경고 방지용) -->
+        <key>NSBonjourServices</key>
+        <array></array>
+        <key>NSLocalNetworkUsageDescription</key>
+        <string>This app does not use local network.</string>
 	</dict>
 </plist>
