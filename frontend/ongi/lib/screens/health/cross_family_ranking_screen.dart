@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:ongi/widgets/date_carousel.dart';
 import 'package:ongi/services/step_rank_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
@@ -36,14 +34,15 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
         throw Exception('로그인이 필요합니다.');
       }
 
-      final List<FamilyStepRank> ranks = await StepRankService.fetchFamilyStepRanks(accessToken);
+      final List<FamilyStepRank> ranks =
+          await StepRankService.fetchFamilyStepRanks(accessToken);
 
       setState(() {
         _familyRanks = ranks;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString().contains('Exception:') 
+        _errorMessage = e.toString().contains('Exception:')
             ? e.toString().replaceFirst('Exception: ', '')
             : '가족 랭킹 조회 실패';
       });
@@ -126,7 +125,7 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
             ),
             // 상단 정보 박스
             Positioned(
-              top: circleSize * 0.5,
+              top: circleSize * 0.45,
               left: 15,
               right: 15,
               child: Container(
@@ -165,17 +164,27 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
                             text: _isLoading
                                 ? '0걸음'
                                 : (_familyRanks.isNotEmpty
-                                ? (_familyRanks.firstWhere((rank) => rank.isOurFamily, 
-                                    orElse: () => FamilyStepRank(familyName: '', averageSteps: 0, isOurFamily: false)).averageSteps)
-                                .toString()
-                                .replaceAllMapped(
-                              RegExp(
-                                r'(\d{1,3})(?=(\d{3})+(?!\d))',
-                              ),
-                                  (m) => '${m[1]},',
-                            ) +
-                                '걸음'
-                                : '0걸음'),
+                                      ? (_familyRanks
+                                                    .firstWhere(
+                                                      (rank) =>
+                                                          rank.isOurFamily,
+                                                      orElse: () =>
+                                                          FamilyStepRank(
+                                                            familyName: '',
+                                                            averageSteps: 0,
+                                                            isOurFamily: false,
+                                                          ),
+                                                    )
+                                                    .averageSteps)
+                                                .toString()
+                                                .replaceAllMapped(
+                                                  RegExp(
+                                                    r'(\d{1,3})(?=(\d{3})+(?!\d))',
+                                                  ),
+                                                  (m) => '${m[1]},',
+                                                ) +
+                                            '걸음'
+                                      : '0걸음'),
                             style: const TextStyle(
                               fontFamily: 'Pretendard',
                               fontWeight: FontWeight.w700,
@@ -195,7 +204,7 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 7),
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Text(
@@ -214,12 +223,12 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
             ),
             // 하단 랭킹 박스
             Positioned(
-              top: circleSize * 0.5 + 140,
+              top: circleSize * 0.68,
               left: 15,
               right: 15,
               bottom: 15,
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 20),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20),
@@ -274,8 +283,6 @@ class _CrossFamilyRankingScreenState extends State<CrossFamilyRankingScreen> {
   }
 }
 
-
-
 Widget _buildRankingMember({
   required BuildContext context,
   required int rank,
@@ -290,7 +297,7 @@ Widget _buildRankingMember({
       children: [
         // 메인 컨테이너
         Transform.translate(
-          offset: Offset(isCurrentUser ? 20:40, 0),
+          offset: Offset(isCurrentUser ? 30 : 50, 0),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.65,
             decoration: BoxDecoration(
@@ -300,10 +307,10 @@ Widget _buildRankingMember({
                   ? null
                   : Border.all(color: AppColors.ongiOrange, width: 1.5),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 9),
             child: Stack(
               children: [
-                //이름
+                // 이름
                 Positioned(
                   top: 0,
                   left: 0,
@@ -312,14 +319,14 @@ Widget _buildRankingMember({
                     style: TextStyle(
                       fontFamily: 'Pretendard',
                       fontWeight: FontWeight.w600,
-                      fontSize: 16,
+                      fontSize: 15,
                       color: isCurrentUser
                           ? Colors.white
                           : AppColors.ongiOrange,
                     ),
                   ),
                 ),
-                //걸음수
+                // 걸음수
                 Center(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
@@ -333,8 +340,8 @@ Widget _buildRankingMember({
                         ),
                         style: TextStyle(
                           fontFamily: 'Pretendard',
-                          fontWeight: FontWeight.w800,
-                          fontSize: 32,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 33,
                           color: isCurrentUser
                               ? Colors.white
                               : AppColors.ongiOrange,
@@ -346,7 +353,7 @@ Widget _buildRankingMember({
                         style: TextStyle(
                           fontFamily: 'Pretendard',
                           fontWeight: FontWeight.w500,
-                          fontSize: 16,
+                          fontSize: 17,
                           color: isCurrentUser
                               ? Colors.white
                               : AppColors.ongiOrange,
@@ -362,15 +369,15 @@ Widget _buildRankingMember({
         // 우리 가족 순위
         if (isCurrentUser)
           Positioned(
-            left: -25,
-            top: -25,
+            left: -20,
+            top: -30,
             child: Container(
               child: Center(
                 child: Text(
                   '$rank',
                   style: TextStyle(
                     fontFamily: 'Pretendard',
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w900,
                     fontSize: 64,
                     color: AppColors.ongiOrange,
                   ),
