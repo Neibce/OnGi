@@ -310,7 +310,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           final userInfo = snapshot.data ?? {};
                           final profileImageId = userInfo['profileImageId'] ?? 0;
                           final profileImagePath = PrefsManager.getProfileImagePath(profileImageId);
-                          
+
                           return CircleAvatar(
                             radius: 22,
                             backgroundImage: AssetImage(profileImagePath),
@@ -384,7 +384,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                               .toList();
                           final comment = _commentController.text.trim();
                           final accessToken =
-                              await PrefsManager.getAccessToken();
+                          await PrefsManager.getAccessToken();
 
                           if (accessToken == null) {
                             throw Exception('로그인이 필요합니다. 다시 로그인해주세요.');
@@ -407,13 +407,13 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           );
 
                           final frontFileName =
-                              presignedData['frontFileName'] as String;
+                          presignedData['frontFileName'] as String;
                           final frontPresignedUrl =
-                              presignedData['frontPresignedUrl'] as String;
+                          presignedData['frontPresignedUrl'] as String;
                           final backFileName =
-                              presignedData['backFileName'] as String;
+                          presignedData['backFileName'] as String;
                           final backPresignedUrl =
-                              presignedData['backPresignedUrl'] as String;
+                          presignedData['backPresignedUrl'] as String;
 
                           await service.uploadFileToS3(
                             presignedUrl: backPresignedUrl,
@@ -422,7 +422,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           );
 
                           final actualFrontFileName =
-                              widget.frontImagePath != null
+                          widget.frontImagePath != null
                               ? frontFileName
                               : backFileName;
                           if (widget.frontImagePath != null) {
@@ -458,7 +458,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text(
-                                '업로드 실패: $e',
+                                '업로드 실패, $e',
                                 style: const TextStyle(
                                   color: AppColors.ongiOrange,
                                 ),

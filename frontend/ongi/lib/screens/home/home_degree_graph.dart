@@ -249,7 +249,8 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
 
                       // 경계값에서 약간 안쪽으로만 필터링
                       final smallMargin = horizontalInterval * 0.1;
-                      if ((value - minY).abs() < smallMargin || (value - maxY).abs() < smallMargin) {
+                      if ((value - minY).abs() < smallMargin ||
+                          (value - maxY).abs() < smallMargin) {
                         return const SizedBox.shrink();
                       }
 
@@ -373,7 +374,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      "${item.userName}이 ${item.formattedChange} 상승 시켰어요!",
+                      "${item.userName}${item.userName == '우리 가족' ? '이' : ' 님이'} ${item.formattedChange} ${item.contributed >= 0 ? '상승' : '하강'}시켰어요!",
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 15,

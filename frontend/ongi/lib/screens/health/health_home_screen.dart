@@ -676,11 +676,13 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   Widget _buildBackButton() {
     return Positioned(
-      top: 40,
+      top: 60,
       left: 20,
-      child: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
-        onPressed: _goBackToHome,
+      child: Container(
+        child: IconButton(
+          icon: SvgPicture.asset('assets/images/back_icon_white.svg'),
+          onPressed: _goBackToHome,
+        ),
       ),
     );
   }
@@ -738,7 +740,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
             Icon(
               Icons.family_restroom,
               size: 80,
-              color: AppColors.ongiOrange.withOpacity(0.7),
+              color: AppColors.ongiOrange.withValues(alpha: 0.7),
             ),
             const SizedBox(height: 40),
 
@@ -1076,7 +1078,10 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: '$_todaySteps',
+                                  text: '${_todaySteps.toString().replaceAllMapped(
+                                    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                                    (Match match) => '${match[1]},'
+                                  ).replaceAll(RegExp(r',$'), '')}',
                                   style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.w600,
@@ -1112,15 +1117,27 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Text(
-                                '다른 가족들은 얼마나 걸었을까요?',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black,
-                                  height: 1.2,
-                                ),
-                                textAlign: TextAlign.right,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/images/step_ranking_icon.svg',
+                                    height: 10,
+                                    width: 10,
+                                    color: AppColors.ongiGrey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    '다른 가족들은 얼마나 걸었을까요?',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black,
+                                      height: 1.2,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
