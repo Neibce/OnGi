@@ -14,5 +14,8 @@ import java.util.List;
 public interface PillIntakeRecordRepository extends JpaRepository<PillIntakeRecord, Long> {
 
     List<PillIntakeRecord> findByPillInAndIntakeDate(List<Pill> pills, LocalDate intakeDate);
+    List<PillIntakeRecord> findByIntakeDate(LocalDate intakeDate);
     Optional<PillIntakeRecord> findByPillAndIntakeDateAndIntakeTime(Pill pill, LocalDate intakeDate, LocalTime intakeTime);
+
+    void deleteByPill(Pill pill);
 }

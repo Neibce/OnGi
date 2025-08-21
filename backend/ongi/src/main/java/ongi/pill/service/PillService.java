@@ -1,7 +1,17 @@
 package ongi.pill.service;
 
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.ApnsConfig;
+import com.google.firebase.messaging.Aps;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingException;
+import com.google.firebase.messaging.Message;
+import com.google.firebase.messaging.Notification;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import ongi.exception.EntityNotFoundException;
@@ -17,8 +27,11 @@ import ongi.pill.entity.PillIntakeRecord;
 import ongi.pill.repository.PillIntakeRecordRepository;
 import ongi.pill.repository.PillRepository;
 import ongi.user.entity.User;
+import ongi.user.entity.UserFcmToken;
+import ongi.user.repository.UserFcmTokenRepository;
 import ongi.user.repository.UserRepository;
 import ongi.util.S3FileService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +51,7 @@ public class PillService {
     private final S3FileService s3FileService;
 
     private static final String DIR_NAME = "pill-photos";
+    private final UserFcmTokenRepository userFcmTokenRepository;
 
     @Transactional
     public PillInfo createPill(User child, PillCreateRequest request) {
@@ -55,7 +69,7 @@ public class PillService {
             throw new IllegalArgumentException("가족에 속하지 않은 사용자입니다.");
         }
 
-        if(request.fileName() != null) {
+        if (request.fileName() != null) {
             if (!s3FileService.objectExists(DIR_NAME, request.fileName())) {
                 throw new IllegalArgumentException("S3에 파일이 존재하지 않습니다.");
             }
@@ -79,6 +93,8 @@ public class PillService {
     public void deletePill(User user, Long pillId) {
         Pill pill = pillRepository.findById(pillId)
                 .orElseThrow(() -> new EntityNotFoundException("약 정보를 찾을 수 없습니다."));
+
+        pillIntakeRecordRepository.deleteByPill(pill);
 
         Family family = familyRepository.findByMembersContains(user.getUuid())
                 .orElseThrow(() -> new EntityNotFoundException("가족 정보를 찾을 수 없습니다."));
@@ -157,7 +173,8 @@ public class PillService {
 
         return pills.stream()
                 .map(pill -> new PillInfoWithIntakeStatus(pill,
-                        pill.getFileName() != null ? s3FileService.createSignedGetUrl(DIR_NAME, pill.getFileName()) : null,
+                        pill.getFileName() != null ? s3FileService.createSignedGetUrl(DIR_NAME,
+                                pill.getFileName()) : null,
                         intakeRecordsMap.getOrDefault(pill.getId(), List.of())))
                 .toList();
     }
@@ -167,5 +184,89 @@ public class PillService {
         URL signedGetUrl = s3FileService.createSignedPutUrl(user, DIR_NAME, fileName);
 
         return new PillPresignedResponseDto(signedGetUrl, fileName);
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void checkAndSendMedicationAlarms() {
+        List<Pill> targets = findMedicationsNeedAlarm();
+
+        if (targets.isEmpty()) {
+            return;
+        }
+
+        for (Pill pill : targets) {
+            try {
+                sendPillAlarmNotification(pill);
+            } catch (Exception e) {
+                System.err.println("약 알람 발송 실패: " + pill.getName() + ", 오류: " + e.getMessage());
+            }
+        }
+    }
+
+    private void sendPillAlarmNotification(Pill pill) throws FirebaseMessagingException {
+        Optional<UserFcmToken> userFcmTokenOptional = userFcmTokenRepository.findByUser(pill.getOwner());
+        if (userFcmTokenOptional.isEmpty()) {
+            return;
+        }
+
+        Message message = Message.builder()
+                .setNotification(Notification.builder()
+                        .setTitle("'" + pill.getName() + "' 약을 복용할 시간입니다!")
+                        .setBody("복용 후 알림을 길게 눌러 복용 여부를 체크하세요.")
+                        .build())
+                .setAndroidConfig(AndroidConfig.builder()
+                        .setTtl(3600 * 1000)
+                        .setNotification(AndroidNotification.builder()
+                                .setSound("default")
+                                .build())
+                        .build())
+                .setApnsConfig(ApnsConfig.builder()
+                        .putHeader("apns-push-type", "alert")
+                        .putHeader("apns-priority", "10")
+                        .setAps(Aps.builder()
+                                .setCategory("PILL_TAKE_REMINDER")
+                                .setBadge(1)
+                                .setSound("default")
+                                .putCustomData("interruption-level", "time-sensitive")
+                                .build())
+                        .build())
+                .setToken(userFcmTokenOptional.get().getToken())
+                .build();
+
+        FirebaseMessaging.getInstance().send(message);
+    }
+
+    private List<Pill> findMedicationsNeedAlarm() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDate today = now.toLocalDate();
+
+        List<Pill> allPills = pillRepository.findAll();
+        List<PillIntakeRecord> todayRecords = pillIntakeRecordRepository.findByIntakeDate(today);
+        Map<Long, List<PillIntakeRecord>> todayRecordsMap = todayRecords.stream()
+                .collect(Collectors.groupingBy(record -> record.getPill().getId()));
+
+        return allPills.stream()
+                .filter(pill -> {
+                    if (!pill.getIntakeDays().contains(today.getDayOfWeek())) {
+                        return false;
+                    }
+
+                    List<PillIntakeRecord> pillTodayRecords = todayRecordsMap.getOrDefault(
+                            pill.getId(), List.of());
+
+                    return pill.getIntakeTimes().stream()
+                            .anyMatch(intakeTime -> {
+                                boolean isTimePassed =
+                                        now.toLocalTime().isAfter(intakeTime) || now.toLocalTime()
+                                                .equals(intakeTime);
+
+                                boolean hasRecord = pillTodayRecords.stream()
+                                        .anyMatch(record -> record.getIntakeTime()
+                                                .equals(intakeTime));
+
+                                return isTimePassed && !hasRecord;
+                            });
+                })
+                .toList();
     }
 }
