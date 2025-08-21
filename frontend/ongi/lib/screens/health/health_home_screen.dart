@@ -13,6 +13,7 @@ import 'package:ongi/services/pill_service.dart';
 import 'package:ongi/services/health_service.dart';
 import 'package:ongi/services/family_service.dart';
 import 'package:intl/intl.dart';
+import 'package:ongi/screens/health/cross_family_ranking_screen.dart';
 
 class HealthHomeScreen extends StatefulWidget {
   const HealthHomeScreen({super.key});
@@ -317,21 +318,33 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   String _convertPainAreaToKorean(String painArea) {
     final painAreaMap = {
-      'head': '머리',
-      'neck': '목',
-      'shoulder': '어깨',
-      'chest': '가슴',
-      'back': '등',
-      'arm': '팔',
-      'hand': '손',
-      'abdomen': '복부',
-      'waist': '허리',
-      'leg': '다리',
-      'knee': '무릎',
-      'foot': '발',
-      'none': '없음',
+      'HEAD': '머리',
+      'NECK': '목',
+      'LEFT_SHOULDER': '왼쪽 어깨',
+      'RIGHT_SHOULDER': '오른쪽 어깨',
+      'CHEST': '가슴',
+      'BACK': '등',
+      'LEFT_UPPER_ARM': '왼쪽 윗팔',
+      'RIGHT_UPPER_ARM': '오른쪽 윗팔',
+      'LEFT_FOREARM': '왼쪽 아랫팔',
+      'RIGHT_FOREARM': '오른쪽 아랫팔',
+      'LEFT_HAND': '왼쪽 손',
+      'RIGHT_HAND': '오른쪽 손',
+      'ABDOMEN': '복부',
+      'WAIST': '허리',
+      'PELVIS': '골반',
+      'HIP': '엉덩이',
+      'LEFT_THIGH': '왼쪽 허벅지',
+      'RIGHT_THIGH': '오른쪽 허벅지',
+      'LEFT_CALF': '왼쪽 종아리',
+      'RIGHT_CALF': '오른쪽 종아리',
+      'LEFT_KNEE': '왼쪽 무릎',
+      'RIGHT_KNEE': '오른쪽 무릎',
+      'LEFT_FOOT': '왼쪽 발',
+      'RIGHT_FOOT': '오른쪽 발',
+      'NONE': '없음',
     };
-    return painAreaMap[painArea.toLowerCase()] ?? painArea;
+    return painAreaMap[painArea] ?? painArea;
   }
 
   Widget _buildPainText() {
@@ -362,10 +375,30 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     }
 
     if (_todayPainRecords.isNotEmpty) {
+      // 디버깅: 실제 painArea 값들 출력
+      for (var record in _todayPainRecords) {
+        print('home_screen 디버깅 - painArea 원본: ${record['painArea']}');
+        print(
+          'home_screen 디버깅 - painArea 타입: ${record['painArea'].runtimeType}',
+        );
+        print(
+          'home_screen 디버깅 - 한글 변환: ${_convertPainAreaToKorean(record['painArea'].toString())}',
+        );
+      }
+
       final koreanAreas = _todayPainRecords
-          .map(
-            (record) => _convertPainAreaToKorean(record['painArea'].toString()),
-          )
+          .expand((record) {
+            final painArea = record['painArea'];
+            if (painArea is List) {
+              // painArea가 List인 경우 각 항목을 변환
+              return painArea.map(
+                (area) => _convertPainAreaToKorean(area.toString()),
+              );
+            } else {
+              // painArea가 단일 값인 경우
+              return [_convertPainAreaToKorean(painArea.toString())];
+            }
+          })
           .toSet()
           .join(', ');
 
@@ -456,22 +489,6 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   void _refreshExerciseTime() {
     _loadTodayExerciseTime();
-  }
-
-  void _goBackToHome() {
-    bool wasExerciseView = _currentView == 'exercise';
-    bool wasPainView = _currentView == 'pain';
-
-    setState(() {
-      _currentView = 'home';
-    });
-
-    if (wasExerciseView) {
-      _refreshExerciseTime();
-    }
-    if (wasPainView) {
-      _loadTodayPainRecords();
-    }
   }
 
   Widget _buildExerciseTimeText() {
@@ -644,6 +661,14 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
         return _buildExerciseView();
       case 'steps':
         return _buildStepTrackerView();
+      case 'familyStepTracker':
+        return Stack(
+          children: [const FamilyStepTrackerScreen(), _buildBackButton()],
+        );
+      case 'crossFamilyRanking':
+        return Stack(
+          children: [const CrossFamilyRankingScreen(), _buildBackButton()],
+        );
       default:
         return _buildHomeView();
     }
@@ -651,16 +676,11 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   Widget _buildBackButton() {
     return Positioned(
-      top: MediaQuery.of(context).padding.top + 16,
-      left: 30,
-      child: GestureDetector(
-        onTap: _goBackToHome,
-        // child: Container(
-        //   width: 44,
-        //   height: 44,
-        //   child: Icon(Icons.arrow_back_ios, color: Colors.white, size: 30),
-        // ),
-        child: SvgPicture.asset('assets/images/back_icon_white.svg'),
+      top: 40,
+      left: 20,
+      child: IconButton(
+        icon: const Icon(Icons.arrow_back, color: Colors.black, size: 28),
+        onPressed: _goBackToHome,
       ),
     );
   }
@@ -1030,7 +1050,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
-                    onPressed: () => _changeView('steps'),
+                    onPressed: () => _changeView('familyStepTracker'),
                     child: Stack(
                       children: [
                         Positioned(
@@ -1079,11 +1099,30 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                           ),
                         ),
                         Positioned(
-                          right: 0,
+                          right: 10,
                           bottom: 10,
-                          child: SvgPicture.asset(
-                            'assets/images/walk_icon.svg',
-                            width: 150,
+                          child: GestureDetector(
+                            onTap: () => _changeView('crossFamilyRanking'),
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 2,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              child: const Text(
+                                '다른 가족들은 얼마나 걸었을까요?',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.black,
+                                  height: 1.2,
+                                ),
+                                textAlign: TextAlign.right,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -1096,6 +1135,12 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
         ],
       ),
     );
+  }
+
+  void _goBackToHome() {
+    setState(() {
+      _currentView = 'home';
+    });
   }
 
   @override

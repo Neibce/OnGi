@@ -56,13 +56,13 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     });
     try {
       final String dateStr = _formatDate(date);
-      
+
       // 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
       final List<Future> futures = [
         _stepService.getSteps(date: dateStr),
         FamilyService.getFamilyMembers(),
       ];
-      
+
       final results = await Future.wait(futures);
       final Map<String, dynamic>? stepResult = results[0] as Map<String, dynamic>?;
       final List<Map<String, dynamic>> familyMembers = results[1] as List<Map<String, dynamic>>;
@@ -87,10 +87,10 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
               final int steps = (item['steps'] is int)
                   ? item['steps'] as int
                   : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
-              
+
               // 실제 가족 구성원의 프로필 이미지 가져오기
               final profileImagePath = await PrefsManager.getProfileImagePathByUserId(userId, familyMembers);
-              
+
               parsedMembers.add(
                 _MemberStep(
                   userId: userId,
@@ -265,14 +265,14 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                           text: _isLoading
                                               ? '0걸음'
                                               : _totalSteps
-                                                        .toString()
-                                                        .replaceAllMapped(
-                                                          RegExp(
-                                                            r'(\d{1,3})(?=(\d{3})+(?!\d))',
-                                                          ),
-                                                          (m) => '${m[1]},',
-                                                        ) +
-                                                    '걸음',
+                                              .toString()
+                                              .replaceAllMapped(
+                                            RegExp(
+                                              r'(\d{1,3})(?=(\d{3})+(?!\d))',
+                                            ),
+                                                (m) => '${m[1]},',
+                                          ) +
+                                              '걸음',
                                           style: const TextStyle(
                                             fontFamily: 'Pretendard',
                                             fontWeight: FontWeight.w700,
@@ -348,7 +348,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                       steps: _memberSteps[i].steps,
                                       image: _memberSteps[i].imageAsset,
                                       isTop:
-                                          i == 0 && _memberSteps[i].steps > 0,
+                                      i == 0 && _memberSteps[i].steps > 0,
                                     ),
                                   if (_memberSteps.isEmpty)
                                     const Padding(
@@ -449,7 +449,7 @@ Widget _buildStepMember({
                     Text(
                       steps.toString().replaceAllMapped(
                         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                        (m) => '${m[1]},',
+                            (m) => '${m[1]},',
                       ),
                       style: const TextStyle(
                         fontFamily: 'Pretendard',

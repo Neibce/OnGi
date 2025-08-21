@@ -9,8 +9,7 @@ class PainService {
   // 통증 기록 추가
   static Future<Map<String, dynamic>?> addPainRecord({
     required String date,
-    required String painArea,
-    required String painLevel,
+    required List<String> painAreas,  // List로 변경
   }) async {
     try {
       final token = await PrefsManager.getAccessToken();
@@ -27,49 +26,51 @@ class PainService {
         },
         body: jsonEncode({
           'date': date,
-          'painArea': painArea,
-          'painLevel': painLevel,
+          'painArea': painAreas,  // painLevel 제거, painArea는 List
         }),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return jsonDecode(response.body);
       } else {
-        throw Exception('Failed to add pain record: ${response.statusCode}');
+        print('통증 기록 API 오류: ${response.statusCode}, 응답: ${response.body}');
+        throw Exception('Failed to add pain record: ${response.statusCode}, ${response.body}');
       }
     } catch (e) {
+      print('통증 기록 서비스 오류: $e');
       return null;
     }
   }
 }
 
-// 통증 부위 enum 매핑
+// 통증 부위 enum 매핑 (백엔드와 일치)
 enum PainArea {
   head('HEAD'),
   neck('NECK'),
-  shoulder('SHOULDER'),
+  leftShoulder('LEFT_SHOULDER'),
+  rightShoulder('RIGHT_SHOULDER'),
   chest('CHEST'),
   back('BACK'),
-  arm('ARM'),
-  hand('HAND'),
+  leftUpperArm('LEFT_UPPER_ARM'),
+  rightUpperArm('RIGHT_UPPER_ARM'),
+  leftForearm('LEFT_FOREARM'),
+  rightForearm('RIGHT_FOREARM'),
+  leftHand('LEFT_HAND'),
+  rightHand('RIGHT_HAND'),
   abdomen('ABDOMEN'),
   waist('WAIST'),
-  leg('LEG'),
-  knee('KNEE'),
-  foot('FOOT'),
+  pelvis('PELVIS'),
+  hip('HIP'),
+  leftThigh('LEFT_THIGH'),
+  rightThigh('RIGHT_THIGH'),
+  leftCalf('LEFT_CALF'),
+  rightCalf('RIGHT_CALF'),
+  leftKnee('LEFT_KNEE'),
+  rightKnee('RIGHT_KNEE'),
+  leftFoot('LEFT_FOOT'),
+  rightFoot('RIGHT_FOOT'),
   none('NONE');
 
   const PainArea(this.value);
-  final String value;
-}
-
-// 통증 강도 enum
-enum PainLevel {
-  strong('STRONG'),
-  midStrong('MID_STRONG'),
-  midWeak('MID_WEAK'),
-  weak('WEAK');
-
-  const PainLevel(this.value);
   final String value;
 }
