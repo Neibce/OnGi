@@ -12,7 +12,7 @@ import 'package:intl/intl.dart';
 class HealthStatusInputScreen extends StatefulWidget {
   final String? selectedParentId;
   final bool? isChild;
-  
+
   const HealthStatusInputScreen({
     super.key,
     this.selectedParentId,
@@ -28,19 +28,22 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   BodyParts _bodyParts = const BodyParts();
   DateTime selectedDate = DateTime.now();
   bool isFrontView = true;
-  
+
   // 가슴과 등만 별도로 관리하는 상태
   bool _chestSelected = false;
   bool _backSelected = false;
-  
+
   // 통증 기록 조회 관련 상태
   List<Map<String, dynamic>> _painRecords = [];
   bool _isLoadingPainRecords = false;
   bool _isInputMode = true; // true: 입력 모드, false: 조회 모드
-  
+
   // 자녀 사용자 관련 상태
   bool _isChild = false;
   String? _selectedParentId;
+
+  //스트레칭 버튼 표시 여부
+  bool _isiStrechingVisible = false;
 
   @override
   void initState() {
@@ -51,7 +54,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   @override
   void didUpdateWidget(HealthStatusInputScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
+
     // 부모가 변경되었을 때 데이터 다시 로드
     if (widget.selectedParentId != oldWidget.selectedParentId) {
       setState(() {
@@ -77,7 +80,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         _isChild = widget.isChild!;
         _selectedParentId = widget.selectedParentId;
       });
-      
+
       if (_isChild) {
         await _loadParentMembers();
       } else {
@@ -93,7 +96,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     try {
       final isParent = await PrefsManager.getIsParent();
       _isChild = !isParent;
-      
+
       if (_isChild) {
         await _loadParentMembers();
       } else {
@@ -109,14 +112,14 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     try {
       final members = await FamilyService.getFamilyMembers();
       final parents = members.where((member) => member['isParent'] == true).toList();
-      
+
       setState(() {
         // 이전 화면에서 전달받은 selectedParentId가 없을 때만 첫 번째 부모를 기본 선택
         if (_selectedParentId == null && parents.isNotEmpty) {
           _selectedParentId = parents.first['uuid'];
         }
       });
-      
+
       // 선택된 부모의 데이터 로드
       if (_selectedParentId != null) {
         await _loadPainRecords();
@@ -131,7 +134,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     try {
       final members = await FamilyService.getFamilyMembers();
       final parents = members.where((member) => member['isParent'] == true).toList();
-      
+
       setState(() {
         // 기존 선택된 부모가 목록에 없으면 첫 번째 부모로 변경
         if (_selectedParentId != null) {
@@ -143,7 +146,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           _selectedParentId = parents.first['uuid'];
         }
       });
-      
+
       // 선택된 부모의 데이터 로드
       if (_selectedParentId != null) {
         await _loadPainRecords();
@@ -157,6 +160,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Future<void> _loadPainRecords() async {
     setState(() {
       _isLoadingPainRecords = true;
+      _isiStrechingVisible = false;
     });
 
     try {
@@ -168,19 +172,20 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         final userInfo = await PrefsManager.getUserInfo();
         targetUserId = userInfo['uuid'];
       }
-      
+
       if (targetUserId != null) {
         final painRecords = await HealthService.fetchPainRecords(targetUserId);
         final today = selectedDate;
         final todayStr = DateFormat('yyyy-MM-dd').format(today);
-        
+
         final todayPainRecords = painRecords
             .where((record) => record['date'] == todayStr)
             .toList();
-            
+
         setState(() {
           _painRecords = todayPainRecords;
           _updateBodyPartsFromRecords();
+          _isiStrechingVisible = true;
         });
       }
     } catch (e) {
@@ -212,14 +217,14 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     });
 
     BodyParts newBodyParts = const BodyParts();
-    
+
     // 가슴/등 상태 초기화
     _chestSelected = false;
     _backSelected = false;
-    
+
     for (final record in _painRecords) {
       final painArea = record['painArea']?.toString().toLowerCase() ?? '';
-      
+
       switch (painArea) {
         case 'head':
           newBodyParts = newBodyParts.copyWith(head: true);
@@ -234,11 +239,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           newBodyParts = newBodyParts.copyWith(rightShoulder: true);
           break;
         case 'chest':
-          // 가슴은 별도 상태로 관리
+        // 가슴은 별도 상태로 관리
           _chestSelected = true;
           break;
         case 'back':
-          // 등은 별도 상태로 관리
+        // 등은 별도 상태로 관리
           _backSelected = true;
           break;
         case 'arm':
@@ -285,11 +290,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           break;
       }
     }
-    
+
     setState(() {
       _bodyParts = newBodyParts;
     });
-    
+
     // 현재 뷰에 따라 가슴/등 표시
     _updateBodyPartsDisplay();
   }
@@ -346,6 +351,56 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     return painAreaMap[painArea.toUpperCase()] ?? painArea;
   }
 
+  void showStretchingDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              color: Colors.white,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Align(
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      child: Icon(
+                        Icons.close,
+                        color: AppColors.ongiOrange,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  painAreasText,
+                  style: const TextStyle(
+                    fontSize: 25,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
   Widget _buildTitleText() {
     if (_painRecords.isNotEmpty) {
       for (var record in _painRecords) {
@@ -353,22 +408,22 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         print('디버깅 - painArea 타입: ${record['painArea'].runtimeType}');
         print('디버깅 - 한글 변환: ${_convertPainAreaToKorean(record['painArea'].toString())}');
       }
-      
+
       final koreanAreas = _painRecords
           .expand((record) {
-            final painArea = record['painArea'];
-            if (painArea is List) {
-              // painArea가 List인 경우 각 항목을 변환
-              return painArea.map((area) => _convertPainAreaToKorean(area.toString()));
-            } else {
-              // painArea가 단일 값인 경우
-              return [_convertPainAreaToKorean(painArea.toString())];
-            }
-          })
+        final painArea = record['painArea'];
+        if (painArea is List) {
+          // painArea가 List인 경우 각 항목을 변환
+          return painArea.map((area) => _convertPainAreaToKorean(area.toString()));
+        } else {
+          // painArea가 단일 값인 경우
+          return [_convertPainAreaToKorean(painArea.toString())];
+        }
+      })
           .where((area) => area != '없음')
           .toSet()
           .join(', ');
-      
+
       if (koreanAreas.isNotEmpty) {
         return Column(
           children: [
@@ -393,7 +448,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         );
       }
     }
-    
+
     // 기본 제목 (통증 기록이 없을 때)
     if (_isChild) {
       return const Column(
@@ -448,18 +503,18 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     if (_isChild) {
       return;
     }
-    
+
     if (!_isInputMode) {
       // 조회 모드에서 입력 모드로 전환
       setState(() {
         _isInputMode = true;
       });
     }
-    
+
     // 가슴/등 선택 상태 업데이트 (앞/뒤 구분)
     final partsString = parts.toString();
     final upperBodySelected = partsString.contains('upperBody: true');
-    
+
     if (isFrontView) {
       // 앞면에서는 가슴만 선택/해제
       _chestSelected = upperBodySelected;
@@ -469,10 +524,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       _backSelected = upperBodySelected;
       // 앞면 선택은 유지
     }
-    
+
     // upperBody 제외하고 다른 부위들만 업데이트
     BodyParts updatedParts = parts.copyWith(upperBody: false);
-    
+
     setState(() {
       _bodyParts = updatedParts;
       // 현재 뷰에 맞는 가슴/등 표시 업데이트
@@ -498,7 +553,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     List<PainArea> painAreas = [];
 
     final bodyPartsString = _bodyParts.toString();
-    
+
     if (bodyPartsString.contains('head: true'))
       painAreas.add(PainArea.head);
     if (bodyPartsString.contains('neck: true'))
@@ -735,6 +790,59 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       },
     );
   }
+  Widget _buildStretchingButton() {
+    return Visibility(
+      // visible: _isStretchingVisible, // _isStretchingVisible 값에 따라 버튼 표시 여부 결정
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 스트레칭 안내 텍스트 추가
+              const Text(
+                '통증이 완화될 수 있도록',
+                style: TextStyle(
+                  fontSize: 25,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
+                ),
+              ),
+              const Text(
+                '스트레칭 해볼까요?',
+                style: TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black,
+                ),
+              ),
+              // 스트레칭 하러 가기 버튼
+              ElevatedButton(
+                onPressed: showStretchingDialog, // 버튼을 누르면 다이얼로그 표시
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.ongiOrange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                ),
+                child: const Text(
+                  '스트레칭 하러 가기',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
 
   // 통증 기록 저장 (실제 API 호출)
   void submitPainRecords() async {
@@ -848,14 +956,14 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       // 선택된 모든 부위를 한 번에 API 호출 (List로 전송)
       final painAreaValues = painAreas.map((area) => area.value).toList();
       print('통증 기록 저장 시도: 날짜=$dateString, 부위들=$painAreaValues');
-      
+
       final result = await PainService.addPainRecord(
         date: dateString,
         painAreas: painAreaValues,  // List로 전송, painLevel 제거
       );
 
       print('통증 기록 저장 결과: $result');
-      
+
       if (result == null) {
         throw Exception('통증 기록 저장에 실패했습니다. 부위들: $painAreaValues');
       }
@@ -883,7 +991,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       await _loadPainRecords();
     } catch (e) {
       print('통증 기록 저장 중 오류 발생: $e');
-      
+
       // 로딩 다이얼로그 닫기
       Navigator.of(context).pop();
 
@@ -966,6 +1074,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
               left: 0,
               right: 0,
               bottom: 0,
+
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -987,29 +1096,29 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(20),
                         ),
-                                                    child: Stack(
-                              children: [
-                                if (_isLoadingPainRecords)
-                                  const Center(
-                                    child: CircularProgressIndicator(
-                                      color: AppColors.ongiOrange,
-                                    ),
-                                  )
-                                else
-                                  Padding(
-                                    padding: const EdgeInsets.all(20),
-                                    child: BodyPartSelector(
-                                      bodyParts: _bodyParts,
-                                      onSelectionUpdated: onBodyPartsSelected,
-                                      side: isFrontView
-                                          ? BodySide.front
-                                          : BodySide.back,
-                                      selectedColor: AppColors.ongiOrange,
-                                      unselectedColor: AppColors.ongiGrey,
-                                      selectedOutlineColor: Colors.white,
-                                      unselectedOutlineColor: Colors.white,
-                                    ),
-                                  ),
+                        child: Stack(
+                          children: [
+                            if (_isLoadingPainRecords)
+                              const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColors.ongiOrange,
+                                ),
+                              )
+                            else
+                              Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: BodyPartSelector(
+                                  bodyParts: _bodyParts,
+                                  onSelectionUpdated: onBodyPartsSelected,
+                                  side: isFrontView
+                                      ? BodySide.front
+                                      : BodySide.back,
+                                  selectedColor: AppColors.ongiOrange,
+                                  unselectedColor: AppColors.ongiGrey,
+                                  selectedOutlineColor: Colors.white,
+                                  unselectedOutlineColor: Colors.white,
+                                ),
+                              ),
                             // 기록완료 버튼 (부모인 경우만 표시)
                             if (!_isChild)
                               Positioned(
@@ -1102,6 +1211,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                       ),
                     ),
                   ),
+                  if(_isiStrechingVisible) _buildStretchingButton(),
                 ],
               ),
             ),
