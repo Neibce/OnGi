@@ -44,7 +44,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   String? _selectedParentId;
 
   //스트레칭 버튼 표시 여부
-  bool _isiStrechingVisible = false;
+  bool _isStretchingVisible = false;
 
   @override
   void initState() {
@@ -161,7 +161,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Future<void> _loadPainRecords() async {
     setState(() {
       _isLoadingPainRecords = true;
-      _isiStrechingVisible = false;
+      _isStretchingVisible = false;
     });
 
     try {
@@ -186,7 +186,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         setState(() {
           _painRecords = todayPainRecords;
           _updateBodyPartsFromRecords();
-          _isiStrechingVisible = true;
+          // 스트레칭 버튼은 통증 기록이 있고, 자녀가 아닐 때만 표시
+          _isStretchingVisible = !_isChild && _painRecords.isNotEmpty;
         });
       }
     } catch (e) {
@@ -208,6 +209,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         _backSelected = false;
         // 자녀인 경우 항상 읽기 전용
         _isInputMode = !_isChild;
+        // 통증 기록이 없으면 스트레칭 버튼 숨기기
+        _isStretchingVisible = false;
       });
       return;
     }
@@ -224,71 +227,93 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     _backSelected = false;
 
     for (final record in _painRecords) {
-      final painArea = record['painArea']?.toString().toLowerCase() ?? '';
+      final painArea = record['painArea'];
+      print('디버깅 - 원본 painArea: $painArea (타입: ${painArea.runtimeType})');
+      
+      // painArea가 List인 경우와 단일 값인 경우 모두 처리
+      List<String> areas = [];
+      if (painArea is List) {
+        areas = painArea.map((area) => area.toString()).toList();
+      } else if (painArea != null) {
+        areas = [painArea.toString()];
+      }
+      
+      print('디버깅 - 처리할 areas: $areas');
 
-      switch (painArea) {
-        case 'head':
-          newBodyParts = newBodyParts.copyWith(head: true);
-          break;
-        case 'neck':
-          newBodyParts = newBodyParts.copyWith(neck: true);
-          break;
-        case 'left_shoulder':
-          newBodyParts = newBodyParts.copyWith(leftShoulder: true);
-          break;
-        case 'right_shoulder':
-          newBodyParts = newBodyParts.copyWith(rightShoulder: true);
-          break;
-        case 'chest':
-        // 가슴은 별도 상태로 관리
-          _chestSelected = true;
-          break;
-        case 'back':
-        // 등은 별도 상태로 관리
-          _backSelected = true;
-          break;
-        case 'arm':
-          newBodyParts = newBodyParts.copyWith(
-            leftUpperArm: true,
-            rightUpperArm: true,
-            leftElbow: true,
-            rightElbow: true,
-            leftLowerArm: true,
-            rightLowerArm: true,
-          );
-          break;
-        case 'hand':
-          newBodyParts = newBodyParts.copyWith(
-            leftHand: true,
-            rightHand: true,
-          );
-          break;
-        case 'abdomen':
-          newBodyParts = newBodyParts.copyWith(abdomen: true);
-          break;
-        case 'waist':
-          newBodyParts = newBodyParts.copyWith(vestibular: true);
-          break;
-        case 'leg':
-          newBodyParts = newBodyParts.copyWith(
-            leftUpperLeg: true,
-            rightUpperLeg: true,
-            leftLowerLeg: true,
-            rightLowerLeg: true,
-          );
-          break;
-        case 'knee':
-          newBodyParts = newBodyParts.copyWith(
-            leftKnee: true,
-            rightKnee: true,
-          );
-          break;
-        case 'foot':
-          newBodyParts = newBodyParts.copyWith(
-            leftFoot: true,
-            rightFoot: true,
-          );
-          break;
+      for (final area in areas) {
+        final areaUpper = area.toUpperCase();
+        print('디버깅 - 처리 중인 부위: $areaUpper');
+        
+        switch (areaUpper) {
+          case 'HEAD':
+            newBodyParts = newBodyParts.copyWith(head: true);
+            break;
+          case 'NECK':
+            newBodyParts = newBodyParts.copyWith(neck: true);
+            break;
+          case 'LEFT_SHOULDER':
+            newBodyParts = newBodyParts.copyWith(leftShoulder: true);
+            break;
+          case 'RIGHT_SHOULDER':
+            newBodyParts = newBodyParts.copyWith(rightShoulder: true);
+            break;
+          case 'CHEST':
+            _chestSelected = true;
+            break;
+          case 'BACK':
+            _backSelected = true;
+            break;
+          case 'LEFT_UPPER_ARM':
+            newBodyParts = newBodyParts.copyWith(leftUpperArm: true);
+            break;
+          case 'RIGHT_UPPER_ARM':
+            newBodyParts = newBodyParts.copyWith(rightUpperArm: true);
+            break;
+          case 'LEFT_FOREARM':
+            newBodyParts = newBodyParts.copyWith(leftLowerArm: true);
+            break;
+          case 'RIGHT_FOREARM':
+            newBodyParts = newBodyParts.copyWith(rightLowerArm: true);
+            break;
+          case 'LEFT_HAND':
+            newBodyParts = newBodyParts.copyWith(leftHand: true);
+            break;
+          case 'RIGHT_HAND':
+            newBodyParts = newBodyParts.copyWith(rightHand: true);
+            break;
+          case 'ABDOMEN':
+            newBodyParts = newBodyParts.copyWith(abdomen: true);
+            break;
+          case 'WAIST':
+          case 'PELVIS':
+          case 'HIP':
+            newBodyParts = newBodyParts.copyWith(vestibular: true);
+            break;
+          case 'LEFT_THIGH':
+            newBodyParts = newBodyParts.copyWith(leftUpperLeg: true);
+            break;
+          case 'RIGHT_THIGH':
+            newBodyParts = newBodyParts.copyWith(rightUpperLeg: true);
+            break;
+          case 'LEFT_CALF':
+            newBodyParts = newBodyParts.copyWith(leftLowerLeg: true);
+            break;
+          case 'RIGHT_CALF':
+            newBodyParts = newBodyParts.copyWith(rightLowerLeg: true);
+            break;
+          case 'LEFT_KNEE':
+            newBodyParts = newBodyParts.copyWith(leftKnee: true);
+            break;
+          case 'RIGHT_KNEE':
+            newBodyParts = newBodyParts.copyWith(rightKnee: true);
+            break;
+          case 'LEFT_FOOT':
+            newBodyParts = newBodyParts.copyWith(leftFoot: true);
+            break;
+          case 'RIGHT_FOOT':
+            newBodyParts = newBodyParts.copyWith(rightFoot: true);
+            break;
+        }
       }
     }
 
@@ -306,10 +331,13 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       if (isFrontView) {
         // 앞면: 가슴 선택 상태만 반영
         _bodyParts = _bodyParts.copyWith(upperBody: _chestSelected);
+        print('디버깅 - 앞면 뷰: 가슴 선택됨 = $_chestSelected');
       } else {
         // 뒷면: 등 선택 상태만 반영
         _bodyParts = _bodyParts.copyWith(upperBody: _backSelected);
+        print('디버깅 - 뒷면 뷰: 등 선택됨 = $_backSelected');
       }
+      print('디버깅 - 업데이트된 _bodyParts: $_bodyParts');
     });
   }
 
@@ -366,7 +394,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       '오른쪽 아랫팔': 'https://youtu.be/w04XkiVO4ro?si=CRSm2LK3gU1J4pr1',
       '왼쪽 손': 'https://youtu.be/iVmlkvxZH6I?si=7CpZxLE9wKOq71N_',
       '오른쪽 손': 'https://youtu.be/iVmlkvxZH6I?si=7CpZxLE9wKOq71N_',
-      '복부': 'https://youtu.be/JMS6Plzq0ps?si=wk3ZbPQDzFExcPx0',
+      '배': 'https://youtu.be/JMS6Plzq0ps?si=wk3ZbPQDzFExcPx0',
       '허리': 'https://www.youtube.com/watch?v=f-mgnsrDWHg',
       '골반': 'https://www.youtube.com/watch?v=VhjkV83q01g',
       '엉덩이': 'https://youtu.be/--VfHFpQL0U?si=M2uhMlkG7QVy6jDv',
@@ -376,8 +404,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       '오른쪽 종아리': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9',
       '왼쪽 무릎': 'https://youtu.be/HOMv9qpqULE?si=7KvvrVE_Mtbo44f6',
       '오른쪽 무릎': 'https://youtu.be/HOMv9qpqULE?si=7KvvrVE_Mtbo44f6',
-      '왼쪽 발': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9', // 종아리 스트레칭으로 대체
-      '오른쪽 발': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9', // 종아리 스트레칭으로 대체
+      '왼쪽 발': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9',
+      '오른쪽 발': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9',
     };
   }
 // 통증 부위에 맞는 스트레칭 링크들을 가져오는 함수
@@ -400,9 +428,16 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         for (final area in areas) {
           if (area != '없음' && stretchingLinks.containsKey(area)) {
             final link = stretchingLinks[area]!;
+            String displayName = area;
+            
+            // 팔 관련 부위들은 스트레칭 버튼에서만 "팔"로 통일
+            if (area.contains('윗팔') || area.contains('아랫팔')) {
+              displayName = '팔';
+            }
+            
             if (!addedLinks.contains(link)) {
               painAreaLinks.add({
-                'name': area,
+                'name': displayName,
                 'url': link,
               });
               addedLinks.add(link);
@@ -508,31 +543,47 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                               child: ElevatedButton(
                                 onPressed: () async {
                                   final url = linkInfo['url']!;
+                                  print('스트레칭 링크 열기 시도: $url');
+                                  
                                   try {
                                     final uri = Uri.parse(url);
-                                    if (await canLaunchUrl(uri)) {
-                                      await launchUrl(
+                                    print('URI 파싱 성공: $uri');
+                                    
+                                    // 먼저 외부 앱으로 열기 시도
+                                    bool launched = await launchUrl(
+                                      uri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                    
+                                    if (!launched) {
+                                      print('외부 앱 열기 실패, 웹 브라우저로 시도');
+                                      // 외부 앱으로 열기 실패 시 웹 브라우저로 시도
+                                      launched = await launchUrl(
                                         uri,
-                                        mode: LaunchMode.externalApplication,
+                                        mode: LaunchMode.platformDefault,
                                       );
+                                    }
+                                    
+                                    if (!launched) {
+                                      throw Exception('링크를 열 수 없습니다');
                                     } else {
-                                      // 외부 앱으로 열 수 없는 경우 웹 브라우저로 시도
-                                      if (await canLaunchUrl(uri)) {
-                                        await launchUrl(
-                                          uri,
-                                          mode: LaunchMode.inAppWebView,
-                                        );
-                                      } else {
-                                        throw Exception('링크를 열 수 없습니다');
-                                      }
+                                      print('링크 열기 성공');
                                     }
                                   } catch (e) {
+                                    print('링크 열기 오류: $e');
                                     if (mounted) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         SnackBar(
-                                          content: Text('링크 열기 실패: ${e.toString()}'),
+                                          content: Text('스트레칭 링크를 열 수 없습니다.\n브라우저에서 직접 열어주세요: $url'),
                                           backgroundColor: Colors.red,
-                                          duration: const Duration(seconds: 3),
+                                          duration: const Duration(seconds: 5),
+                                          action: SnackBarAction(
+                                            label: '복사',
+                                            textColor: Colors.white,
+                                            onPressed: () {
+                                              // URL을 클립보드에 복사하는 기능 추가 가능
+                                            },
+                                          ),
                                         ),
                                       );
                                     }
@@ -763,11 +814,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     if (bodyPartsString.contains('neck: true'))
       painAreas.add(PainArea.neck);
 
-    // 어깨
+    // 어깨 (좌우 매핑 수정)
     if (bodyPartsString.contains('leftShoulder: true'))
-      painAreas.add(PainArea.rightShoulder);
-    if (bodyPartsString.contains('rightShoulder: true'))
       painAreas.add(PainArea.leftShoulder);
+    if (bodyPartsString.contains('rightShoulder: true'))
+      painAreas.add(PainArea.rightShoulder);
 
     // 가슴과 등을 별도 상태로 확인
     if (_chestSelected)
@@ -775,21 +826,21 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     if (_backSelected)
       painAreas.add(PainArea.back);
 
-    // 팔
+    // 팔 (좌우 매핑 수정)
     if (bodyPartsString.contains('leftUpperArm: true'))
-      painAreas.add(PainArea.rightUpperArm);
-    if (bodyPartsString.contains('rightUpperArm: true'))
       painAreas.add(PainArea.leftUpperArm);
+    if (bodyPartsString.contains('rightUpperArm: true'))
+      painAreas.add(PainArea.rightUpperArm);
     if (bodyPartsString.contains('leftLowerArm: true'))
-      painAreas.add(PainArea.rightForearm);
-    if (bodyPartsString.contains('rightLowerArm: true'))
       painAreas.add(PainArea.leftForearm);
+    if (bodyPartsString.contains('rightLowerArm: true'))
+      painAreas.add(PainArea.rightForearm);
 
-    // 손
+    // 손 (좌우 매핑 수정)
     if (bodyPartsString.contains('leftHand: true'))
-      painAreas.add(PainArea.rightHand);
-    if (bodyPartsString.contains('rightHand: true'))
       painAreas.add(PainArea.leftHand);
+    if (bodyPartsString.contains('rightHand: true'))
+      painAreas.add(PainArea.rightHand);
 
     if (bodyPartsString.contains('abdomen: true'))
       painAreas.add(PainArea.abdomen);
@@ -801,27 +852,27 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       painAreas.add(PainArea.hip);
     }
 
-    // 다리
+    // 다리 (좌우 매핑 수정)
     if (bodyPartsString.contains('leftUpperLeg: true'))
-      painAreas.add(PainArea.rightThigh);
-    if (bodyPartsString.contains('rightUpperLeg: true'))
       painAreas.add(PainArea.leftThigh);
+    if (bodyPartsString.contains('rightUpperLeg: true'))
+      painAreas.add(PainArea.rightThigh);
     if (bodyPartsString.contains('leftLowerLeg: true'))
-      painAreas.add(PainArea.rightCalf);
-    if (bodyPartsString.contains('rightLowerLeg: true'))
       painAreas.add(PainArea.leftCalf);
+    if (bodyPartsString.contains('rightLowerLeg: true'))
+      painAreas.add(PainArea.rightCalf);
 
-    // 무릎
+    // 무릎 (좌우 매핑 수정)
     if (bodyPartsString.contains('leftKnee: true'))
-      painAreas.add(PainArea.rightKnee);
-    if (bodyPartsString.contains('rightKnee: true'))
       painAreas.add(PainArea.leftKnee);
+    if (bodyPartsString.contains('rightKnee: true'))
+      painAreas.add(PainArea.rightKnee);
 
-    // 발
+    // 발 (좌우 매핑 수정)
     if (bodyPartsString.contains('leftFoot: true'))
-      painAreas.add(PainArea.rightFoot);
-    if (bodyPartsString.contains('rightFoot: true'))
       painAreas.add(PainArea.leftFoot);
+    if (bodyPartsString.contains('rightFoot: true'))
+      painAreas.add(PainArea.rightFoot);
 
     // 중복 제거
     return painAreas.toSet().toList();
@@ -855,7 +906,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       case PainArea.rightHand:
         return '오른쪽 손';
       case PainArea.abdomen:
-        return '복부';
+        return '배';
       case PainArea.waist:
         return '허리';
       case PainArea.pelvis:
@@ -996,7 +1047,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   }
   Widget _buildStretchingButton() {
     return Visibility(
-      // visible: _isStretchingVisible, // _isStretchingVisible 값에 따라 버튼 표시 여부 결정
+      visible: _isStretchingVisible, // _isStretchingVisible 값에 따라 버튼 표시 여부 결정
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -1024,42 +1075,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
               // 스트레칭 하러 가기 버튼
               ElevatedButton(
                 onPressed: () async {
-                  // 통증 기록이 있으면 다이얼로그 표시, 없으면 기본 스트레칭 링크로 이동
-                  if (_painRecords.isNotEmpty) {
-                    showStretchingDialog();
-                  } else {
-                    // 기본 스트레칭 링크로 이동 (전신 스트레칭)
-                    const defaultStretchingUrl = 'https://youtu.be/JMS6Plzq0ps?si=wk3ZbPQDzFExcPx0';
-                    try {
-                      final uri = Uri.parse(defaultStretchingUrl);
-                      if (await canLaunchUrl(uri)) {
-                        await launchUrl(
-                          uri,
-                          mode: LaunchMode.externalApplication,
-                        );
-                      } else {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: const Text('스트레칭 링크를 열 수 없습니다'),
-                              backgroundColor: Colors.red,
-                              duration: const Duration(seconds: 3),
-                            ),
-                          );
-                        }
-                      }
-                    } catch (e) {
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('링크 열기 실패: ${e.toString()}'),
-                            backgroundColor: Colors.red,
-                            duration: const Duration(seconds: 3),
-                          ),
-                        );
-                      }
-                    }
-                  }
+                  // 통증 기록이 있을 때만 버튼이 표시되므로 다이얼로그만 표시
+                  showStretchingDialog();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.ongiOrange,
@@ -1228,7 +1245,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         ),
       );
 
-      // 기록 다시 로드
+      // 기록 다시 로드하여 신체도 업데이트
+      print('통증 기록 저장 완료, 데이터 다시 로드 중...');
       await _loadPainRecords();
     } catch (e) {
       print('통증 기록 저장 중 오류 발생: $e');
@@ -1452,7 +1470,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                       ),
                     ),
                   ),
-                  if(_isiStrechingVisible) _buildStretchingButton(),
+                  if(_isStretchingVisible) _buildStretchingButton(),
                 ],
               ),
             ),
