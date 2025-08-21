@@ -1078,7 +1078,10 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                   ),
                                 ),
                                 TextSpan(
-                                  text: '$_todaySteps',
+                                  text: '${_todaySteps.toString().replaceAllMapped(
+                                    RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+                                    (Match match) => '${match[1]},'
+                                  ).replaceAll(RegExp(r',$'), '')}',
                                   style: const TextStyle(
                                     fontSize: 25,
                                     fontWeight: FontWeight.w600,
