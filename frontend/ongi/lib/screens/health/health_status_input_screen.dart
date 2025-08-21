@@ -162,6 +162,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     setState(() {
       _isLoadingPainRecords = true;
       _isStretchingVisible = false;
+
     });
 
     try {
@@ -188,6 +189,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           _updateBodyPartsFromRecords();
           // 스트레칭 버튼은 통증 기록이 있고, 자녀가 아닐 때만 표시
           _isStretchingVisible = !_isChild && _painRecords.isNotEmpty;
+
         });
       }
     } catch (e) {
@@ -479,7 +481,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     } else {
       painAreasText = '통증이 완화될 수 있도록\n스트레칭 해볼까요?';
     }
-
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -499,7 +500,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 닫기 버튼
                 Align(
                   alignment: Alignment.topRight,
                   child: GestureDetector(
@@ -1048,6 +1048,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Widget _buildStretchingButton() {
     return Visibility(
       visible: _isStretchingVisible, // _isStretchingVisible 값에 따라 버튼 표시 여부 결정
+
       child: Align(
         alignment: Alignment.bottomCenter,
         child: Padding(
@@ -1078,6 +1079,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                   // 통증 기록이 있을 때만 버튼이 표시되므로 다이얼로그만 표시
                   showStretchingDialog();
                 },
+
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.ongiOrange,
                   shape: RoundedRectangleBorder(
