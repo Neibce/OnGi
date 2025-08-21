@@ -63,4 +63,12 @@ public class MaumLogController {
         MaumLogsResponseDto maumLogsResponseDto = maumLogService.getMaumLog(userDetails, date);
         return ResponseEntity.ok(maumLogsResponseDto);
     }
+
+    @PostMapping("/reminder")
+    public ResponseEntity<Void> sendMaumLogReminder(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        maumLogService.sendMaumLogReminder(userDetails.getUser());
+        return ResponseEntity.status(HttpStatusCode.CREATED).build();
+    }
+
 }
