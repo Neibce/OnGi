@@ -37,7 +37,9 @@ jobs:
       shell: bash
       run: |
         CRED_PATH="$RUNNER_TEMP/firebase-key.json"
-        printf '%s' "${{ secrets.FCM_SECRET }}" > "$CRED_PATH"
+        cat <<'EOF' > "$CRED_PATH"
+        ${{ secrets.FCM_SECRET }}
+        EOF
         echo "GOOGLE_APPLICATION_CREDENTIALS=$CRED_PATH" >> "$GITHUB_ENV"
 
     - name: Load .env and build
@@ -74,7 +76,9 @@ jobs:
       shell: bash
       run: |
         CRED_PATH="$RUNNER_TEMP/firebase-key.json"
-        printf '%s' "${{ secrets.FCM_SECRET }}" > "$CRED_PATH"
+        cat <<'EOF' > "$CRED_PATH"
+        ${{ secrets.FCM_SECRET }}
+        EOF
         echo "GOOGLE_APPLICATION_CREDENTIALS=$CRED_PATH" >> "$GITHUB_ENV"
 
     - name: Generate and submit dependency graph
