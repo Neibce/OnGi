@@ -70,5 +70,10 @@
         <string>This app needs access to location when in the background.</string>
         <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
         <string>This app needs access to location when in the background.</string>
+        <key>NSAppTransportSecurity</key>
+        <dict>
+            <key>NSAllowsArbitraryLoads</key>
+            <true/>
+        </dict>
 	</dict>
 </plist>

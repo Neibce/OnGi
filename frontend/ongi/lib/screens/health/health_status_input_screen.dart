@@ -8,6 +8,7 @@ import '../../services/user_service.dart';
 import '../../services/family_service.dart';
 import '../../utils/prefs_manager.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HealthStatusInputScreen extends StatefulWidget {
   final String? selectedParentId;
@@ -351,7 +352,99 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     return painAreaMap[painArea.toUpperCase()] ?? painArea;
   }
 
+  Map<String, String> getStretchingLinks() {
+    return {
+      '머리': 'https://youtu.be/i4ReOKZJ6qI?si=6qrSwF0pb3VtXWZu',
+      '목': 'https://youtu.be/mUnSpfItRf0?si=EWaeFiuzCEzj6572',
+      '왼쪽 어깨': 'https://youtu.be/mUnSpfItRf0?si=EWaeFiuzCEzj6572',
+      '오른쪽 어깨': 'https://youtu.be/mUnSpfItRf0?si=EWaeFiuzCEzj6572',
+      '가슴': 'https://youtu.be/oPx_Nfnzo-E?si=gjNfLXBMh0SWI3TV',
+      '등': 'https://youtu.be/RobdPJZAxdM?si=W6DBTRmqEipqpMEv',
+      '왼쪽 윗팔': 'https://youtu.be/w04XkiVO4ro?si=CRSm2LK3gU1J4pr1',
+      '오른쪽 윗팔': 'https://youtu.be/w04XkiVO4ro?si=CRSm2LK3gU1J4pr1',
+      '왼쪽 아랫팔': 'https://youtu.be/w04XkiVO4ro?si=CRSm2LK3gU1J4pr1',
+      '오른쪽 아랫팔': 'https://youtu.be/w04XkiVO4ro?si=CRSm2LK3gU1J4pr1',
+      '왼쪽 손': 'https://youtu.be/iVmlkvxZH6I?si=7CpZxLE9wKOq71N_',
+      '오른쪽 손': 'https://youtu.be/iVmlkvxZH6I?si=7CpZxLE9wKOq71N_',
+      '복부': 'https://youtu.be/JMS6Plzq0ps?si=wk3ZbPQDzFExcPx0',
+      '허리': 'https://www.youtube.com/watch?v=f-mgnsrDWHg',
+      '골반': 'https://www.youtube.com/watch?v=VhjkV83q01g',
+      '엉덩이': 'https://youtu.be/--VfHFpQL0U?si=M2uhMlkG7QVy6jDv',
+      '왼쪽 허벅지': 'https://youtu.be/DWVkwuQMXlI?si=F6X16jBzX27FzBzl',
+      '오른쪽 허벅지': 'https://youtu.be/DWVkwuQMXlI?si=F6X16jBzX27FzBzl',
+      '왼쪽 종아리': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9',
+      '오른쪽 종아리': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9',
+      '왼쪽 무릎': 'https://youtu.be/HOMv9qpqULE?si=7KvvrVE_Mtbo44f6',
+      '오른쪽 무릎': 'https://youtu.be/HOMv9qpqULE?si=7KvvrVE_Mtbo44f6',
+      '왼쪽 발': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9', // 종아리 스트레칭으로 대체
+      '오른쪽 발': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9', // 종아리 스트레칭으로 대체
+    };
+  }
+// 통증 부위에 맞는 스트레칭 링크들을 가져오는 함수
+  List<Map<String, String>> getStretchingLinksForPainAreas() {
+    final stretchingLinks = getStretchingLinks();
+    final painAreaLinks = <Map<String, String>>[];
+    final addedLinks = <String>{};
+
+    if (_painRecords.isNotEmpty) {
+      for (final record in _painRecords) {
+        final painArea = record['painArea'];
+        List<String> areas = [];
+
+        if (painArea is List) {
+          areas = painArea.map((area) => _convertPainAreaToKorean(area.toString())).toList();
+        } else {
+          areas = [_convertPainAreaToKorean(painArea.toString())];
+        }
+
+        for (final area in areas) {
+          if (area != '없음' && stretchingLinks.containsKey(area)) {
+            final link = stretchingLinks[area]!;
+            if (!addedLinks.contains(link)) {
+              painAreaLinks.add({
+                'name': area,
+                'url': link,
+              });
+              addedLinks.add(link);
+            }
+          }
+        }
+      }
+    }
+
+    return painAreaLinks;
+  }
+
   void showStretchingDialog() {
+    // 현재 통증 부위에 맞는 스트레칭 링크들 가져오기
+    final stretchingLinks = getStretchingLinksForPainAreas();
+
+    // 통증 부위 텍스트 생성
+    String painAreasText = '';
+
+    if (_painRecords.isNotEmpty) {
+      final koreanAreas = _painRecords
+          .expand((record) {
+        final painArea = record['painArea'];
+        if (painArea is List) {
+          return painArea.map((area) => _convertPainAreaToKorean(area.toString()));
+        } else {
+          return [_convertPainAreaToKorean(painArea.toString())];
+        }
+      })
+          .where((area) => area != '없음')
+          .toSet()
+          .join(', ');
+
+      if (koreanAreas.isNotEmpty) {
+        painAreasText = '$koreanAreas 부위의\n통증이 완화될 수 있도록\n스트레칭 해볼까요?';
+      } else {
+        painAreasText = '통증이 완화될 수 있도록\n스트레칭 해볼까요?';
+      }
+    } else {
+      painAreasText = '통증이 완화될 수 있도록\n스트레칭 해볼까요?';
+    }
+
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -361,6 +454,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           ),
           child: Container(
             padding: const EdgeInsets.all(24),
+            constraints: BoxConstraints(
+              maxHeight: MediaQuery.of(context).size.height * 0.7,
+            ),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
               color: Colors.white,
@@ -368,6 +464,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                // 닫기 버튼
                 Align(
                   alignment: Alignment.topRight,
                   child: GestureDetector(
@@ -383,15 +480,123 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
+
+                // 스트레칭 안내 텍스트
                 Text(
                   painAreasText,
+                  textAlign: TextAlign.center,
                   style: const TextStyle(
-                    fontSize: 25,
+                    fontSize: 20,
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
+                    height: 1.3,
                   ),
                 ),
                 const SizedBox(height: 20),
+
+                // 스트레칭 링크 목록
+                if (stretchingLinks.isNotEmpty)
+                  Flexible(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: stretchingLinks.map((linkInfo) {
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            child: SizedBox(
+                              width: double.infinity,
+                              height: 50,
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  final url = linkInfo['url']!;
+                                  try {
+                                    final uri = Uri.parse(url);
+                                    if (await canLaunchUrl(uri)) {
+                                      await launchUrl(
+                                        uri,
+                                        mode: LaunchMode.externalApplication,
+                                      );
+                                    } else {
+                                      // 외부 앱으로 열 수 없는 경우 웹 브라우저로 시도
+                                      if (await canLaunchUrl(uri)) {
+                                        await launchUrl(
+                                          uri,
+                                          mode: LaunchMode.inAppWebView,
+                                        );
+                                      } else {
+                                        throw Exception('링크를 열 수 없습니다');
+                                      }
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text('링크 열기 실패: ${e.toString()}'),
+                                          backgroundColor: Colors.red,
+                                          duration: const Duration(seconds: 3),
+                                        ),
+                                      );
+                                    }
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColors.ongiOrange,
+                                  foregroundColor: Colors.white,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(15),
+                                  ),
+                                  elevation: 0,
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.play_circle_outline,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      '${linkInfo['name']} 스트레칭',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ),
+                  )
+                else
+                // 스트레칭 링크가 없을 때의 기본 버튼
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        Navigator.of(context).pop();
+                        // 기본 스트레칭 화면으로 이동
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.ongiOrange,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        '스트레칭 하러 가기',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ),
@@ -399,7 +604,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       },
     );
   }
-
 
   Widget _buildTitleText() {
     if (_painRecords.isNotEmpty) {
@@ -819,7 +1023,44 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
               ),
               // 스트레칭 하러 가기 버튼
               ElevatedButton(
-                onPressed: showStretchingDialog, // 버튼을 누르면 다이얼로그 표시
+                onPressed: () async {
+                  // 통증 기록이 있으면 다이얼로그 표시, 없으면 기본 스트레칭 링크로 이동
+                  if (_painRecords.isNotEmpty) {
+                    showStretchingDialog();
+                  } else {
+                    // 기본 스트레칭 링크로 이동 (전신 스트레칭)
+                    const defaultStretchingUrl = 'https://youtu.be/JMS6Plzq0ps?si=wk3ZbPQDzFExcPx0';
+                    try {
+                      final uri = Uri.parse(defaultStretchingUrl);
+                      if (await canLaunchUrl(uri)) {
+                        await launchUrl(
+                          uri,
+                          mode: LaunchMode.externalApplication,
+                        );
+                      } else {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('스트레칭 링크를 열 수 없습니다'),
+                              backgroundColor: Colors.red,
+                              duration: const Duration(seconds: 3),
+                            ),
+                          );
+                        }
+                      }
+                    } catch (e) {
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text('링크 열기 실패: ${e.toString()}'),
+                            backgroundColor: Colors.red,
+                            duration: const Duration(seconds: 3),
+                          ),
+                        );
+                      }
+                    }
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.ongiOrange,
                   shape: RoundedRectangleBorder(
