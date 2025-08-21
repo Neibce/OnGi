@@ -10,11 +10,8 @@ import 'package:ongi/utils/prefs_manager.dart';
 
 class AddPillScreen extends StatefulWidget {
   final String? targetParentId;
-  
-  const AddPillScreen({
-    super.key,
-    this.targetParentId,
-  });
+
+  const AddPillScreen({super.key, this.targetParentId});
 
   @override
   State<AddPillScreen> createState() => _AddPillScreenState();
@@ -29,6 +26,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
   String selectedFrequency = '하루 세 번';
   final List<String> frequencies = ['하루 한 번', '하루 두 번', '하루 세 번', '하루 네 번'];
   String selectedTime = '08:00';
+  String? _uploadedFileName; // 업로드된 파일명 저장
   final List<String> times = [
     '00:00',
     '00:30',
@@ -89,6 +87,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
     '상관없음',
   ];
   bool _isSubmitting = false;
+  bool _isUploadingImage = false;
 
   @override
   void initState() {
@@ -108,9 +107,84 @@ class _AddPillScreenState extends State<AddPillScreen> {
         setState(() {
           _pillImage = XFile(pickedFile.path);
         });
+        
+        // 이미지를 선택하면 바로 업로드
+        await _uploadPillImage();
       }
     } catch (e) {
       print('Error picking image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '이미지 선택 중 오류가 발생했습니다: $e',
+              style: const TextStyle(color: AppColors.ongiOrange),
+            ),
+            backgroundColor: Colors.white,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _uploadPillImage() async {
+    if (_pillImage == null) return;
+
+    setState(() {
+      _isUploadingImage = true;
+    });
+
+    try {
+      // 1. Presigned URL 요청
+      final presignedData = await PillService.getPillPhotoPresignedUrl();
+      final String presignedUrl = presignedData['presignedUrl'];
+      final String fileName = presignedData['fileName'];
+
+      // 2. 사용자 UUID 가져오기
+      final String? userUuid = await PrefsManager.getUuid();
+      if (userUuid == null) {
+        throw Exception('사용자 정보를 찾을 수 없습니다.');
+      }
+
+      // 3. S3에 이미지 업로드
+      await PillService.uploadPillPhotoToS3(
+        presignedUrl: presignedUrl,
+        imageFile: File(_pillImage!.path),
+        uploaderUuid: userUuid,
+      );
+
+      // 4. 업로드된 파일명 저장
+      setState(() {
+        _uploadedFileName = fileName;
+        _isUploadingImage = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isUploadingImage = false;
+      });
+      
+      print('Error uploading image: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '이미지 업로드 실패: $e',
+              style: const TextStyle(color: AppColors.ongiOrange),
+            ),
+            backgroundColor: Colors.white,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -226,7 +300,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
     if (parentUuid == null) {
       parentUuid = await PrefsManager.getUuid();
     }
-    
+
     if (parentUuid == null || parentUuid.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -257,25 +331,19 @@ class _AddPillScreenState extends State<AddPillScreen> {
         intakeTimes: selectedTimes.take(timesPerDay).toList(),
         intakeDays: _mapDaysToServer(selectedDays),
         parentUuid: parentUuid,
+        fileName: _uploadedFileName, // 업로드된 파일명 전달
       );
 
       if (!mounted) return;
+
+      // 약 추가 성공을 알리고 이전 화면으로 돌아가기
+      Navigator.of(context).pop(true); // true를 반환하여 성공을 알림
       
-      // 즉시 홈으로 돌아가면서 성공 결과 전달
-      Navigator.pop(context, true);
-      
-      // 성공 팝업을 약간 지연 후 표시 (홈 화면이 먼저 업데이트되도록)
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (!mounted) return;
-        showDialog(
-          context: context,
-          barrierDismissible: true,
-          builder: (BuildContext context) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: const PillUpdatePopup(),
-          ),
-        );
-      });
+      // PillUpdatePopup 표시
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const PillUpdatePopup()),
+      );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(
@@ -319,23 +387,31 @@ class _AddPillScreenState extends State<AddPillScreen> {
                                     color: AppColors.pillsItemBackground,
                                     borderRadius: BorderRadius.circular(20),
                                   ),
-                                  child: _pillImage != null
-                                      ? ClipRRect(
-                                          borderRadius: BorderRadius.circular(20),
-                                          child: Image.file(
-                                            File(_pillImage!.path),
-                                            width: 120,
-                                            height: 120,
-                                            fit: BoxFit.cover,
+                                  child: _isUploadingImage
+                                      ? const Center(
+                                          child: CircularProgressIndicator(
+                                            color: AppColors.ongiOrange,
                                           ),
                                         )
-                                      : Padding(
-                                          padding: const EdgeInsets.all(30),
-                                          child: SvgPicture.asset(
-                                            'assets/images/pill_item_icon.svg',
-                                            fit: BoxFit.contain,
-                                          ),
-                                        ),
+                                      : _pillImage != null
+                                          ? ClipRRect(
+                                              borderRadius: BorderRadius.circular(
+                                                20,
+                                              ),
+                                              child: Image.file(
+                                                File(_pillImage!.path),
+                                                width: 120,
+                                                height: 120,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            )
+                                          : Padding(
+                                              padding: const EdgeInsets.all(30),
+                                              child: SvgPicture.asset(
+                                                'assets/images/pill_item_icon.svg',
+                                                fit: BoxFit.contain,
+                                              ),
+                                            ),
                                 ),
                               ),
                               Positioned(
@@ -597,7 +673,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
                   width: double.infinity,
                   height: 72,
                   child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submit,
+                    onPressed: (_isSubmitting || _isUploadingImage) ? null : _submit,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.ongiOrange,
                       foregroundColor: Colors.white,
@@ -606,7 +682,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
                         borderRadius: BorderRadius.circular(18),
                       ),
                     ),
-                    child: _isSubmitting
+                    child: (_isSubmitting || _isUploadingImage)
                         ? const SizedBox(
                             height: 28,
                             width: 28,
@@ -639,7 +715,7 @@ class _AddPillScreenState extends State<AddPillScreen> {
                 width: 28,
               ),
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(context).pop(false); // false를 반환하여 취소를 알림
               },
               iconSize: 36,
             ),
