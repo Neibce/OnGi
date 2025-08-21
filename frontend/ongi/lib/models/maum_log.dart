@@ -16,18 +16,50 @@ class MaumLogResponse {
   }
 }
 
+class User {
+  final String uuid;
+  final String email;
+  final String name;
+  final bool isParent;
+  final int profileImageId;
+  final String createdAt;
+  final String updatedAt;
+
+  User({
+    required this.uuid,
+    required this.email,
+    required this.name,
+    required this.isParent,
+    required this.profileImageId,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      uuid: json['uuid'] ?? '',
+      email: json['email'] ?? '',
+      name: json['name'] ?? '',
+      isParent: json['isParent'] ?? false,
+      profileImageId: json['profileImageId'] ?? 0,
+      createdAt: json['createdAt'] ?? '',
+      updatedAt: json['updatedAt'] ?? '',
+    );
+  }
+}
+
 class MaumLogDto {
   final String frontPresignedUrl;
   final String backPresignedUrl;
-  final String comment;
+  final String? comment;
   final String location;
   final List<String> emotions;
-  final String uploader;
+  final User uploader;
 
   MaumLogDto({
     required this.frontPresignedUrl,
     required this.backPresignedUrl,
-    required this.comment,
+    this.comment,
     required this.location,
     required this.emotions,
     required this.uploader,
@@ -38,10 +70,10 @@ class MaumLogDto {
     return MaumLogDto(
       frontPresignedUrl: json['frontPresignedUrl'] ?? '',
       backPresignedUrl: json['backPresignedUrl'] ?? '',
-      comment: json['comment'] ?? '',
+      comment: json['comment'],
       location: json['location'] ?? '',
       emotions: emotionsList.map((e) => e.toString()).toList(),
-      uploader: json['uploader'] ?? '',
+      uploader: User.fromJson(json['uploader'] ?? {}),
     );
   }
 

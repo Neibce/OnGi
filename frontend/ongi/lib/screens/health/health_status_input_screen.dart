@@ -1111,7 +1111,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           ],
         ),
       ),
-    );
   }
 
   // 통증 기록 저장 (실제 API 호출)

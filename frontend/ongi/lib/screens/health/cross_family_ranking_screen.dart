@@ -290,7 +290,7 @@ Widget _buildRankingMember({
       children: [
         // 메인 컨테이너
         Transform.translate(
-          offset: Offset(isCurrentUser ? 30 : 52, 0),
+          offset: Offset(isCurrentUser ? 20:40, 0),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.65,
             decoration: BoxDecoration(
