@@ -414,8 +414,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       '오른쪽 발': 'https://youtu.be/8g0cwnIxn44?si=7Qy8mQWH0RgTz9T9',
     };
   }
-
-  // 통증 부위에 맞는 스트레칭 링크들을 가져오는 함수
   List<Map<String, String>> getStretchingLinksForPainAreas() {
     final stretchingLinks = getStretchingLinks();
     final painAreaLinks = <Map<String, String>>[];
@@ -427,9 +425,8 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         List<String> areas = [];
 
         if (painArea is List) {
-          areas = painArea
-              .map((area) => _convertPainAreaToKorean(area.toString()))
-              .toList();
+          areas = painArea.map((area) => _convertPainAreaToKorean(area.toString())).toList();
+
         } else {
           areas = [_convertPainAreaToKorean(painArea.toString())];
         }
@@ -445,6 +442,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
             }
 
             if (!addedLinks.contains(link)) {
+
               painAreaLinks.add({'name': displayName, 'url': link});
               addedLinks.add(link);
             }
@@ -610,7 +608,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.play_circle_outline, size: 20),
+                                    Icon(
+                                      Icons.play_circle_outline,
+                                      size: 20,
+                                    ),
                                     const SizedBox(width: 8),
                                     Text(
                                       '${linkInfo['name']} 스트레칭',
@@ -629,7 +630,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                     ),
                   )
                 else
-                  // 스트레칭 링크가 없을 때의 기본 버튼
                   SizedBox(
                     width: double.infinity,
                     height: 50,
@@ -1058,6 +1058,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Widget _buildStretchingButton() {
     return Visibility(
       visible: _isStretchingVisible, // _isStretchingVisible 값에 따라 버튼 표시 여부 결정
+     ),
       child: Padding(
         padding: const EdgeInsets.all(25),
         child: Column(
@@ -1094,6 +1095,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                 minimumSize: const Size(double.infinity, 35),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
+
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 8),
               ),
@@ -1454,6 +1456,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                         color: Colors.black.withValues(
                                           alpha: 0.1,
                                         ),
+
                                         blurRadius: 4,
                                         offset: const Offset(0, 2),
                                       ),

@@ -20,7 +20,13 @@ class MaumLogService {
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        return MaumLogResponse.fromJson(jsonDecode(response.body));
+        final responseBody = jsonDecode(response.body);
+        
+        if (responseBody is Map<String, dynamic>) {
+          return MaumLogResponse.fromJson(responseBody);
+        } else {
+          throw Exception('API 응답이 예상한 형태가 아닙니다: ${responseBody.runtimeType}');
+        }
       } else {
         throw Exception('마음 기록을 불러오는 데에 실패했습니다. 상태 코드: ${response.statusCode}');
       }

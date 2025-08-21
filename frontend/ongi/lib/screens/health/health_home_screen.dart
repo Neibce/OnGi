@@ -1114,15 +1114,27 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
                                 color: Colors.white,
                                 borderRadius: BorderRadius.circular(16),
                               ),
-                              child: const Text(
-                                '다른 가족들은 얼마나 걸었을까요?',
-                                style: TextStyle(
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w400,
-                                  color: Colors.black,
-                                  height: 1.2,
-                                ),
-                                textAlign: TextAlign.right,
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/images/step_ranking_icon.svg',
+                                    height: 10,
+                                    width: 10,
+                                    color: AppColors.ongiGrey,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  const Text(
+                                    '다른 가족들은 얼마나 걸었을까요?',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w400,
+                                      color: Colors.black,
+                                      height: 1.2,
+                                    ),
+                                    textAlign: TextAlign.right,
+                                  ),
+                                ],
                               ),
                             ),
                           ),
