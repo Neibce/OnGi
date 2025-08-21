@@ -74,9 +74,10 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final cardWidth = screenWidth;
-    final cardHeight = screenHeight * 0.4;
+    final contentWidth = screenWidth - 80; // 좌우 패딩 40씩 고려
+    const viewport = 0.90; // 카드 크기 증가
+    final cardWidth = contentWidth * viewport; // 실제 카드 폭
+    final cardHeight = cardWidth * 1.2; // 마음기록 추가 화면(1:1.2)과 동일 비율
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -111,7 +112,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                 // 사진 카드 PageView
                 Center(
                   child: SizedBox(
-                    width: cardWidth,
+                    width: contentWidth,
                     height: cardHeight,
                     child: _buildContent(cardWidth, cardHeight),
                   ),
@@ -200,13 +201,14 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
     return PageView.builder(
       itemCount: maumLogs.length,
       controller: PageController(
-        viewportFraction: 0.78,
+        viewportFraction: 0.90,
         initialPage: _currentPage,
       ),
       onPageChanged: (idx) => setState(() => _currentPage = idx),
       itemBuilder: (context, idx) {
         final maumLog = maumLogs[idx];
         final isActive = idx == _currentPage;
+        final hasUploadedOwn = _maumLogResponse!.hasUploadedOwn;
         return AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           margin: EdgeInsets.symmetric(
@@ -220,7 +222,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(32),
-                child: isActive
+                child: (isActive && hasUploadedOwn)
                     ? Image.network(
                         maumLog.frontPresignedUrl,
                         width: cardWidth,
@@ -239,11 +241,11 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                           );
                         },
                       )
-                    : ImageFiltered(
-                        imageFilter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
-                        child: Opacity(
-                          opacity: 0.7,
-                          child: Image.network(
+                    : Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // 선명한 이미지 (상단)
+                          Image.network(
                             maumLog.frontPresignedUrl,
                             width: cardWidth,
                             height: cardHeight,
@@ -261,10 +263,51 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                               );
                             },
                           ),
-                        ),
+                          // 블러 이미지 (그라데이션 마스크)
+                          ShaderMask(
+                            shaderCallback: (Rect bounds) {
+                              return LinearGradient(
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                                colors: [
+                                  Colors.transparent,
+                                  Colors.white,
+                                  Colors.white,
+                                ],
+                                stops: [0.0, 0.2, 1.0],
+                              ).createShader(bounds);
+                            },
+                            blendMode: BlendMode.dstIn,
+                            child: OverflowBox(
+                              maxWidth: cardWidth + 60,
+                              maxHeight: cardHeight + 60,
+                              child: ImageFiltered(
+                                imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                                child: Image.network(
+                                  maumLog.frontPresignedUrl,
+                                  width: cardWidth + 60,
+                                  height: cardHeight + 60,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      width: cardWidth + 60,
+                                      height: cardHeight + 60,
+                                      color: Colors.grey[300],
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        color: Colors.grey,
+                                        size: 48,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
               ),
-              // 좌상단 서브(프로필) 사진
+              // 좌상단 서브(프로필) 사진 - 항상 표시, hasUploadedOwn이 false면 블러 처리
               Positioned(
                 left: 16,
                 top: 16,
@@ -277,143 +320,206 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: Image.network(
-                      maumLog.backPresignedUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: Colors.grey[300],
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: Colors.grey,
-                            size: 24,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ),
-              // 하단 오버레이
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
-                  decoration: BoxDecoration(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(32),
-                      bottomRight: Radius.circular(32),
-                    ),
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.0),
-                        Colors.black.withValues(alpha: 0.4),
-                      ],
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              FutureBuilder<String>(
-                                future: PrefsManager.getProfileImagePathByUserName(
-                                  maumLog.uploader,
-                                  _familyMembers,
+                    child: hasUploadedOwn
+                        ? Image.network(
+                            maumLog.backPresignedUrl,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                color: Colors.grey[300],
+                                child: const Icon(
+                                  Icons.broken_image,
+                                  color: Colors.grey,
+                                  size: 24,
                                 ),
-                                builder: (context, snapshot) {
-                                  final profileImagePath =
-                                      snapshot.data ??
-                                      PrefsManager.getProfileImagePath(0);
-                                  return Image.asset(profileImagePath, width: 30);
+                              );
+                            },
+                          )
+                        : Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              // 선명한 이미지 (상단)
+                              Image.network(
+                                maumLog.backPresignedUrl,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
+                                height: double.infinity,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[300],
+                                    child: const Icon(
+                                      Icons.broken_image,
+                                      color: Colors.grey,
+                                      size: 24,
+                                    ),
+                                  );
                                 },
                               ),
-                              const SizedBox(height: 8),
-                              // 사용자 이름
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 2,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(20),
-                                ),
-                                child: Text(
-                                  maumLog.uploader,
-                                  style: TextStyle(
-                                    color: AppColors.ongiOrange,
-                                    fontSize: 5.5,
-                                    fontWeight: FontWeight.w400,
-                                    fontFamily: 'Pretendard',
+                              // 블러 이미지 (그라데이션 마스크)
+                              ShaderMask(
+                                shaderCallback: (Rect bounds) {
+                                  return LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.transparent,
+                                      Colors.white,
+                                      Colors.white,
+                                    ],
+                                    stops: [0.0, 0.2, 1.0],
+                                  ).createShader(bounds);
+                                },
+                                blendMode: BlendMode.dstIn,
+                                child: OverflowBox(
+                                  maxWidth: 88 + 40,
+                                  maxHeight: 100 + 40,
+                                  child: ImageFiltered(
+                                    imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                                    child: Image.network(
+                                      maumLog.backPresignedUrl,
+                                      width: 88 + 40,
+                                      height: 100 + 40,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) {
+                                        return Container(
+                                          width: 88 + 40,
+                                          height: 100 + 40,
+                                          color: Colors.grey[300],
+                                          child: const Icon(
+                                            Icons.broken_image,
+                                            color: Colors.grey,
+                                            size: 24,
+                                          ),
+                                        );
+                                      },
+                                    ),
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.only(top: 20),
-                              child: Text(
-                                maumLog.comment,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontFamily: 'Pretendard',
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      // 위치 버튼 스타일
-                      Align(
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              SvgPicture.asset(
-                                'assets/images/location_icon.svg',
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                maumLog.location,
-                                style: TextStyle(
-                                  color: AppColors.ongiOrange,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  fontFamily: 'Pretendard',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
                   ),
                 ),
               ),
+              // 하단 오버레이 - hasUploadedOwn이 true일 때만 표시
+              if (hasUploadedOwn)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: Container(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(32),
+                        bottomRight: Radius.circular(32),
+                      ),
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black.withValues(alpha: 0.0),
+                          Colors.black.withValues(alpha: 0.4),
+                        ],
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    FutureBuilder<String>(
+                                      future: PrefsManager.getProfileImagePathByUserName(
+                                        maumLog.uploader.name,
+                                        _familyMembers,
+                                      ),
+                                      builder: (context, snapshot) {
+                                        final profileImagePath =
+                                            snapshot.data ??
+                                            PrefsManager.getProfileImagePath(0);
+                                        return Image.asset(profileImagePath, width: 30);
+                                      },
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      maumLog.comment ?? '',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontFamily: 'Pretendard',
+                                        fontWeight: FontWeight.w700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    maumLog.uploader.name,
+                                    style: const TextStyle(
+                                      color: AppColors.ongiOrange,
+                                      fontSize: 8,
+                                      fontFamily: 'Pretendard',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // 위치 정보가 유효한 경우에만 표시
+                        if (maumLog.location.isNotEmpty && 
+                            maumLog.location != "위치 정보를 불러올 수 없습니다.")
+                          Align(
+                            alignment: Alignment.center,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SvgPicture.asset(
+                                    'assets/images/location_icon.svg',
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    maumLog.location,
+                                    style: TextStyle(
+                                      color: AppColors.ongiOrange,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w500,
+                                      fontFamily: 'Pretendard',
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
             ],
           ),
         );
