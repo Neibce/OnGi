@@ -63,6 +63,12 @@ jobs:
         ${{ secrets.ENV_FILE }}
         EOF
 
+    - name: Create Firebase secret file
+      shell: bash
+      run: |
+        mkdir -p /var/secrets
+        echo "${{ secrets.FCM_SECRET }}" > /var/secrets/ongi-3841c-firebase-adminsdk-fbsvc-e0b6d1072f
+
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@v4
       with:
