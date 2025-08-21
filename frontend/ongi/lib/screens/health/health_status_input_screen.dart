@@ -1058,7 +1058,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   Widget _buildStretchingButton() {
     return Visibility(
       visible: _isStretchingVisible, // _isStretchingVisible 값에 따라 버튼 표시 여부 결정
-     ),
       child: Padding(
         padding: const EdgeInsets.all(25),
         child: Column(
