@@ -10,7 +10,7 @@ import com.google.firebase.messaging.Message;
 import com.google.firebase.messaging.Notification;
 import java.net.URL;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,9 @@ import ongi.pill.dto.PillInfoWithIntakeStatus;
 import ongi.pill.dto.PillIntakeRecordRequest;
 import ongi.pill.dto.PillPresignedResponseDto;
 import ongi.pill.entity.Pill;
+import ongi.pill.entity.PillAlarmRecord;
 import ongi.pill.entity.PillIntakeRecord;
+import ongi.pill.repository.PillAlarmRecordRepository;
 import ongi.pill.repository.PillIntakeRecordRepository;
 import ongi.pill.repository.PillRepository;
 import ongi.user.entity.User;
@@ -48,10 +50,11 @@ public class PillService {
     private final UserRepository userRepository;
     private final FamilyRepository familyRepository;
     private final PillIntakeRecordRepository pillIntakeRecordRepository;
+    private final PillAlarmRecordRepository pillAlarmRecordRepository;
     private final S3FileService s3FileService;
+    private final UserFcmTokenRepository userFcmTokenRepository;
 
     private static final String DIR_NAME = "pill-photos";
-    private final UserFcmTokenRepository userFcmTokenRepository;
 
     @Transactional
     public PillInfo createPill(User child, PillCreateRequest request) {
@@ -94,8 +97,6 @@ public class PillService {
         Pill pill = pillRepository.findById(pillId)
                 .orElseThrow(() -> new EntityNotFoundException("약 정보를 찾을 수 없습니다."));
 
-        pillIntakeRecordRepository.deleteByPill(pill);
-
         Family family = familyRepository.findByMembersContains(user.getUuid())
                 .orElseThrow(() -> new EntityNotFoundException("가족 정보를 찾을 수 없습니다."));
 
@@ -103,6 +104,8 @@ public class PillService {
             throw new IllegalArgumentException("해당 약은 이 사용자의 소유가 아닙니다.");
         }
 
+        pillIntakeRecordRepository.deleteByPill(pill);
+        pillAlarmRecordRepository.deleteByPill(pill);
         pillRepository.delete(pill);
     }
 
@@ -187,6 +190,7 @@ public class PillService {
     }
 
     @Scheduled(cron = "0 * * * * *")
+    @Transactional
     public void checkAndSendMedicationAlarms() {
         List<Pill> targets = findMedicationsNeedAlarm();
 
@@ -194,13 +198,44 @@ public class PillService {
             return;
         }
 
+        LocalDate today = LocalDate.now();
+        
         for (Pill pill : targets) {
-            try {
-                sendPillAlarmNotification(pill);
-            } catch (Exception e) {
-                System.err.println("약 알람 발송 실패: " + pill.getName() + ", 오류: " + e.getMessage());
+            for (LocalTime intakeTime : pill.getIntakeTimes()) {
+                try {
+                    if (shouldSendAlarm(pill, today, intakeTime)) {
+                        sendPillAlarmNotification(pill);
+                        recordAlarmSent(pill, today, intakeTime);
+                    }
+                } catch (Exception e) {
+                    System.err.println("약 알람 발송 실패: " + pill.getName() + " (" + intakeTime + "), 오류: " + e.getMessage());
+                }
             }
         }
+    }
+    
+    private boolean shouldSendAlarm(Pill pill, LocalDate date, LocalTime intakeTime) {
+        LocalTime now = LocalTime.now();
+        
+        if (now.isBefore(intakeTime)) {
+            return false;
+        }
+        
+        if (pillIntakeRecordRepository.findByPillAndIntakeDateAndIntakeTime(pill, date, intakeTime).isPresent()) {
+            return false;
+        }
+        
+        return !pillAlarmRecordRepository.existsByPillAndAlarmDateAndAlarmTime(pill, date, intakeTime);
+    }
+    
+    private void recordAlarmSent(Pill pill, LocalDate date, LocalTime intakeTime) {
+        PillAlarmRecord alarmRecord = PillAlarmRecord.builder()
+                .pill(pill)
+                .alarmDate(date)
+                .alarmTime(intakeTime)
+                .build();
+        
+        pillAlarmRecordRepository.save(alarmRecord);
     }
 
     private void sendPillAlarmNotification(Pill pill) throws FirebaseMessagingException {
@@ -208,7 +243,7 @@ public class PillService {
         if (userFcmTokenOptional.isEmpty()) {
             return;
         }
-
+        
         Message message = Message.builder()
                 .setNotification(Notification.builder()
                         .setTitle("'" + pill.getName() + "' 약을 복용할 시간입니다!")
@@ -237,36 +272,10 @@ public class PillService {
     }
 
     private List<Pill> findMedicationsNeedAlarm() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate today = now.toLocalDate();
-
-        List<Pill> allPills = pillRepository.findAll();
-        List<PillIntakeRecord> todayRecords = pillIntakeRecordRepository.findByIntakeDate(today);
-        Map<Long, List<PillIntakeRecord>> todayRecordsMap = todayRecords.stream()
-                .collect(Collectors.groupingBy(record -> record.getPill().getId()));
-
-        return allPills.stream()
-                .filter(pill -> {
-                    if (!pill.getIntakeDays().contains(today.getDayOfWeek())) {
-                        return false;
-                    }
-
-                    List<PillIntakeRecord> pillTodayRecords = todayRecordsMap.getOrDefault(
-                            pill.getId(), List.of());
-
-                    return pill.getIntakeTimes().stream()
-                            .anyMatch(intakeTime -> {
-                                boolean isTimePassed =
-                                        now.toLocalTime().isAfter(intakeTime) || now.toLocalTime()
-                                                .equals(intakeTime);
-
-                                boolean hasRecord = pillTodayRecords.stream()
-                                        .anyMatch(record -> record.getIntakeTime()
-                                                .equals(intakeTime));
-
-                                return isTimePassed && !hasRecord;
-                            });
-                })
+        LocalDate today = LocalDate.now();
+        
+        return pillRepository.findAll().stream()
+                .filter(pill -> pill.getIntakeDays().contains(today.getDayOfWeek()))
                 .toList();
     }
 }
