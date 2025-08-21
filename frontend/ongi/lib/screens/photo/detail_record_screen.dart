@@ -376,7 +376,7 @@ class _DetailRecordScreenState extends State<DetailRecordScreen> {
 
                           final maumLogResponse = await MaumLogService.getMaumLog(todayStr);
                           final familyPhotos = maumLogResponse.maumLogDtos
-                              .where((log) => log.uploader != currentUserName)
+                              .where((log) => log.uploader.name != currentUserName)
                               .toList();
                           final hasFamilyPhotos = familyPhotos.isNotEmpty;
 
