@@ -320,28 +320,58 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          FutureBuilder<String>(
-                            future: PrefsManager.getProfileImagePathByUserName(
-                              maumLog.uploader,
-                              _familyMembers,
-                            ),
-                            builder: (context, snapshot) {
-                              final profileImagePath =
-                                  snapshot.data ??
-                                  PrefsManager.getProfileImagePath(0);
-                              return Image.asset(profileImagePath, width: 30);
-                            },
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              FutureBuilder<String>(
+                                future: PrefsManager.getProfileImagePathByUserName(
+                                  maumLog.uploader,
+                                  _familyMembers,
+                                ),
+                                builder: (context, snapshot) {
+                                  final profileImagePath =
+                                      snapshot.data ??
+                                      PrefsManager.getProfileImagePath(0);
+                                  return Image.asset(profileImagePath, width: 30);
+                                },
+                              ),
+                              const SizedBox(height: 8),
+                              // 사용자 이름
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  maumLog.uploader,
+                                  style: TextStyle(
+                                    color: AppColors.ongiOrange,
+                                    fontSize: 5.5,
+                                    fontWeight: FontWeight.w400,
+                                    fontFamily: 'Pretendard',
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: Text(
-                              maumLog.comment,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 10,
-                                fontFamily: 'Pretendard',
-                                fontWeight: FontWeight.w500,
+                            child: Padding(
+                              padding: const EdgeInsets.only(top: 20),
+                              child: Text(
+                                maumLog.comment,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontFamily: 'Pretendard',
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
                             ),
                           ),
