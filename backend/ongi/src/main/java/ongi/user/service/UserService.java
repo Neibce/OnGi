@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import ongi.user.dto.FcmTokenUpdateRequestDto;
 import ongi.user.entity.User;
 import ongi.user.entity.UserFcmToken;
+import ongi.user.repository.UserFcmTokenRepository;
 import ongi.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
