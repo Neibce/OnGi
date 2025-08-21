@@ -229,7 +229,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     for (final record in _painRecords) {
       final painArea = record['painArea'];
       print('디버깅 - 원본 painArea: $painArea (타입: ${painArea.runtimeType})');
-      
+
       // painArea가 List인 경우와 단일 값인 경우 모두 처리
       List<String> areas = [];
       if (painArea is List) {
@@ -237,13 +237,13 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       } else if (painArea != null) {
         areas = [painArea.toString()];
       }
-      
+
       print('디버깅 - 처리할 areas: $areas');
 
       for (final area in areas) {
         final areaUpper = area.toUpperCase();
         print('디버깅 - 처리 중인 부위: $areaUpper');
-        
+
         switch (areaUpper) {
           case 'HEAD':
             newBodyParts = newBodyParts.copyWith(head: true);
@@ -429,12 +429,12 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
           if (area != '없음' && stretchingLinks.containsKey(area)) {
             final link = stretchingLinks[area]!;
             String displayName = area;
-            
+
             // 팔 관련 부위들은 스트레칭 버튼에서만 "팔"로 통일
             if (area.contains('윗팔') || area.contains('아랫팔')) {
               displayName = '팔';
             }
-            
+
             if (!addedLinks.contains(link)) {
               painAreaLinks.add({
                 'name': displayName,
@@ -544,17 +544,17 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                 onPressed: () async {
                                   final url = linkInfo['url']!;
                                   print('스트레칭 링크 열기 시도: $url');
-                                  
+
                                   try {
                                     final uri = Uri.parse(url);
                                     print('URI 파싱 성공: $uri');
-                                    
+
                                     // 먼저 외부 앱으로 열기 시도
                                     bool launched = await launchUrl(
                                       uri,
                                       mode: LaunchMode.externalApplication,
                                     );
-                                    
+
                                     if (!launched) {
                                       print('외부 앱 열기 실패, 웹 브라우저로 시도');
                                       // 외부 앱으로 열기 실패 시 웹 브라우저로 시도
@@ -563,7 +563,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                         mode: LaunchMode.platformDefault,
                                       );
                                     }
-                                    
+
                                     if (!launched) {
                                       throw Exception('링크를 열 수 없습니다');
                                     } else {
@@ -1333,90 +1333,132 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
               left: 0,
               right: 0,
               bottom: 0,
-
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Center(
-                    child: DateCarousel(
-                      onDateChanged: _onDateChanged,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Center(
+                      child: DateCarousel(
+                        onDateChanged: _onDateChanged,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Transform.translate(
-                      offset: const Offset(0, -10),
-                      child: Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 80,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Stack(
-                          children: [
-                            if (_isLoadingPainRecords)
-                              const Center(
-                                child: CircularProgressIndicator(
-                                  color: AppColors.ongiOrange,
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.45,
+                      child: Transform.translate(
+                        offset: const Offset(0, -10),
+                        child: Container(
+                          width: double.infinity,
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 80,
+                            vertical: 5,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Stack(
+                            children: [
+                              if (_isLoadingPainRecords)
+                                const Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColors.ongiOrange,
+                                  ),
+                                )
+                              else
+                                Padding(
+                                  padding: const EdgeInsets.all(20),
+                                  child: BodyPartSelector(
+                                    bodyParts: _bodyParts,
+                                    onSelectionUpdated: onBodyPartsSelected,
+                                    side: isFrontView
+                                        ? BodySide.front
+                                        : BodySide.back,
+                                    selectedColor: AppColors.ongiOrange,
+                                    unselectedColor: AppColors.ongiGrey,
+                                    selectedOutlineColor: Colors.white,
+                                    unselectedOutlineColor: Colors.white,
+                                  ),
                                 ),
-                              )
-                            else
-                              Padding(
-                                padding: const EdgeInsets.all(20),
-                                child: BodyPartSelector(
-                                  bodyParts: _bodyParts,
-                                  onSelectionUpdated: onBodyPartsSelected,
-                                  side: isFrontView
-                                      ? BodySide.front
-                                      : BodySide.back,
-                                  selectedColor: AppColors.ongiOrange,
-                                  unselectedColor: AppColors.ongiGrey,
-                                  selectedOutlineColor: Colors.white,
-                                  unselectedOutlineColor: Colors.white,
-                                ),
-                              ),
-                            // 기록완료 버튼 (부모인 경우만 표시)
-                            if (!_isChild)
-                              Positioned(
-                                right: 16,
-                                top: 16,
-                                child: GestureDetector(
-                                  onTap: hasSelectedParts
-                                      ? showConfirmationDialog
-                                      : null,
-                                  child: Container(
-                                    width: 50,
-                                    height: 50,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: hasSelectedParts
-                                          ? AppColors.ongiOrange
-                                          : Colors.grey[300],
-                                      border: Border.all(
+                              // 기록완료 버튼 (부모인 경우만 표시)
+                              if (!_isChild)
+                                Positioned(
+                                  right: 16,
+                                  top: 16,
+                                  child: GestureDetector(
+                                    onTap: hasSelectedParts
+                                        ? showConfirmationDialog
+                                        : null,
+                                    child: Container(
+                                      width: 50,
+                                      height: 50,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
                                         color: hasSelectedParts
                                             ? AppColors.ongiOrange
-                                            : Colors.grey[400]!,
-                                        width: 2,
-                                      ),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.1),
-                                          blurRadius: 4,
-                                          offset: const Offset(0, 2),
+                                            : Colors.grey[300],
+                                        border: Border.all(
+                                          color: hasSelectedParts
+                                              ? AppColors.ongiOrange
+                                              : Colors.grey[400]!,
+                                          width: 2,
                                         ),
-                                      ],
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withOpacity(0.1),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          '완료',
+                                          style: TextStyle(
+                                            color: hasSelectedParts
+                                                ? Colors.white
+                                                : Colors.grey[600],
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     ),
+                                  ),
+                                ),
+                              // 앞뒤 전환 버튼 (오른쪽 하단)
+                              Positioned(
+                                right: 16,
+                                bottom: 16,
+                                child: Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isFrontView
+                                        ? Colors.white
+                                        : AppColors.ongiOrange,
+                                    border: Border.all(
+                                      color: AppColors.ongiOrange,
+                                      width: 2,
+                                    ),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.1),
+                                        blurRadius: 4,
+                                        offset: const Offset(0, 2),
+                                      ),
+                                    ],
+                                  ),
+                                  child: GestureDetector(
+                                    onTap: toggleView,
                                     child: Center(
                                       child: Text(
-                                        '완료',
+                                        isFrontView ? '앞' : '뒤',
                                         style: TextStyle(
-                                          color: hasSelectedParts
-                                              ? Colors.white
-                                              : Colors.grey[600],
-                                          fontSize: 12,
+                                          color: isFrontView
+                                              ? AppColors.ongiOrange
+                                              : Colors.white,
+                                          fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
@@ -1424,54 +1466,16 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                                   ),
                                 ),
                               ),
-                            // 앞뒤 전환 버튼 (오른쪽 하단)
-                            Positioned(
-                              right: 16,
-                              bottom: 16,
-                              child: Container(
-                                width: 50,
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: isFrontView
-                                      ? Colors.white
-                                      : AppColors.ongiOrange,
-                                  border: Border.all(
-                                    color: AppColors.ongiOrange,
-                                    width: 2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.1),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: GestureDetector(
-                                  onTap: toggleView,
-                                  child: Center(
-                                    child: Text(
-                                      isFrontView ? '앞' : '뒤',
-                                      style: TextStyle(
-                                        color: isFrontView
-                                            ? AppColors.ongiOrange
-                                            : Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if(_isStretchingVisible) _buildStretchingButton(),
-                ],
+                    if(_isStretchingVisible) _buildStretchingButton(),
+                    // 스크롤을 위한 여백 추가
+                    const SizedBox(height: 100),
+                  ],
+                ),
               ),
             ),
           ],
