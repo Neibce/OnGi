@@ -1,10 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1080" height="1080"
     viewBox="0 0 1080 1080" xml:space="preserve">
-<g transform="matrix(1 0 0 1 540 540)" id="58459c88-79b6-4df2-862f-4991d3e98a03">
-<rect
-    style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(255,255,255); fill-rule: nonzero; opacity: 1; visibility: hidden;"
-    vector-effect="non-scaling-stroke" x="-540" y="-540" rx="0" ry="0" width="1080" height="1080" />
-</g>
     <g transform="matrix(28.42 0 0 28.42 540 540)">
 <path
     style="stroke: none; stroke-width: 1; stroke-dasharray: none; stroke-linecap: butt; stroke-dashoffset: 0; stroke-linejoin: miter; stroke-miterlimit: 4; fill: rgb(162,162,162); fill-rule: nonzero; opacity: 1;"
