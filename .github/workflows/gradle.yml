@@ -25,13 +25,22 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         build-root-directory: backend/ongi
-        
+
     - name: Create .env file from secrets
       shell: bash
       run: |
         cat <<'EOF' > backend/ongi/.env
         ${{ secrets.ENV_FILE }}
         EOF
+
+    - name: Create Firebase credentials and export ADC
+      shell: bash
+      run: |
+        CRED_PATH="$RUNNER_TEMP/firebase-key.json"
+        cat <<'EOF' > "$CRED_PATH"
+        ${{ secrets.FCM_SECRET }}
+        EOF
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$CRED_PATH" >> "$GITHUB_ENV"
 
     - name: Load .env and build
       working-directory: backend/ongi
@@ -63,11 +72,14 @@ jobs:
         ${{ secrets.ENV_FILE }}
         EOF
 
-    - name: Create Firebase secret file
+    - name: Create Firebase credentials and export ADC
       shell: bash
       run: |
-        mkdir -p /var/secrets
-        echo "${{ secrets.FCM_SECRET }}" > /var/secrets/ongi-3841c-firebase-adminsdk-fbsvc-e0b6d1072f
+        CRED_PATH="$RUNNER_TEMP/firebase-key.json"
+        cat <<'EOF' > "$CRED_PATH"
+        ${{ secrets.FCM_SECRET }}
+        EOF
+        echo "GOOGLE_APPLICATION_CREDENTIALS=$CRED_PATH" >> "$GITHUB_ENV"
 
     - name: Generate and submit dependency graph
       uses: gradle/actions/dependency-submission@v4
