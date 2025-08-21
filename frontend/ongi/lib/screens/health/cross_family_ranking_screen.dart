@@ -362,8 +362,8 @@ Widget _buildRankingMember({
         // 우리 가족 순위
         if (isCurrentUser)
           Positioned(
-            left: -35,
-            top: -40,
+            left: -25,
+            top: -25,
             child: Container(
               child: Center(
                 child: Text(
