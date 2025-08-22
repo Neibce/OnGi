@@ -1,246 +1,201 @@
-# Template for Hackathon
-이 레파지토리는 참여자들이 해커톤 결과물을 위한 레파지토리 생성시에 참고할 내용들을 담고 있습니다.
-1. 레파지토리 생성
-2. 레파지토리 구성
-3. README.md 가이드라인
-4. README.md 작성팁
-<br/>
+# 온기 – 부모와 자식 간 건강 관리 및 정서적 소통을 위한 어플리케이션
+<img width="1178" height="785" alt="온기_썸네일" src="https://github.com/user-attachments/assets/9238452e-313e-43a8-9018-b63846da6716" />
+
+---
+
+만성 질환이나 사고 후 회복, 노화로 인해 돌봄이 필요한 부모님들이 많습니다.
+
+그러나 바쁜 일상과 물리적 거리, 자녀에게 아픈 모습을 쉽게 드러내고 싶지 않은 부모의 마음으로 인해 자녀가 부모의 건강과 감정을 세심하게 살피기 어렵습니다.
+
+그래서 개발된 **‘온기’**는 멀리 있어도 부모님의 건강을 세심하게 돌볼 수 있도록 함께합니다.
+
+부모님은 간편하게 건강 상태를 기록하고, 자녀는 언제 어디서든 그 기록을 확인할 수 있습니다.
+
+### **주요 기능**
+
+- **통증 부위 기록** : 아픈 곳을 쉽고 빠르게 입력
+- **복용 약 체크** : 약 복용 여부를 한눈에 확인
+- **운동 시간 관리** : 운동 시간과 걸음수를 자동 또는 수동으로 기록
+- **건강 데이터 공유** : 부모님의 건강 변화를 실시간으로 확인
+- **일상 사진 공유** : 하루 한 장씩 올리는 일상 사진으로 가족 간 소통 증진
+
+부모님의 하루를 알고 싶을 때, 건강 상태가 걱정될 때, **온기**와 함께라면 멀리 있어도 한결 가까워집니다.
 
 
-## 1. 레파지토리 생성
-- [https://classroom.github.com/a/r_quqgd5](https://classroom.github.com/a/r_quqgd5)
-- 위 Github Classroom 링크에 접속해 본인 조의 github 레파지토리를 생성하세요.
-<img src="https://github.com/user-attachments/assets/deccbc01-9c36-4757-be92-b8ff5c40ec26" width="600px" alt="Classroom에서 team 생성" />
-
-- 레파지토리 생성 시 팀 이름은 `{연도}-TEAM-{조번호}` 형식으로 생성하세요.
-- 예를 들어, 2025년도 3조의 팀명은 `2025-TEAM-03` 입니다.
-- 이 경우 `PNUSW-2025-TEAM-03`이라는 이름으로 레포지토리가 생성됩니다.
-<br/>
-
-
-## 2. 레파지토리 구성
-- 레파지토리 내에 `README.md` 파일 생성하고 아래의 가이드라인과 작성팁을 참고하여 파일을 작성하세요.
-- 레파지토리 내에 `docs` 폴더를 생성하고 폴더 내에는 과제 수행 하면서 작성한 각종 보고서, 발표자료를 올려둡니다.
-- 그 밖에 레파지토리의 폴더 구성은 과제 결과물에 따라 자유롭게 구성하되 가급적 코드의 목적이나 기능에 따라 폴더를 나누어 구성하세요.  
-<br/>
-
-
-## 3. README.md 가이드라인
-- README 파일 작성시에 아래의 5가지 항목의 내용은 필수적으로 포함해야 합니다.
-- 아래의 7가지 항목이외에 프로젝트의 이해를 돕기위한 내용을 추가해도 됩니다.
-- `SAMPLE_README.md`가 단순한 형태의 예제이니 참고하세요.
-```markdown
-### 1. 프로젝트 소개
+## 1. 프로젝트 소개
 #### 1.1. 개발배경 및 필요성
-> 프로젝트를 실행하게 된 배경 및 필요성을 작성하세요.
+이 프로젝트는 창의융합 해커톤에 참여하는 사람들에게 README 작성의 가이드라인을 제공하기 위해 제작되었습니다.
+<br/>
 
-#### 1.2. 개발 목표 및 주요 내용
-> 프로젝트의 목표 및 주요 내용을 작성하세요.
+#### 1.2. 개발목표 및 주요내용
+창의융합 해커톤을 참여하는 사람들의 README 작성방법 이해을 돕는 것입니다.
+<br/>
 
 #### 1.3. 세부내용
-> 위 내용을 작성하세요.
+가이드라인은 README에 들어가야 할 목차와 대략적인 내용을 설명합니다.
+<br/>
 
-#### 1.4. 기존 서비스 대비 차별성
-> 위 내용을 작성하세요.
+#### 1.4. 기존 서비스(상품) 대비 차별성
+> 작성하세요.
+<br/>
 
-#### 1.5. 사회적가치 도입 계획
-> 위 내용을 작성하세요.
+#### 1.5. 사회적가지 도입 계획
+> 작성하세요.
+<br/>
 
 
-### 2. 상세설계
+### 2.상세설계
 #### 2.1. 시스템 구성도
-> 시스템 구성도(infra, front, back등의 node 간의 관계)의 사진을 삽입하세요.
+<img width="600px" alt="시스템 구성도" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/f0e7c7ed-deb1-47ee-8090-32f712fa2b23">
+<br/>
 
-#### 2.1. 사용 기술
-> 스택 별(backend, frontend, designer등) 사용한 기술 및 버전을 작성하세요.
-> 
-> ex) React.Js - React14, Node.js - v20.0.2
+#### 2.3. 사용기술
+| 이름                  | 버전    |
+|:---------------------:|:-------:|
+| Python                | 3.8.0   |
+| Django                | 3.2.9   |
+| Django Rest Framework | 3.12.0  |
+| Node.js               | 16.16.0 |
+| Vue.js                | 2.5.13  |
+<br/>
+
 
 ### 3. 개발결과
+[코딩역량강화플랫폼 Online Judge](http://10.125.121.115:8080/)를 예시로 작성하였습니다.
 #### 3.1. 전체시스템 흐름도
-> 위 내용을 작성하세요.
+- 유저 플로우 차트
+  > 코딩 역량강화 플랫폼의 회원가입 부분만 작성했습니다. <br/>
+  > 사용자의 행동 흐름을 도식화하여 보여줍니다.
+  <img width="400px" alt="유저 플로우 차트" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/c8de7c98-efd8-4f64-a39a-720faabccd78" />
+
+- 테스크 플로우 차트
+  > 코딩 역량강화 플랫폼의 로그인 부분만 작성했습니다. <br/>
+  > 주요 테스크의 프로세스를 도식화하여 보여줍니다.
+  <img width="400px" alt="테스크 플로우 차트" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/b83502a9-032d-4453-8687-428d54643610" />
+
+- 시스템 플로우 차트
+  > 코딩 역량강화 플랫폼의 로그인 부분만 작성했습니다. <br/>
+  > 테스크의 흐름에 따른 데이터 처리를 도식화하여 보여줍니다.
+  <img width="600px" alt="시스템 플로우 차트" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/1bfb66f0-446c-4450-8a81-a78bfe5ac9ce" />
+
+  
+- IA(Information Architecture)
+  > 정보나 시스템의 구조를 도식화하여 보여줍니다. <br/>
+  <img width="600px" alt="IA" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/07d842fe-fb73-4079-97a3-58b2495ff331" />
+
+<br/>
 
 #### 3.2. 기능설명
-> 각 페이지 마다 사용자의 입력의 종류와 입력에 따른 결과 설명 및 시연 영상.
-> 
-> ex. 로그인 페이지:
-> 
-> - 이메일 주소와 비밀번호를 입력하면 입력창에서 유효성 검사가 진행됩니다.
-> 
-> - 요효성 검사를 통과하지 못한 경우, 각 경고 문구가 입력창 하단에 표시됩니다.
->   
-> - 유효성 검사를 통과한 경우, 로그인 버튼이 활성화 됩니다.
->   
-> - 로그인 버튼을 클릭 시, 입력한 이메일 주소와 비밀번호에 대한 계정이 있는지 확인합니다.
->   
-> - 계정이 없는 경우, 경고문구가 나타납니다.
->
-> (영상)
+##### ` 메인 페이지 `
+- 상단 배너
+  - 3초에 마다 자동으로 내용이 넘어갑니다. <br/>
+    ![상단 배너](https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/4640389f-dcaf-4b78-916e-188c8e9c6ee7)
+
+- 공지사항
+  - 최근 5개의 공지사항을 보여줍니다.
+  - 발행된지 일주일이 안 된 공지사항은 new라는 mark표시를 해줍니다.
+  - 공지사항 글을 클릭하면 해당 공지사항 게시글로 이동합니다.
+  - 상단의 더보기 버튼을 클릭하면 공지사항 페이지로 이동합니다.<br/>
+    <img width="600px" alt="공지사항" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/7c425946-ff06-4b32-8b18-4119cc86e308">
+
+- 이번 주 보너스 문제
+  - 이번 주의 보너스 점수를 주는 문제를 보여줍니다.
+  - 문제를 클릭하면, 해당 문제의 게시글로 이동합니다. <br/>
+    <img width="600px" alt="이번 주 보너스 문제" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/5c603984-8cf6-4524-84a6-5410bb6a8cbf">
+
+- 실시간 랭킹
+  - 상위 랭킹 10명의 유저를 보여줍니다.
+  - 상단의 더보기 버튼을 클릭하면 전체 랭킹 페이지로 이동합니다.<br/>
+    <img width="200px" alt="실시간 랭킹" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/8492e285-5423-4c00-bc46-400cbe733d35">
+<br/>
+
+##### ` 문제 페이지 `
+- 문제 목록
+  - 사용자가 설정한 한 번에 보여줄 문제 갯수 만큼 한 화면에 문제를 띄워줍니다.
+  - 검색창에서 문제의 제목 및 번호로 문제를 검색할 수 있습니다.
+  - 난이도, 영역, 카테고리 별로 문제를 볼 수 있습니다.
+  - 상단의 shuffle 이모지를 클릭하면 랜덤으로 선택된 문제 푸는 페이지로 이동합니다.
+  - 목록에서 문제를 클릭하면 해당 문제를 푸는 페이지로 이동합니다.
+    ![문제 목록](https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/95afd0db-b5a7-4628-ac9c-164513a9e51b)
+<br/>
+
 
 #### 3.3. 기능명세서
-> 개발한 제품에 대한 기능명세서를 작성해 제출하세요.
-> 
-> 노션 링크, 한글 문서, pdf 파일, 구글 스프레드 시트 등...
+<img width="200px" alt="실시간 랭킹" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/97ad3fea-f90a-437a-b611-3fb8cd24070e" />
+
+|라벨|이름|상세|
+|:---:|:----------------------------:|:---|
+| S1  | 부산대학교 웹메일              | - 부산대 웹메일 형식인지 검증 <br/>- 중복되는 이메일인지 검증 |
+| S2  | 부산대학교 웹메일 인증 코드 전송| - 클릭 시 인증 코드 메일로 전송 |
+| S3  | 메일 인증 코드                 | - 인증 요청 버튼 클릭 후 활성화 <br/>- 유효시간 5분|
+| S4  | 메일 인증 코드 확인            | - 인증코드 검증 |
+| S5  | 닉네임                        | - 4 ~ 12자 영어, 숫자, '_' 가능 |
+| S6  | 단과대학 선택                  | -부산대학교 단과대학 리스트 보여주기 |
+| S7  | 학과 선택                     | - 단과대학 안의 학과 리스트 보여주기 |
+| S8  | 비밀번호                      | - 입력 시 텍스트 보이지 않도록 •로 표현해주기 <br/>- 6자 이상 20자 이하, 영어와 숫자 조합 필수 |
+| S9  | 비밀번호 확인                  | - 입력 시 텍스트 보이지 않도록 •로 표현해주기 <br/>- 비밀번호와 동일한 지 검증 |
+| S10 | 회원가입 완료                  | - 비어 있는 입력 칸이 없는지 검증 <br/>-메일 인증 완료했는지 확인 <br/>-조건을 만족하면 회원가입 성공|
+| S11 | 로그인                        | - 클릭 시 로그인 모달로 전환 |
+
+<br/>
 
 #### 3.4. 디렉토리 구조
-> 위 레포지토리의 디렉토리 구조를 설명하세요.
+```
+├── build/                      # webpack 설정 파일
+├── config/                     # 프로젝트 설정 파일
+├── deplay/                     # 배포 설정 파일
+├── src/                        # 소스 코드
+│   ├── assets/                 # 이미지, 폰트 등의 정적 파일
+│   ├── pages/                  # 화면에 나타나는 페이지
+│   │   ├── page1/              # 페이지1
+│   │   ├── page2/              # 페이지2
+│   │   ├── components/         # 여러 페이지에서 공통적으로 사용되는 컴포넌트
+│   ├── router/                 # 라우터
+│   ├── store/                  # global state store
+│   ├── styles/                 # 스타일
+│   ├── utils/                  # 유틸리티
+├── static/                     # 정적 파일
+```
+<br/>
+
 
 ### 4. 설치 및 사용 방법
-> 제품을 설치하기 위헤 필요한 소프트웨어 및 설치 방법을 작성하세요.
->
-> 제품을 설치하고 난 후, 실행 할 수 있는 방법을 작성하세요.
+**필요 패키지**
+- 위의 사용 기술 참고
 
-### 5. 소개 및 시연 영상
-> 프로젝트에 대한 소개와 시연 영상을 넣으세요.
-> 프로젝트 소개 동영상을 교육원 메일(swedu@pusan.ac.kr)로 제출 이후 센터에서 부여받은 youtube URL주소를 넣으세요.
+```bash
+$ git clone https://github.com/test/test.git
+$ cd test/frontend
+$ npm i
+$ export NODE_ENV="development" # windows: set NODE_ENV=development
+$ npm run build:dll
+$ export TARGET="http://localhost:8000"  # windows: set NODE_ENV=http://localhost:8000
+$ npm run dev
+```
+<br/>
+
+
+### 5. 소개 및 시연영상
+[<img width="700px" alt="소개 및 시연영상" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/162132cd-9af5-4154-9b9a-41c96cf5e8fd" />](https://www.youtube.com/watch?v=EfEgTrm5_u4)
+
+<br/>
 
 ### 6. 팀 소개
-> 팀원 소개 & 구성원 별 역할 분담 & 간단한 연락처를 작성하세요.
+| MEMBER1 | MEMBER2 | MEMBER3 |
+|:-------:|:-------:|:-------:|
+|<img width="100px" alt="MEMBER1" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/f5b5df2a-e174-437d-86b2-a5a23d9ee75d" /> | <img width="100px" alt="MEMBER2" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/fe4e8910-4565-4f3f-9bd1-f135e74cb39d" /> | <img width="100px" alt="MEMBER3" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/675d8471-19b9-4abc-bf8a-be426989b318" /> |
+| member1@pusan.ac.kr | member2@gmail.com | member3@naver.com |
+| 프론트앤드 개발 | 인프라 구축 <br/> 백앤드 개발 | DB 설계 <br/> 백앤드 개발 |
+
+
+<br/>
+
 
 ### 7. 해커톤 참여 후기
-> 팀원 별 해커톤 참여 후기를 작성하세요.
-```
+- MEMBER1
+  > 작성하세요.
+- MEMBER2
+  > 작성하세요.
+- MEMBER3
+  > 작성하세요.
 <br/>
-
-
-## 4. README.md 작성 팁
-- 마크다운 언어를 이용해 README.md 파일을 작성할 때 참고할 수 있는 마크다운 언어 문법을 공유합니다.
-- 다양한 예제와 보다 자세한 문법은 [이 문서](https://www.markdownguide.org/basic-syntax/)를 참고하세요.
-
-### 4.1. 헤더 Header
-```
-# This is a Header 1
-## This is a Header 2
-### This is a Header 3
-#### This is a Header 4
-##### This is a Header 5
-###### This is a Header 6
-####### This is a Header 7 은 지원되지 않습니다.
-```
-
-# This is a Header 1
-## This is a Header 2
-### This is a Header 3
-#### This is a Header 4
-##### This is a Header 5
-###### This is a Header 6
-####### This is a Header 7 은 지원되지 않습니다.
-<br />
-
-### 4.2. 인용문 BlockQuote
-```
-> This is a first blockqute.
->	> This is a second blockqute.
->	>	> This is a third blockqute.
-```
-> This is a first blockqute.
->	> This is a second blockqute.
->	>	> This is a third blockqute.
-<br />
-
-### 4.3. 목록 List
-* **Ordered List**
-```
-1. first
-2. second
-3. third  
-```
-1. first
-2. second
-3. third
-<br />
-
-* **Unordered List**
-```
-* 하나
-  * 둘
-
-+ 하나
-  + 둘
-
-- 하나
-  - 둘
-```
-* 하나
-  * 둘
-
-+ 하나
-  + 둘
-
-- 하나
-  - 둘
-<br />
-
-### 4.4. 코드 CodeBlock
-* 코드 블럭 이용 '``'
-```
-여러줄 주석 "```" 이용
-"```
-#include <stdio.h>
-int main(void){
-  printf("Hello world!");
-  return 0;
-}
-```"
-
-단어 주석 "`" 이용
-"`Hello world`"
-
-* 큰 따움표(") 없이 사용하세요.
-``` 
-<br />
-
-### 4.5. 링크 Link
-```
-[Title](link)
-[부산대 소프트웨어융합교육원](https://swedu.pusan.ac.kr/swedu/index.do)
-
-<link>
-<https://swedu.pusan.ac.kr>
-``` 
-[부산대 소프트웨어융합교육원](https://swedu.pusan.ac.kr)
-
-<https://swedu.pusan.ac.kr>  
-<br />
-
-### 4.6. 강조 Highlighting
-```
-*single asterisks*
-_single underscores_
-**double asterisks**
-__double underscores__
-~~cancelline~~
-```
-*single asterisks* <br />
-_single underscores_ <br />
-**double asterisks** <br />
-__double underscores__ <br />
-~~cancelline~~  <br />
-<br />
-
-### 4.7. 이미지 Image
-```
-<img src="/path/to/img.jpg" width="600px" title="Title" alt="Alt text"></img>
-![Alt text](/path/to/img.jpg "Optional title")
-```
-<img src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/be7beb64-490f-4480-b121-f25cde7f2a8d" width="600px" title="부산대학교 소프트웨어융합교육원" alt="부산대학교 소프트웨어융합교육원"></img>
-<br/>
-![부산대학교 소프트웨어융합교육원](https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/884154bb-28f6-4498-9f64-a8a878972951, "부산대학교 소프트웨어융합교육원")
-<br/>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
