@@ -159,7 +159,7 @@
 >
 > 실물 리워드로 변환할 수 있어 지속적인 앱 사용을 독려할 수 있다.
 
-## 지속적 사용 트리거 및 수익 구조
+### 1.2.4 지속적 사용 트리거 및 수익 구조
 
 ### 지속적 사용 트리거
 
@@ -1135,6 +1135,8 @@
 <br/>
 
 ## 4. 설치 및 사용 방법
+- iOS: TestFlight를 통해 설치 가능
+- Android: Google Play 스토어 혹은 APK 파일을 통해 설치 가능
 
 | ![ios QR](https://github.com/user-attachments/assets/8a11807e-de17-45dd-884a-71b05cbcf6db)|![android QR](https://github.com/user-attachments/assets/1c062370-d12d-406a-a8c5-05cd494f1178)|![android apk QR](https://github.com/user-attachments/assets/c4a8de56-6f0d-4550-b118-b3883d23ebc8)|
 |:-------------------------------------------------------------------------------------------------:|:------------------:|:----------------:|
