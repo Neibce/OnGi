@@ -45,7 +45,7 @@
     - 원인: 세대 간 소통 및 감정 공유의 단절
     - 서로의 건강 상태와 생활 습관에 대해 함께 이야기하고 공유하고자 하는 의지가 있더라도 이를 실천으로 잇기 어려운 상황이 빈번하게 발생한다.
 
-   ![부모와 자녀는 각 입장에서 상대방과의 건강 소통의 중요성을 인지하고 있다.](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B0%9C%EB%B0%9C%EB%B0%B0%EA%B2%BD_%EC%84%A4%EB%AC%B8%EC%A1%B0%EC%82%AC_%EC%9B%90%EA%B7%B8%EB%9E%98%ED%94%84.jpg)
+![개발배경_설문조사_원그래프 1](https://github.com/user-attachments/assets/8d8ba0c2-3ea3-404b-8968-fd350bfc6d4c)
 
 > 부모와 자녀는 각 입장에서 상대방과의 건강 소통의 중요성을 인지하고 있다.
 
@@ -193,7 +193,8 @@
 
 본 앱에는 ‘프리미엄 구독 시스템’이 존재합니다. 위와 같은 유료 서비스 및 혜택을 위해 돈을 최대 얼마까지 지불할 의향이 있으신가요? (한 달 기준으로 선택해 주세요.)(*)
 
-![설문조사를 바탕으로 분석한 결과, 1,900~3,400원 사이의 금액으로 책정하는 것이 좋다는 결론이 도출되었다. 그래서 본 앱의 유료 서비스 가격을 2,900원으로 결정하였다.](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%E1%84%80%E1%85%A5%E1%86%AB%E1%84%80%E1%85%A1%E1%86%BC_%E1%84%89%E1%85%A9%E1%84%90%E1%85%A9%E1%86%BC_%E1%84%8B%E1%85%A2%E1%86%B8_%E1%84%8B%E1%85%A9%E1%86%AB%E1%84%80%E1%85%B5_%E1%84%89%E1%85%A5%E1%86%AF%E1%84%86%E1%85%AE%E1%86%AB%E1%84%8C%E1%85%A9%E1%84%89%E1%85%A1.xlsx.png)
+<img width="501" height="394" alt="건강_소통_앱_온기_설문조사 xlsx" src="https://github.com/user-attachments/assets/f879fd05-ccdf-465b-8987-2ee5548f9d58" />
+
 
 > 설문조사를 바탕으로 분석한 결과, 1,900~3,400원 사이의 금액으로 책정하는 것이 좋다는 결론이 도출되었다. 따라서 본 앱의 유료 서비스 가격을 2,900원으로
 > 결정하였다.
@@ -310,13 +311,14 @@
 
 ### 2.1. 시스템 구성도
 
-### **Full-Stack Architecture**
+#### **Full-Stack Architecture**
 
-![image.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/image%202.png)
+<img width="851" height="758" alt="image 2" src="https://github.com/user-attachments/assets/95fdc614-bbe5-4294-97c9-98bac7dcac65" />
 
-### **ERD**
+#### **ERD**
 
-![image.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/image%203.png)
+<img width="2559" height="2264" alt="image 3" src="https://github.com/user-attachments/assets/9d4d2a02-37f2-4229-8a20-75fcbe4b92a4" />
+
 <br/>
 
 ### 2.3. 사용기술
@@ -347,32 +349,45 @@
 
 - 컴포넌트
 
-  ![Flow Chart Whiteboard in Red Blue Basic Style (2).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(2).png)
+<img height="200" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(2)" src="https://github.com/user-attachments/assets/3eed7577-37cf-4a92-9eca-111e62dc0ed6" />
+
+<br><br>
 
 - 전체 흐름도 (+로그인/회원가입)
 
-  ![Flow Chart Whiteboard in Red Blue Basic Style (3).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(3).png)
+<img height="1400" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(3)" src="https://github.com/user-attachments/assets/388875d4-dc06-477e-8285-ddc4e0f0b88c" />
+
+<br><br>
 
 - 홈 페이지
 
-  ![Flow Chart Whiteboard in Red Blue Basic Style (9).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(9).png)
+<img height="500" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(9)" src="https://github.com/user-attachments/assets/e283ab9c-ca16-492d-b4a4-e81950b260a4" />
+
+<br>
 
 - 건강 기록 페이지
 
-  ![Flow Chart Whiteboard in Red Blue Basic Style (10).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(10).png)
+<img height="900" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(10)" src="https://github.com/user-attachments/assets/ac2135e4-8522-4b2f-b4d1-47fcd1366cf4" />
+
+<br>
 
 - 마음 기록 작성 페이지
 
-  ![Flow Chart Whiteboard in Red Blue Basic Style (6).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(6).png)
+<img height="500" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(6)" src="https://github.com/user-attachments/assets/790a46ca-7e86-4fdd-83f9-4c40c288278a" />
+
+<br><br>
 
 - 마음 기록 앨범
 
-  ![Flow Chart Whiteboard in Red Blue Basic Style (7).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(7).png)
+<img height="600" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(7)" src="https://github.com/user-attachments/assets/8d14ab59-3468-47b3-a067-332b41ce937b" />
+
+<br><br>
 
 - 마이페이지
 
-  ![Flow Chart Whiteboard in Red Blue Basic Style (8).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(8).png)
-  <br/>
+<img height="300" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(8)" src="https://github.com/user-attachments/assets/15131d0d-f230-4bff-9638-623439d1ae67" />
+
+<br/>
 
 ### 3.2. 기능설명
 
@@ -595,13 +610,13 @@
 
 - 스플래시 화면
 
-![스플래시.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EC%8A%A4%ED%94%8C%EB%9E%98%EC%8B%9C.png)
+<img height="400" alt="스플래시" src="https://github.com/user-attachments/assets/224f2baf-5cd7-47db-9b71-448c7b1c30e6" />
 
 - 시작 페이지
 
-![공통 - 시작1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EC%8B%9C%EC%9E%911.png)
+<img height="400" alt="공통_-_시작1" src="https://github.com/user-attachments/assets/5bbd8ed5-527f-472e-b2b5-399ea7a0e777" />
+<img height="400" alt="공통_-_시작3" src="https://github.com/user-attachments/assets/3f4f0830-58b2-482b-957c-d690e388d7f8" />
 
-![공통 - 시작3.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EC%8B%9C%EC%9E%913.png)
 
 | **라벨** | **이름**    | **상세**                                                                                 |
 |--------|-----------|----------------------------------------------------------------------------------------|
@@ -611,19 +626,14 @@
 
 - 회원가입 페이지
 
-![공통 - 회원가입1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%851.png)
+<img height="400" alt="공통_-_회원가입1" src="https://github.com/user-attachments/assets/1a079bca-5957-4fcb-920a-d746fd722982" />
+<img height="400" alt="공통_-_회원가입2" src="https://github.com/user-attachments/assets/35429e6b-e867-491c-82b8-15ad64d56e97" />
+<img height="400" alt="공통_-_회원가입3" src="https://github.com/user-attachments/assets/1af38cb4-622b-4c07-b1e1-a492de9b343d" />
+<img height="400" alt="공통_-_회원가입4" src="https://github.com/user-attachments/assets/10ef1cf5-433c-4d54-9164-b36dc6d34806" />
+<img height="400" alt="공통_-_회원가입5" src="https://github.com/user-attachments/assets/fbcb7f69-6345-4566-ad08-edba6292a160" />
+<img height="400" alt="공통_-_회원가입6" src="https://github.com/user-attachments/assets/b1c38ca0-cdbe-4660-9fef-3165269bac68" />
+<img height="400" alt="공통_-_회원가입7" src="https://github.com/user-attachments/assets/b4a23a72-6e57-46a5-ab5a-230a71b77910" />
 
-![공통 - 회원가입2.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%852.png)
-
-![공통 - 회원가입3.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%853.png)
-
-![공통 - 회원가입4.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%854.png)
-
-![공통 - 회원가입5.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%855.png)
-
-![공통 - 회원가입6.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%856.png)
-
-![공통 - 회원가입7.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%9A%8C%EC%9B%90%EA%B0%80%EC%9E%857.png)
 
 | **라벨** | **이름**            | **상세**                                                                                        |
 |--------|-------------------|-----------------------------------------------------------------------------------------------|
@@ -640,9 +650,9 @@
 
 - 로그인 페이지
 
-![공통 - 로그인1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EB%A1%9C%EA%B7%B8%EC%9D%B81.png)
+<img height="400" alt="공통_-_로그인1" src="https://github.com/user-attachments/assets/6594550e-f72f-45d8-9f9a-d5d2064da97b" />
+<img height="400" alt="공통_-_로그인2" src="https://github.com/user-attachments/assets/be7734fd-cabc-4b29-9e31-de4e2535181c" />
 
-![공통 - 로그인2.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EB%A1%9C%EA%B7%B8%EC%9D%B82.png)
 
 | **라벨** | **이름**  | **상세**           |
 |--------|---------|------------------|
@@ -651,13 +661,16 @@
 
 - 홈 페이지
 
-![공통 - 홈.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%99%88.png)
+<img height="400" alt="공통_-_홈 Large" src="https://github.com/user-attachments/assets/bef4ca72-fbfd-4ad3-97a2-1d02ba848ee9" />
 
-![공통 - 홈 - 리워드.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%99%88_-_%EB%A6%AC%EC%9B%8C%EB%93%9C.png)
+<img height="400" alt="공통_-_홈_-_리워드" src="https://github.com/user-attachments/assets/307cd4c2-b1e3-44b2-ab48-4f41d72c1566" />
 
-![공통 - 홈 - 온도계그래프.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%99%88_-_%EC%98%A8%EB%8F%84%EA%B3%84%EA%B7%B8%EB%9E%98%ED%94%84.png)
+<img height="400" alt="공통_-_홈_-_온도계그래프" src="https://github.com/user-attachments/assets/444d49c7-001a-4f35-8a31-52b0bd1fdf02" />
 
-![공통 - 홈 - 온도계그래프-1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%ED%99%88_-_%EC%98%A8%EB%8F%84%EA%B3%84%EA%B7%B8%EB%9E%98%ED%94%84-1.png)
+<img height="400" alt="공통_-_홈_-_온도계그래프" src="https://github.com/user-attachments/assets/ef648695-32b7-4744-9209-b87e73559ef0" />
+
+<img height="400" alt="공통_-_홈_-_온도계그래프-1" src="https://github.com/user-attachments/assets/74256919-3717-4633-83b4-01bbca466d56" />
+
 
 | **라벨** | **이름**               | **상세**                                                                           |
 |--------|----------------------|----------------------------------------------------------------------------------|
@@ -679,9 +692,11 @@
 - 건강 기록 페이지 - 메인
     - 부모(좌), 자녀(우)
 
-![부모 - 건강기록.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D.png)
+<img height="400" alt="부모_-_건강기록" src="https://github.com/user-attachments/assets/fb3952ca-a218-46d8-878a-2cee7b5d919e" />
 
-![자녀 - 건강기록.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EC%9E%90%EB%85%80_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D.png)
+
+<img height="400" alt="자녀_-_건강기록" src="https://github.com/user-attachments/assets/3c63c40a-261d-4af4-bae8-2f6a0541e618" />
+
 
 | **라벨** | **이름**          | **상세**                                               |
 |--------|-----------------|------------------------------------------------------|
@@ -696,13 +711,13 @@
 
 - 건강 기록 페이지 - 통증 부위
 
-![부모 - 건강기록 - 건강상태 입력(앞).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EA%B1%B4%EA%B0%95%EC%83%81%ED%83%9C_%EC%9E%85%EB%A0%A5(%EC%95%9E).png)
+<img height="400" alt="부모_-_건강기록_-_건강상태_입력(앞)" src="https://github.com/user-attachments/assets/e4c5dcb2-4dda-4d30-aabb-848d840a0389" />
 
-![부모 - 건강기록 - 건강상태 입력(뒤).png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EA%B1%B4%EA%B0%95%EC%83%81%ED%83%9C_%EC%9E%85%EB%A0%A5(%EB%92%A4).png)
+<img height="400" alt="부모_-_건강기록_-_건강상태_입력(뒤)" src="https://github.com/user-attachments/assets/d3b771b5-d5eb-4269-9f90-f690f79f5827" />
 
-![부모 - 건강기록 - 건강상태 입력1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EA%B1%B4%EA%B0%95%EC%83%81%ED%83%9C_%EC%9E%85%EB%A0%A51.png)
+<img height="400" alt="부모_-_건강기록_-_건강상태_입력1" src="https://github.com/user-attachments/assets/a314d80b-1a78-479d-a3bc-ff834e2ef4a9" />
 
-![부모 - 건강기록 - 건강상태 입력(앞)-1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EA%B1%B4%EA%B0%95%EC%83%81%ED%83%9C_%EC%9E%85%EB%A0%A5(%EC%95%9E)-1.png)
+<img height="400" alt="부모_-_건강기록_-_건강상태_입력(앞)-1" src="https://github.com/user-attachments/assets/ee9bd0c8-2875-4625-987a-7d0c696a5355" />
 
 | **라벨** | **이름**      | **상세**                                                                                                               |
 |--------|-------------|----------------------------------------------------------------------------------------------------------------------|
@@ -716,11 +731,11 @@
 
 - 건강 기록 페이지 - 약 복용
 
-![부모 - 건강기록 - 약 복용.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EC%95%BD_%EB%B3%B5%EC%9A%A9.png)
+<img height="400" alt="부모_-_건강기록_-_약_복용" src="https://github.com/user-attachments/assets/14fa700c-5c68-4f8a-83df-8f0ee87dfac0" />
 
-![공통 - 건강기록 - 약 복용 - 약 추가-1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EC%95%BD_%EB%B3%B5%EC%9A%A9_-_%EC%95%BD_%EC%B6%94%EA%B0%80-1.png)
+<img height="400" alt="공통_-_건강기록_-_약_복용_-_약_추가-1" src="https://github.com/user-attachments/assets/5725d53d-64ee-40f7-9b11-d697f35469ba" />
 
-![공통 - 건강기록 - 약 복용 - 약 추가.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EC%95%BD_%EB%B3%B5%EC%9A%A9_-_%EC%95%BD_%EC%B6%94%EA%B0%80.png)
+<img height="400" alt="공통_-_건강기록_-_약_복용_-_약_추가" src="https://github.com/user-attachments/assets/cdd8961e-9c7a-4d0d-8ca9-0258e44ecd5d" />
 
 | **라벨** | **이름**      | **상세**               |
 |--------|-------------|----------------------|
@@ -737,9 +752,10 @@
 
 - 건강 기록 페이지 - 운동 기록
 
-![부모 - 건강기록 - 운동시간1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EC%9A%B4%EB%8F%99%EC%8B%9C%EA%B0%841.png)
+<img height="400" alt="부모_-_건강기록_-_운동시간1" src="https://github.com/user-attachments/assets/9be38fb7-56a3-44af-a677-73269b2173f2" />
 
-![부모 - 건강기록 - 운동시간2.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/150843dc-06b7-485d-b354-b78b2629a954.png)
+<img height="400" alt="부모 - 건강기록 - 운동시간2" src="https://github.com/user-attachments/assets/9b26126c-d8b7-4951-97b0-9b71eb6a66c3" />
+
 
 | **라벨** | **이름**   | **상세**                                         |
 |--------|----------|------------------------------------------------|
@@ -749,7 +765,7 @@
 
 - 건강 기록 페이지 - 가족 만보기
 
-![부모 - 건강기록 - 가족 만보기.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EA%B0%80%EC%A1%B1_%EB%A7%8C%EB%B3%B4%EA%B8%B0.png)
+<img height="400" alt="부모_-_건강기록_-_가족_만보기" src="https://github.com/user-attachments/assets/f736b804-a0d9-4644-83b8-f95854a5e3af" />
 
 | **라벨** | **이름**  | **상세**                               |
 |--------|---------|--------------------------------------|
@@ -758,7 +774,7 @@
 
 - 건강 기록 페이지 - 만보기 랭킹
 
-![부모 - 건강기록 - 가족 만보기 랭킹.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EA%B0%80%EC%A1%B1_%EB%A7%8C%EB%B3%B4%EA%B8%B0_%EB%9E%AD%ED%82%B9.png)
+<img height="400" alt="부모_-_건강기록_-_가족_만보기_랭킹" src="https://github.com/user-attachments/assets/83403bb1-99a3-4acc-a679-25baf7ba913d" />
 
 | **라벨** | **이름**        | **상세**                                                                     |
 |--------|---------------|----------------------------------------------------------------------------|
@@ -767,15 +783,16 @@
 
 - 마음 기록 페이지
 
-![공통 - 사진 및 마음 추가2.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EC%82%AC%EC%A7%84_%EB%B0%8F_%EB%A7%88%EC%9D%8C_%EC%B6%94%EA%B0%802.png)
+<img height="400" alt="공통_-_사진_및_마음_추가2" src="https://github.com/user-attachments/assets/c8e1591b-e749-46da-9e63-6816c87e45ad" />
 
-![공통 - 사진 및 마음 추가2-1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EC%82%AC%EC%A7%84_%EB%B0%8F_%EB%A7%88%EC%9D%8C_%EC%B6%94%EA%B0%802-1.png)
+<img height="400" alt="공통_-_사진_및_마음_추가2-1" src="https://github.com/user-attachments/assets/30b9044c-18d0-4b18-9ce6-b37af67a1525" />
 
-![공통 - 사진 및 마음 추가3.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EC%82%AC%EC%A7%84_%EB%B0%8F_%EB%A7%88%EC%9D%8C_%EC%B6%94%EA%B0%803.png)
+<img height="400" alt="공통_-_사진_및_마음_추가3" src="https://github.com/user-attachments/assets/1ca57563-bb64-424d-bb4c-ffade6362248" />
 
-![공통 - 사진 및 마음 추가4.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EC%82%AC%EC%A7%84_%EB%B0%8F_%EB%A7%88%EC%9D%8C_%EC%B6%94%EA%B0%804.png)
+<img height="400" alt="공통_-_사진_및_마음_추가4" src="https://github.com/user-attachments/assets/9ddf02f4-02f6-4f31-b8cd-20e8e2aefb5c" />
 
-![공통 - 사진 및 마음 추가5.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EC%82%AC%EC%A7%84_%EB%B0%8F_%EB%A7%88%EC%9D%8C_%EC%B6%94%EA%B0%805.png)
+<img height="400" alt="공통_-_사진_및_마음_추가5" src="https://github.com/user-attachments/assets/32e54fa1-19fb-45a5-bb01-207b08324fe5" />
+
 
 | **라벨** | **이름**      | **상세**                                                                                            |
 |--------|-------------|---------------------------------------------------------------------------------------------------|
@@ -791,13 +808,13 @@
 | 10     | 확인 페이지 1    | 나를 제외한 가족 구성원 중, 마음 기록을 남긴 사람이 있을 때<br>- 보러가기 버튼 클릭<br>- 마음 앨범 페이지로 이동                            |
 | 11     | 확인 페이지 2    | 나를 제외한 가족 구성원 중, 마음 기록을 남긴 사람이 없을 때<br>- 재촉하기 버튼 클릭<br>- 가족 구성원에게 마음 기록을 재촉하는 알림 전송 가능<br>- 마음 앨범 |
 
-![공통 - 마음기록 앨범.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EB%A7%88%EC%9D%8C%EA%B8%B0%EB%A1%9D_%EC%95%A8%EB%B2%94.png)
+<img height="400" alt="공통_-_마음기록_앨범" src="https://github.com/user-attachments/assets/0ca24e55-f95b-46b1-9c8b-f3df19e5f68e" />
 
-![공통 - 마음기록 앨범 - 상세.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EB%A7%88%EC%9D%8C%EA%B8%B0%EB%A1%9D_%EC%95%A8%EB%B2%94_-_%EC%83%81%EC%84%B8.png)
+<img height="400" alt="공통_-_마음기록_앨범_-_상세" src="https://github.com/user-attachments/assets/aafbb261-8c2c-42cc-9313-c69280180649" />
 
-![공통 - 마음기록 앨범 - 상세-1.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EB%A7%88%EC%9D%8C%EA%B8%B0%EB%A1%9D_%EC%95%A8%EB%B2%94_-_%EC%83%81%EC%84%B8-1.png)
+<img height="400" alt="공통_-_마음기록_앨범_-_상세-1" src="https://github.com/user-attachments/assets/5025e11a-9211-4560-a9a9-6f10c49b287c" />
 
-![공통 - 마음기록 앨범 - 상세-2.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EB%A7%88%EC%9D%8C%EA%B8%B0%EB%A1%9D_%EC%95%A8%EB%B2%94_-_%EC%83%81%EC%84%B8-2.png)
+<img height="400" alt="공통_-_마음기록_앨범_-_상세-2" src="https://github.com/user-attachments/assets/56163e6a-9573-4690-910c-a7e0895e03ae" />
 
 | **라벨** | **이름**          | **상세**                                                                         |
 |--------|-----------------|--------------------------------------------------------------------------------|
@@ -812,7 +829,8 @@
 
 - 마이페이지
 
-![공통 - 마이페이지.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EA%B3%B5%ED%86%B5_-_%EB%A7%88%EC%9D%B4%ED%8E%98%EC%9D%B4%EC%A7%80.png)
+<img height="400" alt="공통_-_마이페이지" src="https://github.com/user-attachments/assets/25e4b2c0-26df-4579-a9d2-8e1764ebb940" />
+
 
 | **라벨** | **이름**      | **상세**             |
 |--------|-------------|--------------------|
@@ -1313,7 +1331,7 @@
 
 ## 4. 설치 및 사용 방법
 
-| ![image.png](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/image%205.png) |                  |                |
+| <img width="500" height="500" alt="image 5" src="https://github.com/user-attachments/assets/8a11807e-de17-45dd-884a-71b05cbcf6db" />|                  |                |
 |-------------------------------------------------------------------------------------------------|------------------|----------------|
 | [iOS 베타(Testflight) 참여/다운로드](https://testflight.apple.com/join/ywaeumFn)                        | 안드로이드 베타 참여/다운로드 | 안드로이드 APK 다운로드 | 
 
