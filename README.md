@@ -850,300 +850,119 @@
     │ ├── main
     │ │ ├── application.properties
     │ │ └── ongi
-    │ │     ├── OngiApplication.class
     │ │     ├── auth
     │ │     │ ├── controller
-    │ │     │ │ └── AuthController.class
     │ │     │ ├── dto
-    │ │     │ │ ├── LoginRequest.class
-    │ │     │ │ ├── LoginResponse.class
-    │ │     │ │ └── RegisterRequest.class
     │ │     │ ├── service
-    │ │     │ │ └── AuthService.class
     │ │     │ └── token
     │ │     │     ├── entity
-    │ │     │     │ ├── AccessToken$AccessTokenBuilder.class
-    │ │     │     │ └── AccessToken.class
     │ │     │     ├── repository
-    │ │     │     │ └── AccessTokenRepository.class
     │ │     │     └── util
-    │ │     │         └── TokenProvider.class
     │ │     ├── common
     │ │     │ └── dto
-    │ │     │     └── ErrorResponse.class
     │ │     ├── exception
-    │ │     │ ├── EntityAlreadyExistException.class
-    │ │     │ ├── EntityNotFoundException.class
-    │ │     │ ├── ErrorStatus.class
-    │ │     │ └── GlobalExceptionHandler.class
     │ │     ├── family
     │ │     │ ├── controller
-    │ │     │ │ └── FamilyController.class
     │ │     │ ├── dto
-    │ │     │ │ ├── FamilyCreateRequest.class
-    │ │     │ │ ├── FamilyInfo.class
-    │ │     │ │ ├── FamilyJoinRequest.class
-    │ │     │ │ └── FamilyParentResponse.class
     │ │     │ ├── entity
-    │ │     │ │ ├── Family$FamilyBuilder.class
-    │ │     │ │ └── Family.class
     │ │     │ ├── repository
-    │ │     │ │ └── FamilyRepository.class
     │ │     │ ├── service
-    │ │     │ │ └── FamilyService.class
     │ │     │ └── support
-    │ │     │     └── FamilyCodeGenerator.class
     │ │     ├── health
     │ │     │ ├── controller
-    │ │     │ │ └── HealthRecordController.class
     │ │     │ ├── dto
-    │ │     │ │ ├── ExerciseRecordResponse.class
-    │ │     │ │ └── PainRecordResponse.class
     │ │     │ ├── entity
-    │ │     │ │ ├── ExerciseRecord$ExerciseRecordBuilder.class
-    │ │     │ │ ├── ExerciseRecord.class
-    │ │     │ │ ├── PainRecord$PainArea.class
-    │ │     │ │ ├── PainRecord$PainLevel.class
-    │ │     │ │ ├── PainRecord$PainRecordBuilder.class
-    │ │     │ │ └── PainRecord.class
     │ │     │ ├── repository
-    │ │     │ │ ├── ExerciseRecordRepository.class
-    │ │     │ │ └── PainRecordRepository.class
     │ │     │ └── service
-    │ │     │     └── HealthRecordService.class
     │ │     ├── security
-    │ │     │ ├── AuthenticationFilter.class
-    │ │     │ ├── CustomUserDetails.class
-    │ │     │ ├── CustomUserDetailsService.class
-    │ │     │ └── SecurityConfig.class
     │ │     ├── step
     │ │     │ ├── controller
-    │ │     │ │ └── StepController.class
     │ │     │ ├── dto
-    │ │     │ │ ├── FamilyStepResponse$MemberStepInfo.class
-    │ │     │ │ ├── FamilyStepResponse.class
-    │ │     │ │ └── StepUpsertRequest.class
     │ │     │ ├── entity
-    │ │     │ │ ├── Step$StepBuilder.class
-    │ │     │ │ └── Step.class
     │ │     │ ├── repository
-    │ │     │ │ └── StepRepository.class
     │ │     │ └── service
-    │ │     │     └── StepService.class
     │ │     ├── temperature
     │ │     │ ├── controller
-    │ │     │ │ └── TemperatureController.class
     │ │     │ ├── dto
-    │ │     │ │ ├── FamilyTemperatureContributionResponse$Contribution.class
-    │ │     │ │ ├── FamilyTemperatureContributionResponse.class
-    │ │     │ │ ├── FamilyTemperatureDailyResponse$DailyTemperature.class
-    │ │     │ │ ├── FamilyTemperatureDailyResponse.class
-    │ │     │ │ ├── FamilyTemperatureResponse$FamilyTemperatureResponseBuilder.class
-    │ │     │ │ ├── FamilyTemperatureResponse$MemberTemperatureInfo$MemberTemperatureInfoBuilder.class
-    │ │     │ │ ├── FamilyTemperatureResponse$MemberTemperatureInfo.class
-    │ │     │ │ └── FamilyTemperatureResponse.class
     │ │     │ ├── entity
-    │ │     │ │ ├── Temperature$TemperatureBuilder.class
-    │ │     │ │ └── Temperature.class
     │ │     │ ├── repository
-    │ │     │ │ └── TemperatureRepository.class
     │ │     │ └── service
-    │ │     │     └── TemperatureService.class
     │ │     └── user
     │ │         ├── controller
-    │ │         │ └── UserController.class
     │ │         ├── dto
-    │ │         │ ├── UserExistsResponse.class
-    │ │         │ └── UserInfo.class
     │ │         ├── entity
-    │ │         │ ├── User$UserBuilder.class
-    │ │         │ └── User.class
     │ │         ├── repository
-    │ │         │ └── UserRepository.class
     │ │         └── service
-    │ │             └── UserService.class
     │ └── test
-    │     ├── application-test.properties
     │     └── ongi
-    │         ├── FamilyControllerUnitTest$CreateFamilyTest.class
-    │         ├── FamilyControllerUnitTest$GetFamilyInfoTest.class
-    │         ├── FamilyControllerUnitTest$GetFamilyMembersTest.class
-    │         ├── FamilyControllerUnitTest$JoinFamilyTest.class
-    │         ├── FamilyControllerUnitTest.class
-    │         ├── HealthRecordControllerTest.class
-    │         ├── OngiApplicationTests.class
-    │         ├── StepControllerUnitTest$GetFamilyStepsTest.class
-    │         ├── StepControllerUnitTest$UpsertStepTest.class
-    │         ├── StepControllerUnitTest.class
-    │         ├── TemperatureControllerUnitTest.class
-    │         └── UserControllerUnitTest.class
-    ├── build.gradle
     ├── gradle
-    │ └── wrapper
-    │     ├── gradle-wrapper.jar
-    │     └── gradle-wrapper.properties
-    ├── gradle.properties
-    ├── gradlew
-    ├── gradlew.bat
-    ├── settings.gradle
     └── src
         ├── main
         │ ├── java
         │ │ └── ongi
-        │ │     ├── OngiApplication.java
         │ │     ├── auth
         │ │     │ ├── controller
-        │ │     │ │ └── AuthController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── LoginRequest.java
-        │ │     │ │ ├── LoginResponse.java
-        │ │     │ │ └── RegisterRequest.java
         │ │     │ ├── service
-        │ │     │ │ └── AuthService.java
         │ │     │ └── token
         │ │     │     ├── entity
-        │ │     │     │ └── AccessToken.java
         │ │     │     ├── repository
-        │ │     │     │ └── AccessTokenRepository.java
         │ │     │     └── util
-        │ │     │         └── TokenProvider.java
         │ │     ├── common
-        │ │     │ ├── AuditorAwareImpl.java
         │ │     │ ├── dto
-        │ │     │ │ └── ErrorResponse.java
         │ │     │ └── entity
-        │ │     │     └── BaseEntity.java
         │ │     ├── exception
-        │ │     │ ├── EntityAlreadyExistException.java
-        │ │     │ ├── EntityNotFoundException.java
-        │ │     │ ├── ErrorStatus.java
-        │ │     │ └── GlobalExceptionHandler.java
         │ │     ├── family
         │ │     │ ├── controller
-        │ │     │ │ └── FamilyController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── FamilyCreateRequest.java
-        │ │     │ │ ├── FamilyInfo.java
-        │ │     │ │ ├── FamilyJoinRequest.java
-        │ │     │ │ └── FamilyParentResponse.java
         │ │     │ ├── entity
-        │ │     │ │ └── Family.java
         │ │     │ ├── repository
-        │ │     │ │ └── FamilyRepository.java
         │ │     │ ├── service
-        │ │     │ │ └── FamilyService.java
         │ │     │ └── support
-        │ │     │     └── FamilyCodeGenerator.java
         │ │     ├── health
         │ │     │ ├── controller
-        │ │     │ │ └── HealthRecordController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── ExerciseRecordRequest.java
-        │ │     │ │ ├── ExerciseRecordResponse.java
-        │ │     │ │ ├── ExerciseRecordSummaryResponse.java
-        │ │     │ │ ├── PainRecordRequest.java
-        │ │     │ │ └── PainRecordResponse.java
         │ │     │ ├── entity
-        │ │     │ │ ├── ExerciseRecord.java
-        │ │     │ │ ├── Int2DArrayToJsonConverter.java
-        │ │     │ │ └── PainRecord.java
         │ │     │ ├── repository
-        │ │     │ │ ├── ExerciseRecordRepository.java
-        │ │     │ │ └── PainRecordRepository.java
         │ │     │ └── service
-        │ │     │     └── HealthRecordService.java
         │ │     ├── maum_log
         │ │     │ ├── controller
-        │ │     │ │ └── MaumLogController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── DateCount.java
-        │ │     │ │ ├── MaumLogCalendarDto.java
-        │ │     │ │ ├── MaumLogDto.java
-        │ │     │ │ ├── MaumLogPresignedResponseDto.java
-        │ │     │ │ ├── MaumLogUploadRequestDto.java
-        │ │     │ │ └── MaumLogsResponseDto.java
         │ │     │ ├── entity
-        │ │     │ │ └── MaumLog.java
         │ │     │ ├── enums
-        │ │     │ │ └── Emotion.java
         │ │     │ ├── repository
-        │ │     │ │ └── MaumLogRepository.java
         │ │     │ └── service
-        │ │     │     └── MaumLogService.java
         │ │     ├── pill
         │ │     │ ├── controller
-        │ │     │ │ └── PillController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── PillCreateRequest.java
-        │ │     │ │ ├── PillInfo.java
-        │ │     │ │ ├── PillInfoWithIntakeStatus.java
-        │ │     │ │ └── PillIntakeRecordRequest.java
         │ │     │ ├── entity
-        │ │     │ │ ├── IntakeDetail.java
-        │ │     │ │ ├── Pill.java
-        │ │     │ │ └── PillIntakeRecord.java
         │ │     │ ├── repository
-        │ │     │ │ ├── PillIntakeRecordRepository.java
-        │ │     │ │ └── PillRepository.java
         │ │     │ └── service
-        │ │     │     └── PillService.java
         │ │     ├── security
-        │ │     │ ├── AuthenticationFilter.java
-        │ │     │ ├── CustomUserDetails.java
-        │ │     │ ├── CustomUserDetailsService.java
-        │ │     │ └── SecurityConfig.java
         │ │     ├── step
         │ │     │ ├── controller
-        │ │     │ │ └── StepController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── FamilyStepRankingResponse.java
-        │ │     │ │ ├── FamilyStepResponse.java
-        │ │     │ │ └── StepUpsertRequest.java
         │ │     │ ├── entity
-        │ │     │ │ └── Step.java
         │ │     │ ├── repository
-        │ │     │ │ └── StepRepository.java
         │ │     │ └── service
-        │ │     │     └── StepService.java
         │ │     ├── temperature
         │ │     │ ├── controller
-        │ │     │ │ └── TemperatureController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── FamilyTemperatureContributionResponse.java
-        │ │     │ │ ├── FamilyTemperatureDailyResponse.java
-        │ │     │ │ └── FamilyTemperatureResponse.java
         │ │     │ ├── entity
-        │ │     │ │ └── Temperature.java
         │ │     │ ├── repository
-        │ │     │ │ └── TemperatureRepository.java
         │ │     │ └── service
-        │ │     │     └── TemperatureService.java
         │ │     ├── user
         │ │     │ ├── controller
-        │ │     │ │ └── UserController.java
         │ │     │ ├── dto
-        │ │     │ │ ├── UserExistsResponse.java
-        │ │     │ │ └── UserInfo.java
         │ │     │ ├── entity
-        │ │     │ │ └── User.java
         │ │     │ ├── repository
-        │ │     │ │ └── UserRepository.java
         │ │     │ └── service
-        │ │     │     └── UserService.java
         │ │     └── util
-        │ │         └── S3FileService.java
         │ └── resources
-        │     └── application.properties
         └── test
             ├── java
             │ └── ongi
-            │     ├── FamilyControllerUnitTest.java
-            │     ├── HealthRecordControllerTest.java
-            │     ├── OngiApplicationTests.java
-            │     ├── TemperatureControllerUnitTest.java
-            │     └── UserControllerUnitTest.java
             └── resources
-                └── application-test.properties
     
     ```
 
@@ -1332,7 +1151,7 @@
 ## 4. 설치 및 사용 방법
 
 | <img width="500" height="500" alt="image 5" src="https://github.com/user-attachments/assets/8a11807e-de17-45dd-884a-71b05cbcf6db" />|                  |                |
-|-------------------------------------------------------------------------------------------------|------------------|----------------|
+|:-------------------------------------------------------------------------------------------------:|:------------------:|:----------------:|
 | [iOS 베타(Testflight) 참여/다운로드](https://testflight.apple.com/join/ywaeumFn)                        | 안드로이드 베타 참여/다운로드 | 안드로이드 APK 다운로드 | 
 
 ### 수동 빌드 방법
