@@ -1434,7 +1434,7 @@ flutter build ios --release
         - 리워드의 공정성: 마이페이지에서 ‘온도 지수’의 온도 상승 및 하강 규칙과 리워드 교환 조건, 사용 기록 등을 해당 가족에게 투명하게 공개한다.
 
 
-# 8. 팀 소개
+## 8. 팀 소개
 
 | 이름  | 학과               | 역할          | 이메일                    |
 |-----|------------------|-------------|------------------------|
@@ -1445,9 +1445,8 @@ flutter build ios --release
 | 이태경 | 정보컴퓨터공학부 인공지능전공  | 프론트엔드 개발    | taekoong@pusan.ac.kr   |
 | 최현아 | 디자인학과 시각디자인전공    | 디자인         | hyun_a_923@naver.com   |
 
----
 
-# 9. 해커톤 참여 후기
+## 9. 해커톤 참여 후기
 
 - 양준영
 
@@ -1477,22 +1476,6 @@ flutter build ios --release
   짧지 않은 기간 동안 서로에 대한 신뢰를 바탕으로 끝까지 최선을 다해준 팀원들에게 수고와 감사를 전한다.
 
 
+## 10.  참고문헌
 
----
-
-# 10.  참고문헌
-
-<참고문헌>
-
-    최윤주 (2022, 7, 22). 한국인 10명 중 9명은 적극적 건강관리에 큰 관심. <덴탈아리랑>. Retrieved from [https://www.dentalarirang.com/news/articleView.html?idxno=35683](https://www.dentalarirang.com/news/articleView.html?idxno=35683)
-
-
-
-### 7. 해커톤 참여 후기
-- MEMBER1
-  > 작성하세요.
-- MEMBER2
-  > 작성하세요.
-- MEMBER3
-  > 작성하세요.
-<br/>
+&nbsp;최윤주 (2022, 7, 22). 한국인 10명 중 9명은 적극적 건강관리에 큰 관심. <덴탈아리랑>. Retrieved from [https://www.dentalarirang.com/news/articleView.html?idxno=35683](https://www.dentalarirang.com/news/articleView.html?idxno=35683)
