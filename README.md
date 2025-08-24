@@ -941,169 +941,22 @@
     ├── pubspec.yaml
     ├── assets
     │   ├── fonts
-    │   │   ├── Pretendard-Black.ttf
-    │   │   ├── Pretendard-Bold.ttf
-    │   │   ├── Pretendard-ExtraBold.ttf
-    │   │   ├── Pretendard-ExtraLight.ttf
-    │   │   ├── Pretendard-Light.ttf
-    │   │   ├── Pretendard-Medium.ttf
-    │   │   ├── Pretendard-Regular.ttf
-    │   │   ├── Pretendard-SemiBold.ttf
-    │   │   └── Pretendard-Thin.ttf
     │   └── images
-    │       ├── add_icon.svg
-    │       ├── all_pfp_icons.png
-    │       ├── back_icon_black.svg
-    │       ├── back_icon_white.svg
-    │       ├── body_back.png
-    │       ├── body_back_btn.png
-    │       ├── body_front.png
-    │       ├── body_front_btn.png
-    │       ├── body_selector_back.svg
-    │       ├── body_selector_front.svg
-    │       ├── camera_button.svg
-    │       ├── close_icon_black.svg
-    │       ├── close_icon_orange.svg
-    │       ├── close_icon_white.svg
-    │       ├── dropdown_icon.svg
-    │       ├── exercise_record_title_logo.png
-    │       ├── gallery_icon_orange.svg
-    │       ├── gallery_icon_white.svg
-    │       ├── homebar_capsule.svg
-    │       ├── homebar_med.svg
-    │       ├── homebar_walk.svg
-    │       ├── location_icon.svg
-    │       ├── logo.png
-    │       ├── logo.svg
-    │       ├── logo_white.svg
-    │       ├── nav_Commun.svg
-    │       ├── nav_Health.svg
-    │       ├── nav_Home.svg
-    │       ├── nav_Mypage.svg
-    │       ├── parent_exercise_icon.png
-    │       ├── photobook_icon.png
-    │       ├── pill_history_title_logo.png
-    │       ├── pill_item_icon.svg
-    │       ├── reward_gift_icon.png
-    │       ├── reward_icon.svg
     │       ├── reward_products
-    │       │   ├── americano.png
-    │       │   ├── bacchus.png
-    │       │   ├── beef.png
-    │       │   ├── honeycombo.png
-    │       │   ├── jeonggwanjang.png
-    │       │   └── orthomol.png
-    │       ├── ruler_icon.svg
-    │       ├── sample_family_photo.png
-    │       ├── sitting_mom_icon.png
-    │       ├── speech_bubble.png
-    │       ├── splash_icon.png
-    │       ├── splash_icon.svg
-    │       ├── step_tracker_crown.svg
-    │       ├── step_tracker_light_background.svg
-    │       ├── step_tracker_rectangle.svg
-    │       ├── step_tracker_title_logo.png
-    │       ├── users
-    │       │   ├── baby_icon.png
-    │       │   ├── black_man_icon.png
-    │       │   ├── black_woman_icon.png
-    │       │   ├── dad_icon.png
-    │       │   ├── daughter_icon.png
-    │       │   ├── dog_icon.png
-    │       │   ├── elderly_woman.png
-    │       │   ├── mom_icon.png
-    │       │   ├── pfp_check_icon.svg
-    │       │   ├── robot_icon.png
-    │       │   └── son_icon.png
-    │       └── walk_icon.svg
+    │       └── users
     └── lib
         ├── core
-        │   ├── app_background.dart
-        │   ├── app_colors.dart
-        │   ├── app_email_background.dart
-        │   ├── app_light_background.dart
-        │   └── app_orange_background.dart
-        ├── firebase_options.dart
-        ├── main.dart
         ├── models
-        │   ├── maum_log.dart
-        │   ├── maumlog.dart
-        │   └── temperature_contribution.dart
         ├── screens
-        │   ├── add_record_screen.dart
-        │   ├── bottom_nav.dart
-        │   ├── splash_screen.dart
-        │   ├── start_screen.dart
-        │   ├── parent_init_screen.dart
-        │   ├── reward_screen.dart
         │   ├── health
-        │   │   ├── add_pill_screen.dart
-        │   │   ├── body_selector_test.dart
-        │   │   ├── exercise_record_detail_screen.dart
-        │   │   ├── exercise_record_screen.dart
-        │   │   ├── family_step_tracker_screen.dart
-        │   │   ├── health_home_screen.dart
-        │   │   ├── health_status_input_screen.dart
-        │   │   ├── pill_history_screen.dart
-        │   │   └── pill_update_popup.dart
         │   ├── home
-        │   │   ├── home_degree_graph.dart
-        │   │   ├── home_donutCapsule.dart
-        │   │   ├── home_logo.dart
-        │   │   ├── home_ourfamily_text.dart
-        │   │   ├── home_ourfamily_text_withoutUser.dart
-        │   │   └── home_screen.dart
         │   ├── login
-        │   │   ├── login_pw_screen.dart
-        │   │   └── login_ready_screen.dart
         │   ├── mypage
-        │   │   ├── mypage_myinfo.dart
-        │   │   └── mypage_screen.dart
         │   ├── photo
-        │   │   ├── check_record_screen.dart
-        │   │   ├── detail_record_screen.dart
-        │   │   ├── photo_calendar_screen.dart
-        │   │   ├── photo_date_screen.dart
-        │   │   ├── photo_remind_popup.dart
-        │   │   └── photo_update_popup.dart
         │   ├── signup
-        │   │   ├── familycode_create_screen.dart
-        │   │   ├── familycode_screen.dart
-        │   │   ├── familyname_screen.dart
-        │   │   ├── mode_screen.dart
-        │   │   ├── password_screen.dart
-        │   │   ├── profilepic_screen.dart
-        │   │   ├── ready_screen.dart
-        │   │   └── username_screen.dart
         ├── services
-        │   ├── code_service.dart
-        │   ├── email_service.dart
-        │   ├── exercise_service.dart
-        │   ├── family_join_service.dart
-        │   ├── family_service.dart
-        │   ├── health_service.dart
-        │   ├── login_service.dart
-        │   ├── maum_log_service.dart
-        │   ├── maumlog_service.dart
-        │   ├── pain_service.dart
-        │   ├── photo_calendar_service.dart
-        │   ├── pill_service.dart
-        │   ├── signup_service.dart
-        │   ├── step_service.dart
-        │   ├── temperature_service.dart
-        │   └── user_service.dart
         ├── utils
-        │   └── prefs_manager.dart
         └── widgets
-            ├── body_selector.dart
-            ├── custom_chart_painter.dart
-            ├── custom_drop_down.dart
-            ├── custom_line_chart.dart
-            ├── custom_line_chart_painter.dart
-            ├── date_carousel.dart
-            ├── day_circles.dart
-            ├── reward_product_card.dart
-            └── time_grid.dart
     ```
 
 <br/>
@@ -1262,8 +1115,7 @@ flutter build ios --release
   이번 해커톤은 나에게 많은 처음을 선사해주었다. 처음으로 장기간 해커톤을 진행해보았고, 처음으로 내가 파일 구조부터 완성물까지 스스로 구현해보았고, 처음으로 여러
   직군들과 힘을 합쳐 목표를 달성해보았다. 모든 게 처음이었던 만큼 많은 역경이 있었지만, 열심히 노력한 과정의 끝이 보이는 지금에서야 그 많은 역경들은 목표를 달성하기 위한
   발판이었음을 깨닫는다. 그리고 6명의 팀원들이 열심히 노력하여 한 프로젝트를 완성시키고 나니 깨닫는 게 참 많다. 이 세상에 나와있는 작고 큰 프로젝트들은 모두 많은 사람들의
-  노력과 땀으로 완성되었다는 것을, 그래서 아무리 작은 완성물이어도 다 너무 멋진 작품이라는 것을! 마지막으로 우리 온기 팀원들에게 고생 많았고 다들 너무 멋있었다고 전하고
-  싶다.
+  노력과 땀으로 완성되었다는 것을, 그래서 아무리 작은 완성물이어도 다 너무 멋진 작품이라는 것을! 마지막으로 우리 온기 팀원들에게 고생 많았다고 전하고 싶다.
 
 - **박민지**:
   해커톤은 짧은 기간 안에 아이디어를 내고 이를 실현해야 한다는 점에서 어려움이 있었지만, 동시에 짧은 기간 안에 큰 성취와 결과물을 얻을 수 있었던 좋은 경험이었다.
