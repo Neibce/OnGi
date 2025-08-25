@@ -794,75 +794,75 @@
 
     ```
     ongi
-    ├── gradle                              # Gradle 설정 폴더
-    └── src
-        ├── main
-        │   ├── java
-        │   │   └── ongi
-        │   │       ├── auth                # 인증 및 토큰 관련 기능
-        │   │       │   ├── controller      # API 엔드포인트
-        │   │       │   ├── dto             # 요청/응답 DTO
-        │   │       │   ├── service         # 비즈니스 로직
-        │   │       │   └── token           # 토큰 관리
-        │   │       │       ├── entity      # DB 매핑 엔티티
-        │   │       │       ├── repository  # DB 접근 계층
-        │   │       │       └── util        # 관련 유틸리티
-        │   │       ├── common              # 공통 클래스 모음
-        │   │       │   ├── dto             # 공용 DTO
-        │   │       │   └── entity          # 공용 엔티티
-        │   │       ├── exception           # 전역 예외 처리 및 커스텀 예외
-        │   │       ├── family              # 가족 관련 기능 처리
-        │   │       │   ├── controller
-        │   │       │   ├── dto
-        │   │       │   ├── entity
-        │   │       │   ├── repository
-        │   │       │   ├── service
-        │   │       │   └── support         # 가족 관련 보조 클래스
-        │   │       ├── firebase            # Firebase(fcm) 관련 설정
-        │   │       ├── health              # 건강 기록 관련 기능
-        │   │       │   ├── controller
-        │   │       │   ├── dto
-        │   │       │   ├── entity
-        │   │       │   ├── repository
-        │   │       │   └── service
-        │   │       ├── maum_log            # 마음 기록 관련 기능
-        │   │       │   ├── controller
-        │   │       │   ├── dto
-        │   │       │   ├── entity
-        │   │       │   ├── enums           # 감정 상태 Enum
-        │   │       │   ├── repository
-        │   │       │   └── service
-        │   │       ├── pill                # 복약 관리 기능
-        │   │       │   ├── controller
-        │   │       │   ├── dto
-        │   │       │   ├── entity
-        │   │       │   ├── repository
-        │   │       │   └── service
-        │   │       ├── security            # Spring Security 설정 및 필터
-        │   │       ├── step                # 가족 걸음 수 관련 기능
-        │   │       │   ├── controller
-        │   │       │   ├── dto
-        │   │       │   ├── entity
-        │   │       │   ├── repository
-        │   │       │   └── service
-        │   │       ├── temperature         # 가족 온도 관련 기능
-        │   │       │   ├── controller
-        │   │       │   ├── dto
-        │   │       │   ├── entity
-        │   │       │   ├── repository
-        │   │       │   └── service
-        │   │       ├── user                # 사용자 관리 기능
-        │   │       │   ├── controller
-        │   │       │   ├── dto
-        │   │       │   ├── entity
-        │   │       │   ├── repository
-        │   │       │   └── service
-        │   │       └── util                # 공통 유틸리티 클래스(S3 등)
-        │   └── resources                   # 설정 및 리소스 파일
-        └── test
-            ├── java
-            │   └── ongi                    # 테스트 코드
-            └── resources                   # 테스트 리소스
+    ├── gradle/                             # Gradle 설정 폴더
+    └── src/
+        ├── main/
+        │   ├── java/
+        │   │   └── ongi/
+        │   │       ├── auth/               # 인증 및 토큰 관련 기능
+        │   │       │   ├── controller/     # API 엔드포인트
+        │   │       │   ├── dto/            # 요청/응답 DTO
+        │   │       │   ├── service/        # 비즈니스 로직
+        │   │       │   └── token/          # 토큰 관리
+        │   │       │       ├── entity/     # DB 매핑 엔티티
+        │   │       │       ├── repository/ # DB 접근 계층
+        │   │       │       └── util/       # 관련 유틸리티
+        │   │       ├── common/             # 공통 클래스 모음
+        │   │       │   ├── dto/            # 공용 DTO
+        │   │       │   └── entity/         # 공용 엔티티
+        │   │       ├── exception/          # 전역 예외 처리 및 커스텀 예외
+        │   │       ├── family/             # 가족 관련 기능 처리
+        │   │       │   ├── controller/
+        │   │       │   ├── dto/
+        │   │       │   ├── entity/
+        │   │       │   ├── repository/
+        │   │       │   ├── service/
+        │   │       │   └── support/        # 가족 관련 보조 클래스
+        │   │       ├── firebase/           # Firebase(fcm) 관련 설정
+        │   │       ├── health/             # 건강 기록 관련 기능
+        │   │       │   ├── controller/
+        │   │       │   ├── dto/
+        │   │       │   ├── entity/
+        │   │       │   ├── repository/
+        │   │       │   └── service/
+        │   │       ├── maum_log/           # 마음 기록 관련 기능
+        │   │       │   ├── controller/
+        │   │       │   ├── dto/
+        │   │       │   ├── entity/
+        │   │       │   ├── enums/          # 감정 상태 Enum
+        │   │       │   ├── repository/
+        │   │       │   └── service/
+        │   │       ├── pill/               # 복약 관리 기능
+        │   │       │   ├── controller/
+        │   │       │   ├── dto/
+        │   │       │   ├── entity/
+        │   │       │   ├── repository/
+        │   │       │   └── service/
+        │   │       ├── security/           # Spring Security 설정 및 필터
+        │   │       ├── step/               # 가족 걸음 수 관련 기능
+        │   │       │   ├── controller/
+        │   │       │   ├── dto/
+        │   │       │   ├── entity/
+        │   │       │   ├── repository/
+        │   │       │   └── service/
+        │   │       ├── temperature/        # 가족 온도 관련 기능
+        │   │       │   ├── controller/
+        │   │       │   ├── dto/
+        │   │       │   ├── entity/
+        │   │       │   ├── repository/
+        │   │       │   └── service/
+        │   │       ├── user/               # 사용자 관리 기능
+        │   │       │   ├── controller/
+        │   │       │   ├── dto/
+        │   │       │   ├── entity/
+        │   │       │   ├── repository/
+        │   │       │   └── service/
+        │   │       └── util/               # 공통 유틸리티 클래스(S3 등)
+        │   └── resources/                  # 설정 및 리소스 파일
+        └── test/
+            ├── java/
+            │   └── ongi/                   # 테스트 코드
+            └── resources/                  # 테스트 리소스
     ```
 
 - 프론트엔드(Front-end)
