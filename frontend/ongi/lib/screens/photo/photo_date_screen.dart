@@ -224,7 +224,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                 borderRadius: BorderRadius.circular(32),
                 child: (isActive && hasUploadedOwn)
                     ? Image.network(
-                        maumLog.frontPresignedUrl,
+                        maumLog.backPresignedUrl,
                         width: cardWidth,
                         height: cardHeight,
                         fit: BoxFit.cover,
@@ -246,7 +246,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                         children: [
                           // 선명한 이미지 (상단)
                           Image.network(
-                            maumLog.frontPresignedUrl,
+                            maumLog.backPresignedUrl,
                             width: cardWidth,
                             height: cardHeight,
                             fit: BoxFit.cover,
@@ -284,7 +284,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                               child: ImageFiltered(
                                 imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
                                 child: Image.network(
-                                  maumLog.frontPresignedUrl,
+                                  maumLog.backPresignedUrl,
                                   width: cardWidth + 60,
                                   height: cardHeight + 60,
                                   fit: BoxFit.cover,
@@ -322,7 +322,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                     borderRadius: BorderRadius.circular(12),
                     child: hasUploadedOwn
                         ? Image.network(
-                            maumLog.backPresignedUrl,
+                            maumLog.frontPresignedUrl,
                             fit: BoxFit.cover,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
@@ -340,7 +340,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                             children: [
                               // 선명한 이미지 (상단)
                               Image.network(
-                                maumLog.backPresignedUrl,
+                                maumLog.frontPresignedUrl,
                                 fit: BoxFit.cover,
                                 width: double.infinity,
                                 height: double.infinity,
@@ -376,7 +376,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                   child: ImageFiltered(
                                     imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
                                     child: Image.network(
-                                      maumLog.backPresignedUrl,
+                                      maumLog.frontPresignedUrl,
                                       width: 88 + 40,
                                       height: 100 + 40,
                                       fit: BoxFit.cover,

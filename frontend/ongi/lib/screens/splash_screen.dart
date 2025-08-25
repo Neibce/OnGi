@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/bottom_nav.dart';
+import 'package:ongi/screens/parent_init_screen.dart';
 import 'package:ongi/screens/start_screen.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
@@ -32,9 +33,16 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (!mounted) return;
     if (hasToken) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const BottomNavScreen()),
-      );
+      final isParent = await PrefsManager.getIsParent();
+      if (isParent) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const ParentInitScreen()),
+        );
+      } else {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+        );
+      }
     } else {
       Navigator.of(
         context,
