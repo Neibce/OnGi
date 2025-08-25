@@ -497,6 +497,7 @@
 - 선택한 날짜에 따라 복용해야 하는 약 목록이 표시되며, 각 약은 이름 · 사진 · 복용 횟수 및 시간 정보와 함께 보여진다.
 - 약 목록 아래에 **플러스 버튼**을 클릭하면 약 등록 페이지(3.2.12)로 이동한다.
 - 사용자는 표시된 **복용 시간 버튼**을 클릭하여 해당 시간의 복용 여부를 체크할 수 있다.
+- 앱을 나가 있을 때 약 알림이 뜨면 해당 알림을 길게 눌러 쉽게 복용 여부를 기록할 수 있다.
 
 #### **3.2.12. 약 등록 페이지**
 
@@ -568,7 +569,15 @@
 - 프로필 아이콘 우측에는 **프로필 수정 버튼**이 있고, 이를 클릭하면 프로필 수정 화면으로 이동한다.
 - 하단에는 개인정보 보호/시스템 알림/공지사항/정보/문의하기/로그아웃 버튼이 세로 배열되어 있다.
 - **로그아웃 버튼**을 클릭하면 현재 로그인된 사용자 계정이 로그아웃되고, 온보딩 페이지(3.2.1)로 이동한다.
-  <br/>
+
+#### 실제 동작 영상
+|<video src="https://github.com/user-attachments/assets/41a57ff7-67d6-4dd9-b5f8-a0a427340617">|<video src="https://github.com/user-attachments/assets/24b68e7f-daab-45df-91f5-b3315af7955a">|<video src="https://github.com/user-attachments/assets/eee5b761-6baf-41a2-87b6-3b19d896d127">|<video src="https://github.com/user-attachments/assets/876aa4ff-d97a-4391-97e9-60d9947ec8f7">|
+|:--:|:--:|:--:|:--:|
+|3.2.1. 온보딩 페이지<br>3.2.2. 회원가입 페이지|3.2.3. 로그인 페이지|3.2.4. 부모 랜딩 페이지<br>3.2.6. 메인 페이지|3.2.5. 네비게이션 바|
+|<video src="https://github.com/user-attachments/assets/4293ce57-6a2b-4145-8247-d94eea8d7623">|<video src="https://github.com/user-attachments/assets/b1e2483b-8f2e-4cd4-8b3d-626aa0a62ca1">|<video src="https://github.com/user-attachments/assets/4aba9005-9801-424e-bd43-8a3a0bc510f9">|<video src="https://github.com/user-attachments/assets/b8c91178-440c-4fea-b68d-31ecbedc3547">|
+|3.2.8. 리워드 페이지|3.2.9. 건강 기록 메인 페이지(부모)<br>3.2.10. 건강 상태 기록 페이지|3.2.9 건강 기록 메인 페이지(자녀)|3.2.11. 약 복용 페이지|
+|<video src="https://github.com/user-attachments/assets/bb48e2e4-89c6-453e-81ca-b5e0b929fb0d">|<video src="https://github.com/user-attachments/assets/2ae5bca7-7c45-4652-8252-02fa7b99ca77">|<video src="https://github.com/user-attachments/assets/6a7f6c30-9939-4e04-8a88-ac6a3111e87f">|<video src="https://github.com/user-attachments/assets/11362522-5227-4e97-9ba6-d2c3f6ade7c0">|
+|3.2.13. 운동 시간 요약 페이지<br>3.2.14. 운동 시간 기록 페이지|3.2.15. 걸음 수 페이지<br>3.2.16. 걸음 수 경쟁 페이지|3.2.17. 마음 기록 입력 페이지<br>3.2.18. 마음 기록 조회 페이지<br>3.2.19. 마음 기록 상세 페이지|3.2.20. 마이 페이지|
 
 --- 
 
