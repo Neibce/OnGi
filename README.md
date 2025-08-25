@@ -243,7 +243,6 @@
 - **앱 사용 잠재력**: 사용 의향 70%, 건강 관련 앱 경험 65% → 진입 장벽 낮음
 - **시장 확산 전략**: **자녀 세대 중심 → 부모 세대로 확산되는 바텀업 전략**이 효과적
 - **핵심 가치 제안**: 부모 건강 관리 및 가족 간 소통을 결합한 서비스 설계 필요
-</br>
 
 ### 1.4. 기존 서비스 대비 차별성
 
@@ -831,9 +830,9 @@
 | **웨어러블 및 헬스케어 연동**                                          | 현재는 걸음 수 정보만 수집하고 있으며, 향후 Google Fit, Samsung Health(갤럭시 워치), Apple Health(애플 워치)등과 연동하여 **건강 데이터를 보다 체계적으로 자동으로 수집·분석할 수 있도록 구현할 계획** |
 
 
-| <img height="800" alt="부모_-_건강기록_-_가족_만보기_랭킹 1" src="https://github.com/user-attachments/assets/94a59518-cbb4-486b-a871-0febb8ae4f7c" /> | <img height="800" alt="image 4" src="https://github.com/user-attachments/assets/f6ed1cba-636b-4401-a5fb-50e4a82e9469" />|
-|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
-|                                                                                                        [화면 1] 가족 만보기 랭킹 시스템 화면                                                                                                        |                                            [화면 2] 카카오톡 건강 분석 리포트 공유                                            |
+| <img height="800" alt="부모_-_건강기록_-_가족_만보기_랭킹 1" src="https://github.com/user-attachments/assets/94a59518-cbb4-486b-a871-0febb8ae4f7c" /> | <img height="800" alt="image 4" src="https://github.com/user-attachments/assets/f6ed1cba-636b-4401-a5fb-50e4a82e9469" /> |
+|:------------------------------------------------------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------:|
+|                                                                   [화면 1] 가족 만보기 랭킹 시스템 화면                                                                    |                                                 [화면 2] 카카오톡 건강 분석 리포트 공유                                                 |
 
 
 ### 3.5. 디렉토리 구조
@@ -952,9 +951,9 @@
 - iOS: TestFlight를 통해 설치 가능
 - Android: Google Play 스토어 혹은 APK 파일을 통해 설치 가능
   
-| ![ios QR](https://github.com/user-attachments/assets/8a11807e-de17-45dd-884a-71b05cbcf6db)|![android QR](https://github.com/user-attachments/assets/1c062370-d12d-406a-a8c5-05cd494f1178)|![android apk QR](https://github.com/user-attachments/assets/c4a8de56-6f0d-4550-b118-b3883d23ebc8)|
-|:-------------------------------------------------------------------------------------------------:|:------------------:|:----------------:|
-|[<img height="50" alt="image" src="https://github.com/user-attachments/assets/f0142e99-1a46-4d57-ab86-7ca4aef3596c" />](https://testflight.apple.com/join/ywaeumFn)|[<img height="50" alt="GetItOnGooglePlay_Badge_Web_color_English" src="https://github.com/user-attachments/assets/2e88def4-7311-4663-af88-016e77260517" />](https://play.google.com/store/apps/details?id=com.ongi2025.ongi)|[<img height="50" alt="download-android-apk-badge-seeklogo" src="https://github.com/user-attachments/assets/805f1362-4fd2-46e3-81fb-97dcd87b2d9b" />](https://statics.jun0.dev/app-release.apk)|
+|                                     ![ios QR](https://github.com/user-attachments/assets/8a11807e-de17-45dd-884a-71b05cbcf6db)                                      |                                                                ![android QR](https://github.com/user-attachments/assets/1c062370-d12d-406a-a8c5-05cd494f1178)                                                                |                                               ![android apk QR](https://github.com/user-attachments/assets/c4a8de56-6f0d-4550-b118-b3883d23ebc8)                                                |
+|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
+| [<img height="50" alt="image" src="https://github.com/user-attachments/assets/f0142e99-1a46-4d57-ab86-7ca4aef3596c" />](https://testflight.apple.com/join/ywaeumFn) | [<img height="50" alt="GetItOnGooglePlay_Badge_Web_color_English" src="https://github.com/user-attachments/assets/2e88def4-7311-4663-af88-016e77260517" />](https://play.google.com/store/apps/details?id=com.ongi2025.ongi) | [<img height="50" alt="download-android-apk-badge-seeklogo" src="https://github.com/user-attachments/assets/805f1362-4fd2-46e3-81fb-97dcd87b2d9b" />](https://statics.jun0.dev/app-release.apk) |
 
 ### 수동 빌드 방법
 
