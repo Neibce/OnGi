@@ -64,8 +64,10 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       ];
 
       final results = await Future.wait(futures);
-      final Map<String, dynamic>? stepResult = results[0] as Map<String, dynamic>?;
-      final List<Map<String, dynamic>> familyMembers = results[1] as List<Map<String, dynamic>>;
+      final Map<String, dynamic>? stepResult =
+          results[0] as Map<String, dynamic>?;
+      final List<Map<String, dynamic>> familyMembers =
+          results[1] as List<Map<String, dynamic>>;
 
       int parsedTotal = 0;
       final List<_MemberStep> parsedMembers = [];
@@ -88,8 +90,12 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                   ? item['steps'] as int
                   : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
 
-              // 실제 가족 구성원의 프로필 이미지 가져오기
-              final profileImagePath = await PrefsManager.getProfileImagePathByUserId(userId, familyMembers);
+              // 더 향상된 사용자 매칭 로직
+              String profileImagePath = await _getProfileImageForUser(
+                userId,
+                userName,
+                familyMembers,
+              );
 
               parsedMembers.add(
                 _MemberStep(
@@ -120,6 +126,62 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
           _isLoading = false;
         });
       }
+    }
+  }
+
+  Future<String> _getProfileImageForUser(
+    String userId,
+    String userName,
+    List<Map<String, dynamic>> familyMembers,
+  ) async {
+    try {
+      // 1. userId로 매칭 시도 (uuid 필드와 비교)
+      final memberByUuid = familyMembers
+          .where((member) => member['uuid']?.toString() == userId)
+          .firstOrNull;
+
+      if (memberByUuid != null && memberByUuid['profileImageId'] != null) {
+        return PrefsManager.getProfileImagePath(
+          memberByUuid['profileImageId'] as int,
+        );
+      }
+
+      // 2. userId 필드와 직접 비교
+      final memberByUserId = familyMembers
+          .where((member) => member['userId']?.toString() == userId)
+          .firstOrNull;
+
+      if (memberByUserId != null && memberByUserId['profileImageId'] != null) {
+        return PrefsManager.getProfileImagePath(
+          memberByUserId['profileImageId'] as int,
+        );
+      }
+
+      // 3. userName으로 매칭 시도
+      if (userName.isNotEmpty) {
+        final memberByName = familyMembers
+            .where((member) => member['name']?.toString() == userName)
+            .firstOrNull;
+
+        if (memberByName != null && memberByName['profileImageId'] != null) {
+          return PrefsManager.getProfileImagePath(
+            memberByName['profileImageId'] as int,
+          );
+        }
+      }
+
+      final currentUserInfo = await PrefsManager.getUserInfo();
+      final currentUserUuid = currentUserInfo['uuid'];
+      final currentUserName = currentUserInfo['name'];
+
+      if (userId == currentUserUuid || userName == currentUserName) {
+        final profileImageId = currentUserInfo['profileImageId'] ?? 0;
+        return PrefsManager.getProfileImagePath(profileImageId);
+      }
+
+      return PrefsManager.getProfileImagePath(0);
+    } catch (e) {
+      return PrefsManager.getProfileImagePath(0);
     }
   }
 
@@ -265,14 +327,14 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                           text: _isLoading
                                               ? '0걸음'
                                               : _totalSteps
-                                              .toString()
-                                              .replaceAllMapped(
-                                            RegExp(
-                                              r'(\d{1,3})(?=(\d{3})+(?!\d))',
-                                            ),
-                                                (m) => '${m[1]},',
-                                          ) +
-                                              '걸음',
+                                                        .toString()
+                                                        .replaceAllMapped(
+                                                          RegExp(
+                                                            r'(\d{1,3})(?=(\d{3})+(?!\d))',
+                                                          ),
+                                                          (m) => '${m[1]},',
+                                                        ) +
+                                                    '걸음',
                                           style: const TextStyle(
                                             fontFamily: 'Pretendard',
                                             fontWeight: FontWeight.w700,
@@ -348,7 +410,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                       steps: _memberSteps[i].steps,
                                       image: _memberSteps[i].imageAsset,
                                       isTop:
-                                      i == 0 && _memberSteps[i].steps > 0,
+                                          i == 0 && _memberSteps[i].steps > 0,
                                     ),
                                   if (_memberSteps.isEmpty)
                                     const Padding(
@@ -449,7 +511,7 @@ Widget _buildStepMember({
                     Text(
                       steps.toString().replaceAllMapped(
                         RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                            (m) => '${m[1]},',
+                        (m) => '${m[1]},',
                       ),
                       style: const TextStyle(
                         fontFamily: 'Pretendard',
