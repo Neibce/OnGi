@@ -34,6 +34,12 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   bool _chestSelected = false;
   bool _backSelected = false;
 
+  // 복부 세부 부위들을 별도로 관리하는 상태
+  bool _abdomenSelected = false;
+  bool _waistSelected = false;
+  bool _hipSelected = false;
+  bool _pelvisSelected = false;
+
   // 통증 기록 조회 관련 상태
   List<Map<String, dynamic>> _painRecords = [];
   bool _isLoadingPainRecords = false;
@@ -213,6 +219,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         // 가슴/등 상태 초기화
         _chestSelected = false;
         _backSelected = false;
+        // 복부 세부 부위 상태 초기화
+        _abdomenSelected = false;
+        _waistSelected = false;
+        _hipSelected = false;
+        _pelvisSelected = false;
         // 자녀인 경우 항상 읽기 전용
         _isInputMode = !_isChild;
         // 통증 기록이 없으면 스트레칭 버튼 숨기기
@@ -231,6 +242,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     // 가슴/등 상태 초기화
     _chestSelected = false;
     _backSelected = false;
+    // 복부 세부 부위 상태 초기화
+    _abdomenSelected = false;
+    _waistSelected = false;
+    _hipSelected = false;
+    _pelvisSelected = false;
 
     for (final record in _painRecords) {
       final painArea = record['painArea'];
@@ -288,12 +304,16 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
             newBodyParts = newBodyParts.copyWith(rightHand: true);
             break;
           case 'ABDOMEN':
-            newBodyParts = newBodyParts.copyWith(abdomen: true);
+            _abdomenSelected = true;
             break;
           case 'WAIST':
+            _waistSelected = true;
+            break;
           case 'PELVIS':
+            _pelvisSelected = true;
+            break;
           case 'HIP':
-            newBodyParts = newBodyParts.copyWith(vestibular: true);
+            _hipSelected = true;
             break;
           case 'LEFT_THIGH':
             newBodyParts = newBodyParts.copyWith(leftUpperLeg: true);
@@ -331,7 +351,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     _updateBodyPartsDisplay();
   }
 
-  // 현재 뷰에 따라 가슴/등 표시 업데이트
+  // 현재 뷰에 따라 가슴/등 및 복부 부위 표시 업데이트
   void _updateBodyPartsDisplay() {
     setState(() {
       if (isFrontView) {
@@ -343,7 +363,15 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
         _bodyParts = _bodyParts.copyWith(upperBody: _backSelected);
         print('디버깅 - 뒷면 뷰: 등 선택됨 = $_backSelected');
       }
+      
+      // 복부 부위들을 라이브러리 속성에 매핑
+      // abdomen: 실제 복부만
+      _bodyParts = _bodyParts.copyWith(abdomen: _abdomenSelected);
+      // vestibular: 허리, 골반, 엉덩이
+      _bodyParts = _bodyParts.copyWith(vestibular: _waistSelected || _pelvisSelected || _hipSelected);
+      
       print('디버깅 - 업데이트된 _bodyParts: $_bodyParts');
+      print('디버깅 - 복부 부위 상태: abdomen=$_abdomenSelected, waist=$_waistSelected, pelvis=$_pelvisSelected, hip=$_hipSelected');
     });
   }
 
@@ -400,7 +428,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       '오른쪽 아랫팔': 'https://youtu.be/w04XkiVO4ro?si=CRSm2LK3gU1J4pr1',
       '왼쪽 손': 'https://youtu.be/iVmlkvxZH6I?si=7CpZxLE9wKOq71N_',
       '오른쪽 손': 'https://youtu.be/iVmlkvxZH6I?si=7CpZxLE9wKOq71N_',
-      '배': 'https://youtu.be/JMS6Plzq0ps?si=wk3ZbPQDzFExcPx0',
+      '복부': 'https://youtu.be/JMS6Plzq0ps?si=wk3ZbPQDzFExcPx0',
       '허리': 'https://www.youtube.com/watch?v=f-mgnsrDWHg',
       '골반': 'https://www.youtube.com/watch?v=VhjkV83q01g',
       '엉덩이': 'https://youtu.be/--VfHFpQL0U?si=M2uhMlkG7QVy6jDv',
@@ -777,8 +805,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       });
     }
 
-    // 가슴/등 선택 상태 업데이트 (앞/뒤 구분)
     final partsString = parts.toString();
+
+    // 가슴/등 선택 상태 업데이트 (앞/뒤 구분)
     final upperBodySelected = partsString.contains('upperBody: true');
 
     if (isFrontView) {
@@ -791,12 +820,39 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       // 앞면 선택은 유지
     }
 
-    // upperBody 제외하고 다른 부위들만 업데이트
-    BodyParts updatedParts = parts.copyWith(upperBody: false);
+    // 복부 부위 선택 상태 업데이트
+    final abdomenSelected = partsString.contains('abdomen: true');
+    final vestibularSelected = partsString.contains('vestibular: true');
+
+    // 복부 부위 토글 처리 (단순화를 위해 abdomen은 실제 복부, vestibular는 허리/골반/엉덩이로 묶어서 처리)
+    if (abdomenSelected && !_abdomenSelected) {
+      _abdomenSelected = true;
+    } else if (abdomenSelected && _abdomenSelected) {
+      _abdomenSelected = false;
+    }
+
+    if (vestibularSelected && !(_waistSelected || _pelvisSelected || _hipSelected)) {
+      // vestibular이 선택되었는데 하위 부위가 모두 비선택 상태면 모두 선택
+      _waistSelected = true;
+      _pelvisSelected = true;
+      _hipSelected = true;
+    } else if (vestibularSelected && (_waistSelected || _pelvisSelected || _hipSelected)) {
+      // vestibular이 선택되었는데 일부 하위 부위가 이미 선택되어 있으면 모두 해제
+      _waistSelected = false;
+      _pelvisSelected = false;
+      _hipSelected = false;
+    }
+
+    // upperBody, abdomen, vestibular 제외하고 다른 부위들만 업데이트
+    BodyParts updatedParts = parts.copyWith(
+      upperBody: false,
+      abdomen: false,
+      vestibular: false,
+    );
 
     setState(() {
       _bodyParts = updatedParts;
-      // 현재 뷰에 맞는 가슴/등 표시 업데이트
+      // 현재 뷰에 맞는 가슴/등 및 복부 부위 표시 업데이트
       _updateBodyPartsDisplay();
     });
   }
@@ -805,7 +861,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
   bool get hasSelectedParts {
     return _bodyParts.toString().contains('true') ||
         _chestSelected ||
-        _backSelected;
+        _backSelected ||
+        _abdomenSelected ||
+        _waistSelected ||
+        _hipSelected ||
+        _pelvisSelected;
   }
 
   // 앞/뒤 전환 메서드
@@ -851,15 +911,11 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     if (bodyPartsString.contains('rightHand: true'))
       painAreas.add(PainArea.rightHand);
 
-    if (bodyPartsString.contains('abdomen: true'))
-      painAreas.add(PainArea.abdomen);
-
-    // 허리/골반/엉덩이 (vestibular 속성)
-    if (bodyPartsString.contains('vestibular: true')) {
-      painAreas.add(PainArea.waist);
-      painAreas.add(PainArea.pelvis);
-      painAreas.add(PainArea.hip);
-    }
+    // 복부 세부 부위들을 별도 상태로 확인
+    if (_abdomenSelected) painAreas.add(PainArea.abdomen);
+    if (_waistSelected) painAreas.add(PainArea.waist);
+    if (_pelvisSelected) painAreas.add(PainArea.pelvis);
+    if (_hipSelected) painAreas.add(PainArea.hip);
 
     // 다리 (좌우 매핑 수정)
     if (bodyPartsString.contains('leftUpperLeg: true'))
@@ -915,7 +971,7 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       case PainArea.rightHand:
         return '오른쪽 손';
       case PainArea.abdomen:
-        return '배';
+        return '복부';
       case PainArea.waist:
         return '허리';
       case PainArea.pelvis:
