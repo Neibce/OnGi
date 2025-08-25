@@ -277,7 +277,9 @@
 4. **시니어 친화적 UI**
     - 부모의 위치로 가입하는 사용자는 디지털 취약계능일 가능성이 높다고 판단하여 큰 글자, 큰 기록 버튼, 최소 터치 플로우 등을 통해 인지적 부담을 낮춘 입력 방식을
       제공한다.
-      <br/>
+
+
+---
 
 ### 1.5. 사회적가지 도입 계획
 1. 사회적 기여(What)
@@ -315,7 +317,7 @@
 
 <br/>
 
-### 2.3. 사용기술
+### 2.2. 사용 기술
 
 - **Frontend**
     - Flutter - 3.35.1
@@ -375,9 +377,9 @@
 - 마이페이지<br><br>
 <img height="300" alt="Flow_Chart_Whiteboard_in_Red_Blue_Basic_Style_(8)" src="https://github.com/user-attachments/assets/15131d0d-f230-4bff-9638-623439d1ae67" />
 
-<br/>
+---
 
-### 3.2. 기능설명
+### 3.2. 기능 설명
 
 #### **3.2.1. 온보딩 페이지**
 
@@ -575,7 +577,7 @@
 
 --- 
 
-### 3.3. 기능명세서
+### 3.3. 기능 명세서
 
 - 스플래시 화면<br>
 <img height="400" alt="스플래시" src="https://github.com/user-attachments/assets/224f2baf-5cd7-47db-9b71-448c7b1c30e6" />
