@@ -129,7 +129,7 @@
 > 가족 내 개인별 순위를 통해 가장 많이 걸은 구성원을 확인할 수 있다.<br>
 > 또한, 타 가족과의 걸음 수를 비교하고 순위를 공유함으로써, 가족 간 건강한 경쟁을 유도한다.단순한 경쟁이 아닌, 함께 걷는 즐거움과 응원의 문화를 만들어내는 데에 중점을 둔다.
 
-#### 마음 기록(소통)
+### 마음 기록(소통)
 
 > 사용자는 하루 한 번 사진 촬영을 하여 그날의 감정 상태, 한 마디와 함께 **일상 사진을 업로드** 할 수 있다.<br>
 > 가족 구성원은 사진 열람 화면에서 그날 가족들의 일상과 감정 상태를 열람할 수 있다.<br>
@@ -833,7 +833,7 @@
 | **웨어러블 및 헬스케어 연동**                                          | 현재는 걸음 수 정보만 수집하고 있으며, 향후 Google Fit, Samsung Health(갤럭시 워치), Apple Health(애플 워치)등과 연동하여 **건강 데이터를 보다 체계적으로 자동으로 수집·분석할 수 있도록 구현할 계획** |
 
 
-| ![[화면 1] 가족 만보기 랭킹 시스템 화면](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/%EB%B6%80%EB%AA%A8_-_%EA%B1%B4%EA%B0%95%EA%B8%B0%EB%A1%9D_-_%EA%B0%80%EC%A1%B1_%EB%A7%8C%EB%B3%B4%EA%B8%B0_%EB%9E%AD%ED%82%B9%201.png) | ![[화면 2] 카카오톡 건강 분석 리포트 공유](README%20md%20%EC%9E%91%EC%84%B1%20223f0cc1d61280f7af41dc746142684f/image%204.png) |
+| <img height="800" alt="부모_-_건강기록_-_가족_만보기_랭킹 1" src="https://github.com/user-attachments/assets/94a59518-cbb4-486b-a871-0febb8ae4f7c" /> | <img height="800" alt="image 4" src="https://github.com/user-attachments/assets/f6ed1cba-636b-4401-a5fb-50e4a82e9469" />|
 |:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------------:|
 |                                                                                                        [화면 1] 가족 만보기 랭킹 시스템 화면                                                                                                        |                                            [화면 2] 카카오톡 건강 분석 리포트 공유                                            |
 
@@ -844,55 +844,6 @@
 
     ```
     ongi
-    ├── bin
-    │ ├── main
-    │ │ ├── application.properties
-    │ │ └── ongi
-    │ │     ├── auth
-    │ │     │ ├── controller
-    │ │     │ ├── dto
-    │ │     │ ├── service
-    │ │     │ └── token
-    │ │     │     ├── entity
-    │ │     │     ├── repository
-    │ │     │     └── util
-    │ │     ├── common
-    │ │     │ └── dto
-    │ │     ├── exception
-    │ │     ├── family
-    │ │     │ ├── controller
-    │ │     │ ├── dto
-    │ │     │ ├── entity
-    │ │     │ ├── repository
-    │ │     │ ├── service
-    │ │     │ └── support
-    │ │     ├── health
-    │ │     │ ├── controller
-    │ │     │ ├── dto
-    │ │     │ ├── entity
-    │ │     │ ├── repository
-    │ │     │ └── service
-    │ │     ├── security
-    │ │     ├── step
-    │ │     │ ├── controller
-    │ │     │ ├── dto
-    │ │     │ ├── entity
-    │ │     │ ├── repository
-    │ │     │ └── service
-    │ │     ├── temperature
-    │ │     │ ├── controller
-    │ │     │ ├── dto
-    │ │     │ ├── entity
-    │ │     │ ├── repository
-    │ │     │ └── service
-    │ │     └── user
-    │ │         ├── controller
-    │ │         ├── dto
-    │ │         ├── entity
-    │ │         ├── repository
-    │ │         └── service
-    │ └── test
-    │     └── ongi
     ├── gradle
     └── src
         ├── main
@@ -968,33 +919,33 @@
 
     ```
     ongi
-    ├── android/
-    ├── build/
-    ├── ios/
-    ├── test/
-    ├── analysis_options.yaml
-    ├── devtools_options.yaml
-    ├── firebase.json
-    ├── pubspec.lock
-    ├── pubspec.yaml
-    ├── assets
-    │   ├── fonts
-    │   └── images
-    │       ├── reward_products
-    │       └── users
-    └── lib
-        ├── core
-        ├── models
-        ├── screens
-        │   ├── health
-        │   ├── home
-        │   ├── login
-        │   ├── mypage
-        │   ├── photo
-        │   ├── signup
-        ├── services
-        ├── utils
-        └── widgets
+    ├── android/                 # 안드로이드 네이티브 프로젝트 폴더
+    ├── build/                   # 빌드 결과물 디렉토리
+    ├── ios/                     # iOS 네이티브 프로젝트 폴더
+    ├── test/                    # 테스트 코드 폴더
+    ├── analysis_options.yaml    # 코드 분석 및 린트 규칙 설정 파일
+    ├── devtools_options.yaml    # Flutter DevTools 관련 설정 파일
+    ├── firebase.json            # Firebase 관련 설정 파일
+    ├── pubspec.lock             # 의존성 버전 잠금 파일
+    ├── pubspec.yaml             # 프로젝트 메인 설정 파일
+    ├── assets/                  # 정적 리소스 폴더 (폰트, 이미지 등)
+    │   ├── fonts/               # 폰트 리소스 폴더
+    │   └── images/              # 이미지 리소스 폴더
+    │       ├── reward_products/ # 리워드 이미지 폴더
+    │       └── users/           # 유저 아이콘 이미지 폴더
+    └── lib/                     # 메인 소스 코드 폴더
+        ├── core/                # 핵심 구성 요소 폴더 (전역 설정, 상수, 테마 등)
+        ├── models/              # 데이터 모델 정의 폴더
+        ├── screens/             # 화면(UI) 관련 코드 폴더
+        │   ├── health/          # 건강 기록 관련 화면(UI) 코드 폴더
+        │   ├── home/            # 홈 화면 코드 폴더
+        │   ├── login/           # 로그인 관련 화면(UI) 코드 폴더
+        │   ├── mypage/          # 마이페이지 화면(UI) 코드 폴더
+        │   ├── photo/           # 마음 기록 관련 화면(UI) 코드 폴더
+        │   ├── signup/          # 회원가입 관련 화면(UI) 코드 폴더
+        ├── services/            # 서비스 로직 코드 폴더
+        ├── utils/               # 공통 유틸리티 함수 및 헬퍼 클래스 폴더 
+        └── widgets/             # 위젯 컴포넌트 코드 폴더
     ```
 
 <br/>
