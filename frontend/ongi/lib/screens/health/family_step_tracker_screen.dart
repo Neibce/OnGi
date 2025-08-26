@@ -37,23 +37,26 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     _initializeHealthData();
   }
 
-  /// Health 데이터 초기화 및 권한 요청
+  /// Health 데이터 권한 상태 확인 (권한 요청은 앱 시작 시에만)
   Future<void> _initializeHealthData() async {
     try {
-      // Health 설정
-      final hasPermission = await _healthDataService.setupHealthData();
+      // Health 초기화 (권한 요청 없이)
+      await _healthDataService.initialize();
+      
+      // 기존 권한 상태만 확인
+      final hasPermission = await _healthDataService.hasPermissions();
       setState(() {
         _hasHealthPermission = hasPermission;
       });
 
       if (hasPermission) {
-        print('Health 권한 획득 성공');
+        print('Health 권한이 이미 있음');
         _startStepUpdateTimer(); // 오늘 날짜인 경우에만 실시간 업데이트 시작
       } else {
-        print('Health 권한 획득 실패');
+        print('Health 권한이 없음 - 사용자가 수동으로 권한을 허용해야 함');
       }
     } catch (e) {
-      print('Health 초기화 오류: $e');
+      print('Health 권한 확인 오류: $e');
     }
 
     // 걸음 수 데이터 가져오기
@@ -535,92 +538,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                 ],
                               ),
                             ),
-                            // Health 권한 및 디바이스 걸음 수 정보 표시
-                            if (_hasHealthPermission && _deviceSteps > 0)
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 8,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF3E6),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: AppColors.ongiOrange.withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.phone_iphone,
-                                      color: AppColors.ongiOrange,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: Text(
-                                        '내 iPhone: ${_deviceSteps.toString().replaceAllMapped(
-                                          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-                                          (m) => '${m[1]},',
-                                        )}걸음',
-                                        style: const TextStyle(
-                                          fontFamily: 'Pretendard',
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color: AppColors.ongiOrange,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            else if (!_hasHealthPermission)
-                              Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                  vertical: 8,
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 12,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF8F8),
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: Colors.red.withValues(alpha: 0.3),
-                                  ),
-                                ),
-                                child: Row(
-                                  children: [
-                                    const Icon(
-                                      Icons.health_and_safety,
-                                      color: Colors.red,
-                                      size: 20,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: _initializeHealthData,
-                                        child: const Text(
-                                          'Health 앱 권한이 필요합니다. 탭해서 권한 요청',
-                                          style: TextStyle(
-                                            fontFamily: 'Pretendard',
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.red,
-                                            decoration: TextDecoration.underline,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+
                             const SizedBox(height: 10),
                             Row(
                               children: [
