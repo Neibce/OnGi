@@ -43,20 +43,30 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       // Health 초기화 (권한 요청 없이)
       await _healthDataService.initialize();
       
-      // 기존 권한 상태만 확인
-      final hasPermission = await _healthDataService.hasPermissions();
-      setState(() {
-        _hasHealthPermission = hasPermission;
-      });
-
-      if (hasPermission) {
-        print('Health 권한이 이미 있음');
-        _startStepUpdateTimer(); // 오늘 날짜인 경우에만 실시간 업데이트 시작
-      } else {
-        print('Health 권한이 없음 - 사용자가 수동으로 권한을 허용해야 함');
+      // 권한 확인을 위해 실제 데이터 접근 시도
+      try {
+        final todaySteps = await _healthDataService.getTodaySteps();
+        // 데이터를 성공적으로 가져왔으면 권한이 있는 것
+        setState(() {
+          _hasHealthPermission = true;
+          _deviceSteps = todaySteps;
+        });
+        print('Health 권한 확인됨 - 실제 걸음수: $todaySteps');
+        _startStepUpdateTimer();
+      } catch (e) {
+        // 데이터 접근 실패시 권한 없음
+        print('Health 데이터 접근 실패: $e');
+        final hasPermission = await _healthDataService.hasPermissions();
+        setState(() {
+          _hasHealthPermission = hasPermission;
+        });
+        print('Health 권한 상태: $hasPermission');
       }
     } catch (e) {
       print('Health 권한 확인 오류: $e');
+      setState(() {
+        _hasHealthPermission = false;
+      });
     }
 
     // 걸음 수 데이터 가져오기
@@ -538,7 +548,6 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                 ],
                               ),
                             ),
-
                             const SizedBox(height: 10),
                             Row(
                               children: [
