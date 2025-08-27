@@ -73,6 +73,7 @@ flutter:
     - assets/images/photobook_icon.png
     - assets/images/reward_products/
     - assets/images/users/
+    - assets/images/tutorial/
     - assets/images/close_icon_black.svg
     - assets/images/close_icon_white.svg
     - assets/images/back_icon_black.svg
