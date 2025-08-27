@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:ongi/core/app_background.dart';
 import 'package:ongi/screens/bottom_nav.dart';
+import 'package:ongi/screens/tutorial_screen.dart';
 
 class LoginReadyScreen extends StatefulWidget {
   final String username;
@@ -19,7 +20,19 @@ class _LoginReadyScreenState extends State<LoginReadyScreen> {
   void initState() {
     super.initState();
 
-    _timer = Timer(const Duration(seconds: 2), () {
+    _timer = Timer(const Duration(seconds: 2), () async {
+      if (!mounted) return;
+      
+      // 튜토리얼 화면 표시 (매번 표시)
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => TutorialScreen(
+            imageAssets: List.generate(10, (i) => 'assets/images/tutorial/tutorial${i + 1}.png'),
+          ),
+          fullscreenDialog: true,
+        ),
+      );
+      
       if (!mounted) return;
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => const BottomNavScreen()),

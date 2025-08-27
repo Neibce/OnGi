@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ongi/core/app_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/bottom_nav.dart';
+import 'package:ongi/screens/tutorial_screen.dart';
 
 class ReadyScreen extends StatelessWidget {
   const ReadyScreen({super.key});
@@ -46,11 +47,24 @@ class ReadyScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                   ),
-                  onPressed: () => Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const BottomNavScreen()),
-                        (Route<dynamic> route) => false,
-                  ),
+                  onPressed: () async {
+                    // 튜토리얼 화면 표시 (매번 표시)
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => TutorialScreen(
+                          imageAssets: List.generate(10, (i) => 'assets/images/tutorial/tutorial${i + 1}.png'),
+                        ),
+                        fullscreenDialog: true,
+                      ),
+                    );
+                    
+                    if (!context.mounted) return;
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BottomNavScreen()),
+                          (Route<dynamic> route) => false,
+                    );
+                  },
                   child: const Text(
                     '준비완료!',
                     style: TextStyle(
