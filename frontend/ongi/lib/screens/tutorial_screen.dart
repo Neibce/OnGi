@@ -33,7 +33,7 @@ class TutorialScreen extends StatefulWidget {
 }
 
 class _TutorialScreenState extends State<TutorialScreen> {
-  late final PageController _pageController;
+  PageController? _pageController;
   int _index = 0;
 
   @override
@@ -51,7 +51,8 @@ class _TutorialScreenState extends State<TutorialScreen> {
 
   @override
   void dispose() {
-    _pageController.dispose();
+    _pageController?.dispose();
+    _pageController = null;
     super.dispose();
   }
 
@@ -82,9 +83,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          isLast
-                              ? Icons.check_rounded
-                              : Icons.skip_next_rounded,
+                          isLast ? null : Icons.skip_next_rounded,
                           color: AppColors.pillsItemBackground,
                           size: 38,
                         ),
@@ -106,23 +105,25 @@ class _TutorialScreenState extends State<TutorialScreen> {
               ),
               const SizedBox(height: 5),
               Expanded(
-                child: PageView.builder(
-                  controller: _pageController,
-                  itemCount: widget.imageAssets.length,
-                  onPageChanged: (i) => setState(() => _index = i),
-                  itemBuilder: (_, i) {
-                    return Center(
-                      child: InteractiveViewer(
-                        child: Image.asset(
-                          widget.imageAssets[i],
-                          fit: BoxFit.contain,
-                          width: double.infinity,
-                          height: double.infinity,
-                        ),
-                      ),
-                    );
-                  },
-                ),
+                child: _pageController != null
+                    ? PageView.builder(
+                        controller: _pageController,
+                        itemCount: widget.imageAssets.length,
+                        onPageChanged: (i) => setState(() => _index = i),
+                        itemBuilder: (_, i) {
+                          return Center(
+                            child: InteractiveViewer(
+                              child: Image.asset(
+                                widget.imageAssets[i],
+                                fit: BoxFit.contain,
+                                width: double.infinity,
+                                height: double.infinity,
+                              ),
+                            ),
+                          );
+                        },
+                      )
+                    : const Center(child: CircularProgressIndicator()),
               ),
               const SizedBox(height: 16),
               Row(
@@ -146,7 +147,7 @@ class _TutorialScreenState extends State<TutorialScreen> {
                 padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
                 child: SizedBox(
                   width: double.infinity,
-                  height: 52,
+                  height: 55,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -160,16 +161,19 @@ class _TutorialScreenState extends State<TutorialScreen> {
                       if (isLast) {
                         await _finish();
                       } else {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 250),
-                          curve: Curves.easeOut,
-                        );
+                        final controller = _pageController;
+                        if (controller != null && controller.hasClients) {
+                          await controller.nextPage(
+                            duration: const Duration(milliseconds: 250),
+                            curve: Curves.easeOut,
+                          );
+                        }
                       }
                     },
                     child: Text(
                       isLast ? '시작하기' : '다음',
                       style: TextStyle(
-                        fontSize: 25,
+                        fontSize: 27,
                         fontWeight: FontWeight.w400,
                         color: AppColors.ongiOrange,
                       ),
