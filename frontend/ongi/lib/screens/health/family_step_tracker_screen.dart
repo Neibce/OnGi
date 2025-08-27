@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/widgets/date_carousel.dart';
 import 'package:ongi/services/step_service.dart';
 import 'package:ongi/services/family_service.dart';
+import 'package:ongi/services/health_data_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
 class FamilyStepTrackerScreen extends StatefulWidget {
@@ -19,20 +21,136 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   late final PageController _dateCarouselController;
   DateTime selectedDate = DateTime.now();
   final StepService _stepService = StepService();
+  final HealthDataService _healthDataService = HealthDataService();
   bool _isLoading = false;
   int _totalSteps = 0;
+  int _deviceSteps = 0; // 디바이스에서 가져온 걸음 수
   String? _errorMessage;
   List<_MemberStep> _memberSteps = [];
+  bool _hasHealthPermission = false;
+  Timer? _stepUpdateTimer;
 
   @override
   void initState() {
     super.initState();
     _dateCarouselController = PageController(initialPage: 5000);
+    _initializeHealthData();
+  }
+
+  /// Health 데이터 권한 상태 확인 (권한 요청은 앱 시작 시에만)
+  Future<void> _initializeHealthData() async {
+    try {
+      // Health 초기화 (권한 요청 없이)
+      await _healthDataService.initialize();
+      
+      // 권한 확인을 위해 실제 데이터 접근 시도
+      try {
+        final todaySteps = await _healthDataService.getTodaySteps();
+        // 데이터를 성공적으로 가져왔으면 권한이 있는 것
+        setState(() {
+          _hasHealthPermission = true;
+          _deviceSteps = todaySteps;
+        });
+        print('Health 권한 확인됨 - 실제 걸음수: $todaySteps');
+        _startStepUpdateTimer();
+      } catch (e) {
+        // 데이터 접근 실패시 권한 없음
+        print('Health 데이터 접근 실패: $e');
+        final hasPermission = await _healthDataService.hasPermissions();
+        setState(() {
+          _hasHealthPermission = hasPermission;
+        });
+        print('Health 권한 상태: $hasPermission');
+      }
+    } catch (e) {
+      print('Health 권한 확인 오류: $e');
+      setState(() {
+        _hasHealthPermission = false;
+      });
+    }
+
+    // 걸음 수 데이터 가져오기
     _fetchStepsForDate(selectedDate);
+  }
+
+  /// 실시간 걸음 수 업데이트 타이머 시작 (오늘 날짜인 경우에만)
+  void _startStepUpdateTimer() {
+    _stepUpdateTimer?.cancel();
+    
+    // 오늘 날짜인 경우에만 실시간 업데이트
+    final isToday = _isToday(selectedDate);
+    if (isToday && _hasHealthPermission) {
+      _stepUpdateTimer = Timer.periodic(
+        const Duration(seconds: 30), // 30초마다 업데이트
+        (timer) async {
+          if (mounted && _isToday(selectedDate)) {
+            await _updateTodaySteps();
+          } else {
+            timer.cancel();
+          }
+        },
+      );
+    }
+  }
+
+  /// 오늘 날짜인지 확인
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year && 
+           date.month == now.month && 
+           date.day == now.day;
+  }
+
+  /// 오늘의 걸음 수만 빠르게 업데이트
+  Future<void> _updateTodaySteps() async {
+    if (!_hasHealthPermission || !_isToday(selectedDate)) return;
+
+    try {
+      final deviceSteps = await _healthDataService.getTodaySteps();
+      if (deviceSteps != _deviceSteps) {
+        setState(() {
+          // 기존 총합에서 이전 디바이스 걸음 수를 빼고 새로운 걸음 수 추가
+          final difference = deviceSteps - _deviceSteps;
+          _deviceSteps = deviceSteps;
+          _totalSteps += difference;
+
+          // 현재 사용자의 걸음 수 업데이트
+          final currentUserInfo = PrefsManager.getUserInfo();
+          currentUserInfo.then((userInfo) {
+            final currentUserUuid = userInfo['uuid'];
+            for (int i = 0; i < _memberSteps.length; i++) {
+              if (_memberSteps[i].userId == currentUserUuid) {
+                setState(() {
+                  _memberSteps[i] = _MemberStep(
+                    userId: _memberSteps[i].userId,
+                    userName: _memberSteps[i].userName,
+                    steps: deviceSteps,
+                    imageAsset: _memberSteps[i].imageAsset,
+                  );
+                });
+                break;
+              }
+            }
+            // 걸음 수 순으로 다시 정렬
+            _memberSteps.sort((a, b) => b.steps.compareTo(a.steps));
+          });
+        });
+
+        // 서버에 업데이트
+        try {
+          await _stepService.uploadSteps(steps: deviceSteps);
+        } catch (e) {
+          print('실시간 걸음 수 서버 업로드 실패: $e');
+        }
+      }
+    } catch (e) {
+      print('실시간 걸음 수 업데이트 실패: $e');
+    }
   }
 
   @override
   void dispose() {
+    _stepUpdateTimer?.cancel();
     _dateCarouselController.dispose();
     super.dispose();
   }
@@ -42,6 +160,11 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       selectedDate = DateTime(date.year, date.month, date.day);
     });
     _fetchStepsForDate(selectedDate);
+    
+    // 날짜가 변경되면 타이머 재시작 (오늘 날짜인 경우에만)
+    if (_hasHealthPermission) {
+      _startStepUpdateTimer();
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -57,7 +180,18 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     try {
       final String dateStr = _formatDate(date);
 
-      // 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
+      // 1. 디바이스에서 Health 데이터 가져오기 (iOS)
+      int deviceSteps = 0;
+      if (_hasHealthPermission) {
+        try {
+          deviceSteps = await _healthDataService.getStepsForDate(date);
+          print('디바이스 걸음 수: $deviceSteps');
+        } catch (e) {
+          print('디바이스 걸음 수 가져오기 실패: $e');
+        }
+      }
+
+      // 2. 서버에서 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
       final List<Future> futures = [
         _stepService.getSteps(date: dateStr),
         FamilyService.getFamilyMembers(),
@@ -69,8 +203,19 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       final List<Map<String, dynamic>> familyMembers =
           results[1] as List<Map<String, dynamic>>;
 
+      // 3. 현재 사용자의 디바이스 걸음 수를 서버에 업로드
+      if (_hasHealthPermission && deviceSteps > 0) {
+        try {
+          await _stepService.uploadSteps(steps: deviceSteps);
+          print('걸음 수 서버 업로드 완료: $deviceSteps');
+        } catch (e) {
+          print('걸음 수 서버 업로드 실패: $e');
+        }
+      }
+
       int parsedTotal = 0;
       final List<_MemberStep> parsedMembers = [];
+      
       if (stepResult != null) {
         if (stepResult['totalSteps'] is int) {
           parsedTotal = stepResult['totalSteps'] as int;
@@ -86,9 +231,16 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
             if (item is Map<String, dynamic>) {
               final String userId = (item['userId'] ?? '').toString();
               final String userName = (item['userName'] ?? '').toString();
-              final int steps = (item['steps'] is int)
+              int steps = (item['steps'] is int)
                   ? item['steps'] as int
                   : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
+
+              // 현재 사용자의 경우 디바이스 걸음 수로 업데이트
+              final currentUserInfo = await PrefsManager.getUserInfo();
+              final currentUserUuid = currentUserInfo['uuid'];
+              if (userId == currentUserUuid && _hasHealthPermission && deviceSteps > 0) {
+                steps = deviceSteps; // 디바이스 걸음 수 사용
+              }
 
               // 더 향상된 사용자 매칭 로직
               String profileImagePath = await _getProfileImageForUser(
@@ -110,15 +262,55 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
         }
       }
 
+      // 현재 사용자가 서버 데이터에 없는 경우 추가
+      if (_hasHealthPermission && deviceSteps > 0) {
+        final currentUserInfo = await PrefsManager.getUserInfo();
+        final currentUserUuid = currentUserInfo['uuid'];
+        final currentUserName = currentUserInfo['name'] ?? '나';
+        
+        // 이미 존재하는지 확인
+        final existingUser = parsedMembers
+            .where((member) => member.userId == currentUserUuid)
+            .firstOrNull;
+            
+        if (existingUser == null) {
+          final profileImageId = currentUserInfo['profileImageId'] ?? 0;
+          final profileImagePath = PrefsManager.getProfileImagePath(profileImageId);
+          
+          parsedMembers.add(
+            _MemberStep(
+              userId: currentUserUuid,
+              userName: currentUserName,
+              steps: deviceSteps,
+              imageAsset: profileImagePath,
+            ),
+          );
+        }
+      }
+
+      // 총 걸음 수 재계산 (디바이스 걸음 수 포함)
+      if (_hasHealthPermission && deviceSteps > 0) {
+        // 기존 총합에서 현재 사용자 걸음 수를 빼고 디바이스 걸음 수 추가
+        final currentUserInfo = await PrefsManager.getUserInfo();
+        final currentUserUuid = currentUserInfo['uuid'];
+        
+        final existingUserSteps = parsedMembers
+            .where((member) => member.userId == currentUserUuid)
+            .firstOrNull?.steps ?? 0;
+            
+        parsedTotal = parsedTotal - existingUserSteps + deviceSteps;
+      }
+
       parsedMembers.sort((a, b) => b.steps.compareTo(a.steps));
 
       setState(() {
+        _deviceSteps = deviceSteps;
         _totalSteps = parsedTotal;
         _memberSteps = parsedMembers;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '걸음 수 조회 실패';
+        _errorMessage = '걸음 수 조회 실패: $e';
       });
     } finally {
       if (mounted) {
@@ -326,15 +518,14 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                         TextSpan(
                                           text: _isLoading
                                               ? '0걸음'
-                                              : _totalSteps
+                                              : '${_totalSteps
                                                         .toString()
                                                         .replaceAllMapped(
                                                           RegExp(
                                                             r'(\d{1,3})(?=(\d{3})+(?!\d))',
                                                           ),
                                                           (m) => '${m[1]},',
-                                                        ) +
-                                                    '걸음',
+                                                        )}걸음',
                                           style: const TextStyle(
                                             fontFamily: 'Pretendard',
                                             fontWeight: FontWeight.w700,

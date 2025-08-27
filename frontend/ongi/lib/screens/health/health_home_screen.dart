@@ -206,14 +206,29 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
       int todaySteps = 0;
       if (serverData != null) {
-        final dynamic stepsField =
-            serverData['totalSteps'] ??
-            serverData['steps'] ??
-            serverData['total'];
-        if (stepsField is int) {
-          todaySteps = stepsField;
-        } else if (stepsField != null) {
-          todaySteps = int.tryParse(stepsField.toString()) ?? 0;
+        final userInfo = await PrefsManager.getUserInfo();
+        final currentUserId = userInfo['uuid'];
+
+        if (serverData['memberSteps'] != null && currentUserId != null) {
+          final List<dynamic> memberSteps = serverData['memberSteps'];
+          final currentUserStep = memberSteps.firstWhere(
+            (member) => member['userId'] == currentUserId,
+            orElse: () => null,
+          );
+
+          if (currentUserStep != null) {
+            todaySteps = currentUserStep['steps'] ?? 0;
+          }
+        } else {
+          final dynamic stepsField =
+              serverData['steps'] ??
+              serverData['totalSteps'] ??
+              serverData['total'];
+          if (stepsField is int) {
+            todaySteps = stepsField;
+          } else if (stepsField != null) {
+            todaySteps = int.tryParse(stepsField.toString()) ?? 0;
+          }
         }
       }
 

@@ -5,6 +5,7 @@ import 'package:ongi/screens/login/login_pw_screen.dart';
 import 'package:ongi/screens/splash_screen.dart';
 import 'package:ongi/screens/signup/password_screen.dart';
 import 'package:ongi/services/fcm_service.dart';
+import 'package:ongi/services/health_data_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -34,6 +35,7 @@ void main() async {
   );
   
   _initializeFCMIfLoggedIn();
+  _initializeHealthData();
 
   const categoryId = 'PILL_TAKE_REMINDER';
   final iosInit = DarwinInitializationSettings(
@@ -71,6 +73,20 @@ void _initializeFCMIfLoggedIn() async {
     }
   } catch (e) {
     print('앱 시작 시 FCM 초기화 중 오류: $e');
+  }
+}
+
+void _initializeHealthData() async {
+  try {
+    final healthDataService = HealthDataService();
+    final hasPermission = await healthDataService.setupHealthData();
+    if (hasPermission) {
+      print('앱 시작 시 Health 권한 획득 성공');
+    } else {
+      print('앱 시작 시 Health 권한 획득 실패 또는 거부됨');
+    }
+  } catch (e) {
+    print('앱 시작 시 Health 초기화 오류: $e');
   }
 }
 
