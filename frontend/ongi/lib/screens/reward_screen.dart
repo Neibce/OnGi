@@ -210,7 +210,7 @@ class _RewardScreenState extends State<RewardScreen> {
                                         depth: -5, // +면 돌출, -면 들어간 효과
                                         intensity: 0.3,
                                         shadowDarkColorEmboss: Colors.black54
-                                            .withOpacity(0.9),
+                                            .withValues(alpha: 0.9),
                                         shape: NeumorphicShape.concave,
                                         boxShape: NeumorphicBoxShape.roundRect(
                                           BorderRadius.circular(20),
@@ -222,7 +222,7 @@ class _RewardScreenState extends State<RewardScreen> {
                                       ),
                                       child: SizedBox(
                                         width: double.infinity,
-                                        height: 90,
+                                        height: 100,
                                         child: Row(
                                           crossAxisAlignment:
                                               CrossAxisAlignment.start,
@@ -279,6 +279,20 @@ class _RewardScreenState extends State<RewardScreen> {
                                                         height: 1.0,
                                                         color: AppColors
                                                             .ongiOrange,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.bottomRight,
+                                                    child: Text(
+                                                      '기본 온도 36.5℃를 제외한 실제 사용 가능 온도예요!',
+                                                      style: const TextStyle(
+                                                        fontSize: 9,
+                                                        fontWeight:
+                                                            FontWeight.w400,
+                                                        height: 1.0,
+                                                        color: Colors.black54,
                                                       ),
                                                     ),
                                                   ),
