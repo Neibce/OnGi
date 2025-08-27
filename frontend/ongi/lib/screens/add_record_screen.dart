@@ -306,7 +306,7 @@ class AddRecordScreenState extends State<AddRecordScreen>
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.black45,
-                        fontWeight: FontWeight.w400,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
