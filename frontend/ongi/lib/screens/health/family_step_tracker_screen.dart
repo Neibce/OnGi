@@ -154,16 +154,13 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     });
     try {
       final String dateStr = _formatDate(date);
+      final bool isToday = _isToday(date);
 
-      // 1. 디바이스에서 HealthKit 데이터 가져오기 (iOS)
+      // 1. 디바이스에서 HealthKit 데이터 가져오기 (오늘 날짜만)
       int deviceSteps = 0;
-      if (_hasHealthPermission) {
+      if (_hasHealthPermission && isToday) {
         try {
-          if (_isToday(date)) {
-            deviceSteps = await _stepService.getTodaySteps();
-          } else {
-            deviceSteps = await _stepService.getStepsForDate(date);
-          }
+          deviceSteps = await _stepService.getTodaySteps();
           print('디바이스 걸음 수: $deviceSteps');
         } catch (e) {
           print('디바이스 걸음 수 가져오기 실패: $e');
@@ -172,7 +169,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
 
       // 2. 서버에서 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
       final List<Future> futures = [
-        _stepService.getStepsFromServer(date: _isToday(date) ? null : dateStr),
+        _stepService.getStepsFromServer(date: isToday ? null : dateStr),
         FamilyService.getFamilyMembers(),
       ];
 
@@ -182,8 +179,8 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       final List<Map<String, dynamic>> familyMembers =
           results[1] as List<Map<String, dynamic>>;
 
-      // 3. 현재 사용자의 디바이스 걸음 수를 서버에 업로드
-      if (_hasHealthPermission && deviceSteps > 0) {
+      // 3. 현재 사용자의 디바이스 걸음 수를 서버에 업로드 (오늘 날짜만)
+      if (_hasHealthPermission && deviceSteps > 0 && isToday) {
         try {
           await _stepService.uploadSteps(steps: deviceSteps);
           print('걸음 수 서버 업로드 완료: $deviceSteps');
@@ -214,11 +211,11 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                   ? item['steps'] as int
                   : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
 
-              // 현재 사용자의 경우 디바이스 걸음 수로 업데이트
+              // 현재 사용자의 경우 오늘 날짜일 때만 디바이스 걸음 수로 업데이트
               final currentUserInfo = await PrefsManager.getUserInfo();
               final currentUserUuid = currentUserInfo['uuid'];
-              if (userId == currentUserUuid && _hasHealthPermission && deviceSteps > 0) {
-                steps = deviceSteps; // 디바이스 걸음 수 사용
+              if (userId == currentUserUuid && _hasHealthPermission && deviceSteps > 0 && isToday) {
+                steps = deviceSteps; // 디바이스 걸음 수 사용 (오늘 날짜만)
               }
 
               // 더 향상된 사용자 매칭 로직
@@ -241,8 +238,8 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
         }
       }
 
-      // 현재 사용자가 서버 데이터에 없는 경우 추가
-      if (_hasHealthPermission && deviceSteps > 0) {
+      // 현재 사용자가 서버 데이터에 없는 경우 추가 (오늘 날짜만)
+      if (_hasHealthPermission && deviceSteps > 0 && isToday) {
         final currentUserInfo = await PrefsManager.getUserInfo();
         final currentUserUuid = currentUserInfo['uuid'];
         final currentUserName = currentUserInfo['name'] ?? '나';
@@ -267,8 +264,8 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
         }
       }
 
-      // 총 걸음 수 재계산 (디바이스 걸음 수 포함)
-      if (_hasHealthPermission && deviceSteps > 0) {
+      // 총 걸음 수 재계산 (오늘 날짜일 때만 디바이스 걸음 수 포함)
+      if (_hasHealthPermission && deviceSteps > 0 && isToday) {
         // 기존 총합에서 현재 사용자 걸음 수를 빼고 디바이스 걸음 수 추가
         final currentUserInfo = await PrefsManager.getUserInfo();
         final currentUserUuid = currentUserInfo['uuid'];

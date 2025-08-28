@@ -519,10 +519,6 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     });
   }
 
-  void _refreshExerciseTime() {
-    _loadTodayExerciseTime();
-  }
-
   Widget _buildExerciseTimeText() {
     if (_todayExerciseHours == 0 && _todayExerciseMinutes == 0) {
       return const Column(
@@ -1205,6 +1201,10 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
   void _goBackToHome() {
     setState(() {
       _currentView = 'home';
+    });
+    // 홈으로 복귀 시 건강 데이터 자동 새로고침
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      refreshHealthData();
     });
   }
 
