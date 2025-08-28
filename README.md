@@ -582,9 +582,9 @@
 - 해당 사용자가 자녀인 경우, **시작하기 버튼**을 클릭하면 메인 페이지(3.2.6)로 넘어간다.
 
 #### 실제 동작 영상
-|<video src="https://github.com/user-attachments/assets/41a57ff7-67d6-4dd9-b5f8-a0a427340617">|<video src="https://github.com/user-attachments/assets/24b68e7f-daab-45df-91f5-b3315af7955a">|<video src="https://github.com/user-attachments/assets/eee5b761-6baf-41a2-87b6-3b19d896d127">|<video src="https://github.com/user-attachments/assets/876aa4ff-d97a-4391-97e9-60d9947ec8f7">|
+|<video src="https://github.com/user-attachments/assets/41a57ff7-67d6-4dd9-b5f8-a0a427340617">|<video src="https://github.com/user-attachments/assets/24b68e7f-daab-45df-91f5-b3315af7955a">|<video src="https://github.com/user-attachments/assets/346b30b3-b7f4-4283-abec-e1071638d487">|<video src="https://github.com/user-attachments/assets/876aa4ff-d97a-4391-97e9-60d9947ec8f7">|
 |:--:|:--:|:--:|:--:|
-|3.2.1. 온보딩 페이지<br>3.2.2. 회원가입 페이지|3.2.3. 로그인 페이지|3.2.4. 부모 랜딩 페이지<br>3.2.6. 메인 페이지|3.2.5. 네비게이션 바|
+|3.2.1. 온보딩 페이지<br>3.2.2. 회원가입 페이지|3.2.3. 로그인 페이지|3.2.4. 부모 랜딩 페이지<br>3.2.6. 메인 페이지<br>3.2.21. 튜토리얼 페이지|3.2.5. 네비게이션 바|
 |<video src="https://github.com/user-attachments/assets/4293ce57-6a2b-4145-8247-d94eea8d7623">|<video src="https://github.com/user-attachments/assets/b1e2483b-8f2e-4cd4-8b3d-626aa0a62ca1">|<video src="https://github.com/user-attachments/assets/4aba9005-9801-424e-bd43-8a3a0bc510f9">|<video src="https://github.com/user-attachments/assets/b8c91178-440c-4fea-b68d-31ecbedc3547">|
 |3.2.8. 리워드 페이지|3.2.9. 건강 기록 메인 페이지(부모)<br>3.2.10. 건강 상태 기록 페이지|3.2.9 건강 기록 메인 페이지(자녀)|3.2.11. 약 복용 페이지|
 |<video src="https://github.com/user-attachments/assets/bb48e2e4-89c6-453e-81ca-b5e0b929fb0d">|<video src="https://github.com/user-attachments/assets/2ae5bca7-7c45-4652-8252-02fa7b99ca77">|<video src="https://github.com/user-attachments/assets/6a7f6c30-9939-4e04-8a88-ac6a3111e87f">|<video src="https://github.com/user-attachments/assets/11362522-5227-4e97-9ba6-d2c3f6ade7c0">|
@@ -963,8 +963,7 @@ flutter build ios --release
 <br/>
 
 ## 5. 소개 및 시연영상
-
-[<img width="700px" alt="소개 및 시연영상" src="https://github.com/pnuswedu/SW-Hackathon-2024/assets/34933690/162132cd-9af5-4154-9b9a-41c96cf5e8fd" />](https://www.youtube.com/watch?v=EfEgTrm5_u4)
+[<img width="700px" alt="소개 및 시연영상" src="https://github.com/user-attachments/assets/c3a1f398-bd85-440b-8480-2e2b30355244" />](https://youtu.be/b4rGJLy9ngk)
 
 <br/>
 
@@ -1088,7 +1087,10 @@ flutter build ios --release
   앞으로 이 값진 경험을 바탕으로 내가 잘할 수 있는 분야의 역량을 더욱 길러 더 다양한 환경으로 뻗어나가는 것에 도전하고 싶다.
 
 - **옥소미**:
-
+  이번 해커톤은 장기간 진행되는 해커톤에 처음 참여한 경험이었다. 짧은 기간에 결과물을 내는 해커톤과 달리, 기획부터 개발까지 과정을 충분히 고민하고 조율할 수 있었던 점이 좋았다.
+  처음에는 다양한 학과와 직군에서 모인 사람들과 협업하는 것이 낯설었지만, 서로의 강점과 아이디어를 존중하며 하나의 팀으로 성장해 가는 과정을 통해 많은 것을 배우고 성장할 수 있었다.
+  개발 과정에서 시행착오도 있을 때에도, 함께 고민하며 다양한 시각에서 피드백을 주고받아 더 나은 결과를 만들어 갈 수 있었다.
+  4달동안 열심히 달려온 우리 팀원들 너무 수고했고, 방학을 바쳐 열정을 쏟은 만큼 좋은 결과가 있었으면 좋겠다.
 
 - **이태경**:
   이번 해커톤을 통해 다양한 직군이 모여 하나의 서비스를 완성하기 위해 노력하는 과정이 얼마나 멋진 경험인지를 느낄 수 있었다. 서비스를 만들어내는 과정에서 어려움도
