@@ -1505,31 +1505,31 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
                               Positioned(
                                 right: 16,
                                 bottom: 16,
-                                child: Container(
-                                  width: 50,
-                                  height: 50,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: isFrontView
-                                        ? Colors.white
-                                        : AppColors.ongiOrange,
-                                    border: Border.all(
-                                      color: AppColors.ongiOrange,
-                                      width: 2,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.1,
-                                        ),
-
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
+                                child: GestureDetector(
+                                  onTap: toggleView,
+                                  child: Container(
+                                    width: 50,
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: isFrontView
+                                          ? Colors.white
+                                          : AppColors.ongiOrange,
+                                      border: Border.all(
+                                        color: AppColors.ongiOrange,
+                                        width: 2,
                                       ),
-                                    ],
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: toggleView,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.1,
+                                          ),
+
+                                          blurRadius: 4,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
                                     child: Center(
                                       child: Text(
                                         isFrontView ? '앞' : '뒤',
