@@ -383,7 +383,7 @@ class _HomeDegreeGraph extends State<HomeDegreeGraph> {
                     ),
                   ),
                   Text(
-                    item.formattedDate ?? '',
+                    item.formattedDate,
                     style: const TextStyle(
                       color: Colors.grey,
                       fontSize: 12,

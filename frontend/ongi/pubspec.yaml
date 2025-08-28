@@ -3,7 +3,7 @@ description: "A new Flutter project."
 
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.8.1
@@ -33,6 +33,7 @@ dependencies:
   image_picker: ^1.1.2
   url_launcher: ^6.2.1
   flutter_local_notifications: ^19.4.0
+  health_kit_reporter: ^2.3.1
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,7 @@ flutter:
     - assets/images/photobook_icon.png
     - assets/images/reward_products/
     - assets/images/users/
+    - assets/images/tutorial/
     - assets/images/close_icon_black.svg
     - assets/images/close_icon_white.svg
     - assets/images/back_icon_black.svg

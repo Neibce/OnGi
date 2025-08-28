@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../core/app_colors.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -21,15 +22,108 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   final StepService _stepService = StepService();
   bool _isLoading = false;
   int _totalSteps = 0;
+  int _deviceSteps = 0; // 디바이스에서 가져온 걸음 수
   String? _errorMessage;
   List<_MemberStep> _memberSteps = [];
+  bool _hasHealthPermission = false;
 
   @override
   void initState() {
     super.initState();
     _dateCarouselController = PageController(initialPage: 5000);
+    _initializeHealthData();
+  }
+
+  /// HealthKit 데이터 권한 상태 확인 및 실시간 관찰 시작
+  Future<void> _initializeHealthData() async {
+    try {
+      // 권한 확인을 위해 실제 데이터 접근 시도
+      final hasPermission = await _stepService.hasPermissions();
+      
+      if (hasPermission) {
+        final todaySteps = await _stepService.getTodaySteps();
+        setState(() {
+          _hasHealthPermission = true;
+          _deviceSteps = todaySteps;
+        });
+        print('HealthKit 권한 확인됨 - 실제 걸음수: $todaySteps');
+        
+        // 실시간 관찰 시작
+        await _startRealtimeObserver();
+      } else {
+        setState(() {
+          _hasHealthPermission = false;
+        });
+        print('HealthKit 권한 없음');
+      }
+    } catch (e) {
+      print('HealthKit 권한 확인 오류: $e');
+      setState(() {
+        _hasHealthPermission = false;
+      });
+    }
+
+    // 걸음 수 데이터 가져오기
     _fetchStepsForDate(selectedDate);
   }
+
+  /// 실시간 걸음 수 관찰 시작
+  Future<void> _startRealtimeObserver() async {
+    if (!_hasHealthPermission) return;
+    
+    try {
+      await StepService.startObserving(
+        onStepsChanged: (int newSteps) async {
+          if (mounted && _isToday(selectedDate)) {
+            setState(() {
+              // 기존 총합에서 이전 디바이스 걸음 수를 빼고 새로운 걸음 수 추가
+              final difference = newSteps - _deviceSteps;
+              _deviceSteps = newSteps;
+              _totalSteps += difference;
+
+              // 현재 사용자의 걸음 수 업데이트
+              _updateCurrentUserSteps(newSteps);
+            });
+            
+            print('실시간 걸음 수 업데이트: $newSteps');
+          }
+        },
+      );
+    } catch (e) {
+      print('실시간 관찰 시작 실패: $e');
+    }
+  }
+
+  /// 현재 사용자의 걸음 수 업데이트
+  Future<void> _updateCurrentUserSteps(int newSteps) async {
+    final currentUserInfo = await PrefsManager.getUserInfo();
+    final currentUserUuid = currentUserInfo['uuid'];
+    
+    for (int i = 0; i < _memberSteps.length; i++) {
+      if (_memberSteps[i].userId == currentUserUuid) {
+        _memberSteps[i] = _MemberStep(
+          userId: _memberSteps[i].userId,
+          userName: _memberSteps[i].userName,
+          steps: newSteps,
+          imageAsset: _memberSteps[i].imageAsset,
+        );
+        break;
+      }
+    }
+    
+    // 걸음 수 순으로 다시 정렬
+    _memberSteps.sort((a, b) => b.steps.compareTo(a.steps));
+  }
+
+  /// 오늘 날짜인지 확인
+  bool _isToday(DateTime date) {
+    final now = DateTime.now();
+    return date.year == now.year && 
+           date.month == now.month && 
+           date.day == now.day;
+  }
+
+
 
   @override
   void dispose() {
@@ -40,6 +134,10 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   void _updateFromDateCarousel(DateTime date) {
     setState(() {
       selectedDate = DateTime(date.year, date.month, date.day);
+      _isLoading = true; // 로딩 상태 시작
+      _errorMessage = null; // 에러 메시지 초기화
+      _memberSteps = []; // 멤버 리스트 초기화
+      _totalSteps = 0; // 총 걸음수 초기화
     });
     _fetchStepsForDate(selectedDate);
   }
@@ -56,10 +154,22 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     });
     try {
       final String dateStr = _formatDate(date);
+      final bool isToday = _isToday(date);
 
-      // 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
+      // 1. 디바이스에서 HealthKit 데이터 가져오기 (오늘 날짜만)
+      int deviceSteps = 0;
+      if (_hasHealthPermission && isToday) {
+        try {
+          deviceSteps = await _stepService.getTodaySteps();
+          print('디바이스 걸음 수: $deviceSteps');
+        } catch (e) {
+          print('디바이스 걸음 수 가져오기 실패: $e');
+        }
+      }
+
+      // 2. 서버에서 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
       final List<Future> futures = [
-        _stepService.getSteps(date: dateStr),
+        _stepService.getStepsFromServer(date: isToday ? null : dateStr),
         FamilyService.getFamilyMembers(),
       ];
 
@@ -69,8 +179,19 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
       final List<Map<String, dynamic>> familyMembers =
           results[1] as List<Map<String, dynamic>>;
 
+      // 3. 현재 사용자의 디바이스 걸음 수를 서버에 업로드 (오늘 날짜만)
+      if (_hasHealthPermission && deviceSteps > 0 && isToday) {
+        try {
+          await _stepService.uploadSteps(steps: deviceSteps);
+          print('걸음 수 서버 업로드 완료: $deviceSteps');
+        } catch (e) {
+          print('걸음 수 서버 업로드 실패: $e');
+        }
+      }
+
       int parsedTotal = 0;
       final List<_MemberStep> parsedMembers = [];
+      
       if (stepResult != null) {
         if (stepResult['totalSteps'] is int) {
           parsedTotal = stepResult['totalSteps'] as int;
@@ -86,9 +207,16 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
             if (item is Map<String, dynamic>) {
               final String userId = (item['userId'] ?? '').toString();
               final String userName = (item['userName'] ?? '').toString();
-              final int steps = (item['steps'] is int)
+              int steps = (item['steps'] is int)
                   ? item['steps'] as int
                   : int.tryParse(item['steps']?.toString() ?? '0') ?? 0;
+
+              // 현재 사용자의 경우 오늘 날짜일 때만 디바이스 걸음 수로 업데이트
+              final currentUserInfo = await PrefsManager.getUserInfo();
+              final currentUserUuid = currentUserInfo['uuid'];
+              if (userId == currentUserUuid && _hasHealthPermission && deviceSteps > 0 && isToday) {
+                steps = deviceSteps; // 디바이스 걸음 수 사용 (오늘 날짜만)
+              }
 
               // 더 향상된 사용자 매칭 로직
               String profileImagePath = await _getProfileImageForUser(
@@ -110,15 +238,55 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
         }
       }
 
+      // 현재 사용자가 서버 데이터에 없는 경우 추가 (오늘 날짜만)
+      if (_hasHealthPermission && deviceSteps > 0 && isToday) {
+        final currentUserInfo = await PrefsManager.getUserInfo();
+        final currentUserUuid = currentUserInfo['uuid'];
+        final currentUserName = currentUserInfo['name'] ?? '나';
+        
+        // 이미 존재하는지 확인
+        final existingUser = parsedMembers
+            .where((member) => member.userId == currentUserUuid)
+            .firstOrNull;
+            
+        if (existingUser == null) {
+          final profileImageId = currentUserInfo['profileImageId'] ?? 0;
+          final profileImagePath = PrefsManager.getProfileImagePath(profileImageId);
+          
+          parsedMembers.add(
+            _MemberStep(
+              userId: currentUserUuid,
+              userName: currentUserName,
+              steps: deviceSteps,
+              imageAsset: profileImagePath,
+            ),
+          );
+        }
+      }
+
+      // 총 걸음 수 재계산 (오늘 날짜일 때만 디바이스 걸음 수 포함)
+      if (_hasHealthPermission && deviceSteps > 0 && isToday) {
+        // 기존 총합에서 현재 사용자 걸음 수를 빼고 디바이스 걸음 수 추가
+        final currentUserInfo = await PrefsManager.getUserInfo();
+        final currentUserUuid = currentUserInfo['uuid'];
+        
+        final existingUserSteps = parsedMembers
+            .where((member) => member.userId == currentUserUuid)
+            .firstOrNull?.steps ?? 0;
+            
+        parsedTotal = parsedTotal - existingUserSteps + deviceSteps;
+      }
+
       parsedMembers.sort((a, b) => b.steps.compareTo(a.steps));
 
       setState(() {
+        _deviceSteps = deviceSteps;
         _totalSteps = parsedTotal;
         _memberSteps = parsedMembers;
       });
     } catch (e) {
       setState(() {
-        _errorMessage = '걸음 수 조회 실패';
+        _errorMessage = '걸음 수 조회 실패: $e';
       });
     } finally {
       if (mounted) {
@@ -326,15 +494,14 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                         TextSpan(
                                           text: _isLoading
                                               ? '0걸음'
-                                              : _totalSteps
+                                              : '${_totalSteps
                                                         .toString()
                                                         .replaceAllMapped(
                                                           RegExp(
                                                             r'(\d{1,3})(?=(\d{3})+(?!\d))',
                                                           ),
                                                           (m) => '${m[1]},',
-                                                        ) +
-                                                    '걸음',
+                                                        )}걸음',
                                           style: const TextStyle(
                                             fontFamily: 'Pretendard',
                                             fontWeight: FontWeight.w700,
@@ -390,7 +557,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                   ),
                                 ),
                               )
-                            else if (_isLoading && _memberSteps.isEmpty)
+                            else if (_isLoading)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8),
                                 child: Center(

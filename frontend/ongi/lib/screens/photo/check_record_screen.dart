@@ -7,8 +7,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:ongi/screens/photo/detail_record_screen.dart';
 
-import '../home/home_screen.dart';
-
 class CheckRecordScreen extends StatefulWidget {
   final String backImagePath;
   final String? frontImagePath;
