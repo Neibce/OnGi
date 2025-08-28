@@ -51,7 +51,13 @@ void main() async {
       ),
     ],
   );
-  final initSettings = InitializationSettings(iOS: iosInit);
+  const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  final initSettings = InitializationSettings(
+    android: androidInit,
+    iOS: iosInit,
+  );
+
   await flutterLocalNotificationsPlugin.initialize(
     initSettings,
     onDidReceiveNotificationResponse: (resp) {
