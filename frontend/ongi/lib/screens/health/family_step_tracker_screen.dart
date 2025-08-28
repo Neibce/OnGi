@@ -5,7 +5,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:ongi/widgets/date_carousel.dart';
 import 'package:ongi/services/step_service.dart';
 import 'package:ongi/services/family_service.dart';
-import 'package:ongi/services/health_data_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 
 class FamilyStepTrackerScreen extends StatefulWidget {
@@ -21,14 +20,12 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   late final PageController _dateCarouselController;
   DateTime selectedDate = DateTime.now();
   final StepService _stepService = StepService();
-  final HealthDataService _healthDataService = HealthDataService();
   bool _isLoading = false;
   int _totalSteps = 0;
   int _deviceSteps = 0; // 디바이스에서 가져온 걸음 수
   String? _errorMessage;
   List<_MemberStep> _memberSteps = [];
   bool _hasHealthPermission = false;
-  Timer? _stepUpdateTimer;
 
   @override
   void initState() {
@@ -37,33 +34,30 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     _initializeHealthData();
   }
 
-  /// Health 데이터 권한 상태 확인 (권한 요청은 앱 시작 시에만)
+  /// HealthKit 데이터 권한 상태 확인 및 실시간 관찰 시작
   Future<void> _initializeHealthData() async {
     try {
-      // Health 초기화 (권한 요청 없이)
-      await _healthDataService.initialize();
-      
       // 권한 확인을 위해 실제 데이터 접근 시도
-      try {
-        final todaySteps = await _healthDataService.getTodaySteps();
-        // 데이터를 성공적으로 가져왔으면 권한이 있는 것
+      final hasPermission = await _stepService.hasPermissions();
+      
+      if (hasPermission) {
+        final todaySteps = await _stepService.getTodaySteps();
         setState(() {
           _hasHealthPermission = true;
           _deviceSteps = todaySteps;
         });
-        print('Health 권한 확인됨 - 실제 걸음수: $todaySteps');
-        _startStepUpdateTimer();
-      } catch (e) {
-        // 데이터 접근 실패시 권한 없음
-        print('Health 데이터 접근 실패: $e');
-        final hasPermission = await _healthDataService.hasPermissions();
+        print('HealthKit 권한 확인됨 - 실제 걸음수: $todaySteps');
+        
+        // 실시간 관찰 시작
+        await _startRealtimeObserver();
+      } else {
         setState(() {
-          _hasHealthPermission = hasPermission;
+          _hasHealthPermission = false;
         });
-        print('Health 권한 상태: $hasPermission');
+        print('HealthKit 권한 없음');
       }
     } catch (e) {
-      print('Health 권한 확인 오류: $e');
+      print('HealthKit 권한 확인 오류: $e');
       setState(() {
         _hasHealthPermission = false;
       });
@@ -73,24 +67,52 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     _fetchStepsForDate(selectedDate);
   }
 
-  /// 실시간 걸음 수 업데이트 타이머 시작 (오늘 날짜인 경우에만)
-  void _startStepUpdateTimer() {
-    _stepUpdateTimer?.cancel();
+  /// 실시간 걸음 수 관찰 시작
+  Future<void> _startRealtimeObserver() async {
+    if (!_hasHealthPermission) return;
     
-    // 오늘 날짜인 경우에만 실시간 업데이트
-    final isToday = _isToday(selectedDate);
-    if (isToday && _hasHealthPermission) {
-      _stepUpdateTimer = Timer.periodic(
-        const Duration(seconds: 30), // 30초마다 업데이트
-        (timer) async {
+    try {
+      await StepService.startObserving(
+        onStepsChanged: (int newSteps) async {
           if (mounted && _isToday(selectedDate)) {
-            await _updateTodaySteps();
-          } else {
-            timer.cancel();
+            setState(() {
+              // 기존 총합에서 이전 디바이스 걸음 수를 빼고 새로운 걸음 수 추가
+              final difference = newSteps - _deviceSteps;
+              _deviceSteps = newSteps;
+              _totalSteps += difference;
+
+              // 현재 사용자의 걸음 수 업데이트
+              _updateCurrentUserSteps(newSteps);
+            });
+            
+            print('실시간 걸음 수 업데이트: $newSteps');
           }
         },
       );
+    } catch (e) {
+      print('실시간 관찰 시작 실패: $e');
     }
+  }
+
+  /// 현재 사용자의 걸음 수 업데이트
+  Future<void> _updateCurrentUserSteps(int newSteps) async {
+    final currentUserInfo = await PrefsManager.getUserInfo();
+    final currentUserUuid = currentUserInfo['uuid'];
+    
+    for (int i = 0; i < _memberSteps.length; i++) {
+      if (_memberSteps[i].userId == currentUserUuid) {
+        _memberSteps[i] = _MemberStep(
+          userId: _memberSteps[i].userId,
+          userName: _memberSteps[i].userName,
+          steps: newSteps,
+          imageAsset: _memberSteps[i].imageAsset,
+        );
+        break;
+      }
+    }
+    
+    // 걸음 수 순으로 다시 정렬
+    _memberSteps.sort((a, b) => b.steps.compareTo(a.steps));
   }
 
   /// 오늘 날짜인지 확인
@@ -101,56 +123,10 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
            date.day == now.day;
   }
 
-  /// 오늘의 걸음 수만 빠르게 업데이트
-  Future<void> _updateTodaySteps() async {
-    if (!_hasHealthPermission || !_isToday(selectedDate)) return;
 
-    try {
-      final deviceSteps = await _healthDataService.getTodaySteps();
-      if (deviceSteps != _deviceSteps) {
-        setState(() {
-          // 기존 총합에서 이전 디바이스 걸음 수를 빼고 새로운 걸음 수 추가
-          final difference = deviceSteps - _deviceSteps;
-          _deviceSteps = deviceSteps;
-          _totalSteps += difference;
-
-          // 현재 사용자의 걸음 수 업데이트
-          final currentUserInfo = PrefsManager.getUserInfo();
-          currentUserInfo.then((userInfo) {
-            final currentUserUuid = userInfo['uuid'];
-            for (int i = 0; i < _memberSteps.length; i++) {
-              if (_memberSteps[i].userId == currentUserUuid) {
-                setState(() {
-                  _memberSteps[i] = _MemberStep(
-                    userId: _memberSteps[i].userId,
-                    userName: _memberSteps[i].userName,
-                    steps: deviceSteps,
-                    imageAsset: _memberSteps[i].imageAsset,
-                  );
-                });
-                break;
-              }
-            }
-            // 걸음 수 순으로 다시 정렬
-            _memberSteps.sort((a, b) => b.steps.compareTo(a.steps));
-          });
-        });
-
-        // 서버에 업데이트
-        try {
-          await _stepService.uploadSteps(steps: deviceSteps);
-        } catch (e) {
-          print('실시간 걸음 수 서버 업로드 실패: $e');
-        }
-      }
-    } catch (e) {
-      print('실시간 걸음 수 업데이트 실패: $e');
-    }
-  }
 
   @override
   void dispose() {
-    _stepUpdateTimer?.cancel();
     _dateCarouselController.dispose();
     super.dispose();
   }
@@ -158,13 +134,12 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
   void _updateFromDateCarousel(DateTime date) {
     setState(() {
       selectedDate = DateTime(date.year, date.month, date.day);
+      _isLoading = true; // 로딩 상태 시작
+      _errorMessage = null; // 에러 메시지 초기화
+      _memberSteps = []; // 멤버 리스트 초기화
+      _totalSteps = 0; // 총 걸음수 초기화
     });
     _fetchStepsForDate(selectedDate);
-    
-    // 날짜가 변경되면 타이머 재시작 (오늘 날짜인 경우에만)
-    if (_hasHealthPermission) {
-      _startStepUpdateTimer();
-    }
   }
 
   String _formatDate(DateTime date) {
@@ -180,11 +155,15 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
     try {
       final String dateStr = _formatDate(date);
 
-      // 1. 디바이스에서 Health 데이터 가져오기 (iOS)
+      // 1. 디바이스에서 HealthKit 데이터 가져오기 (iOS)
       int deviceSteps = 0;
       if (_hasHealthPermission) {
         try {
-          deviceSteps = await _healthDataService.getStepsForDate(date);
+          if (_isToday(date)) {
+            deviceSteps = await _stepService.getTodaySteps();
+          } else {
+            deviceSteps = await _stepService.getStepsForDate(date);
+          }
           print('디바이스 걸음 수: $deviceSteps');
         } catch (e) {
           print('디바이스 걸음 수 가져오기 실패: $e');
@@ -193,7 +172,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
 
       // 2. 서버에서 가족 구성원 정보와 걸음 수 정보를 동시에 가져오기
       final List<Future> futures = [
-        _stepService.getSteps(date: dateStr),
+        _stepService.getStepsFromServer(date: _isToday(date) ? null : dateStr),
         FamilyService.getFamilyMembers(),
       ];
 
@@ -581,7 +560,7 @@ class _FamilyStepTrackerScreenState extends State<FamilyStepTrackerScreen> {
                                   ),
                                 ),
                               )
-                            else if (_isLoading && _memberSteps.isEmpty)
+                            else if (_isLoading)
                               const Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8),
                                 child: Center(

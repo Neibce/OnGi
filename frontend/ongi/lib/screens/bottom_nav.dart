@@ -26,8 +26,8 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   bool _isParent = false;
 
   final List<Widget> _screens = [
-    const HomeScreen(),
-    const HealthHomeScreen(),
+    HomeScreen(key: homeScreenKey),
+    HealthHomeScreen(key: healthHomeScreenKey),
     const PhotoCalendarScreen(),
     const ProfileScreen(),
   ];
@@ -37,6 +37,20 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _checkUserTypeAndHealthRecord();
+    
+    // 초기 화면이 홈이면 데이터 새로고침 (로그인 후 진입 시)
+    if (_currentIndex == 0) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _refreshHomeData();
+      });
+    }
+    
+    // 초기 화면이 건강기록이면 건강 데이터 새로고침 (parent_init_screen에서 건강기록 선택 시)
+    if (_currentIndex == 1) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _refreshHealthData();
+      });
+    }
   }
 
   Future<void> _checkUserTypeAndHealthRecord() async {
@@ -83,6 +97,34 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     await _checkUserTypeAndHealthRecord();
   }
 
+  Future<void> _refreshHealthData() async {
+    // 건강기록 화면의 데이터를 백그라운드에서 새로고침
+    try {
+      final healthHomeScreenState = healthHomeScreenKey.currentState;
+      if (healthHomeScreenState != null) {
+        // 백그라운드에서 조용히 새로고침 수행
+        await healthHomeScreenState.refreshHealthData();
+      }
+    } catch (e) {
+      // 새로고침 실패 시 조용히 처리
+      print('건강 데이터 새로고침 실패 (조용히 처리됨): $e');
+    }
+  }
+
+  Future<void> _refreshHomeData() async {
+    // 홈 화면의 데이터를 백그라운드에서 새로고침
+    try {
+      final homeScreenState = homeScreenKey.currentState;
+      if (homeScreenState != null) {
+        // 백그라운드에서 조용히 새로고침 수행
+        await homeScreenState.refreshHomeData();
+      }
+    } catch (e) {
+      // 새로고침 실패 시 조용히 처리
+      print('홈 데이터 새로고침 실패 (조용히 처리됨): $e');
+    }
+  }
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -90,6 +132,16 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
 
     if (index == 0 || index == 1) {
       _checkHealthRecordStatus();
+    }
+
+    // 홈 탭(index=0) 선택 시 백그라운드 새로고침
+    if (index == 0) {
+      _refreshHomeData();
+    }
+
+    // 건강기록 탭(index=1) 선택 시 백그라운드 새로고침
+    if (index == 1) {
+      _refreshHealthData();
     }
   }
 

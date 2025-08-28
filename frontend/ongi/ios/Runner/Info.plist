@@ -43,9 +43,9 @@
 	<key>NSCameraUsageDescription</key>
 	<string>이 앱은 사진을 찍기 위해 카메라 접근 권한이 필요합니다.</string>
 	<key>NSHealthShareUsageDescription</key>
-	<string>We will sync your data with the Apple Health app to give you better insights</string>
+	<string>가족의 건강 정보를 공유하기 위해 Apple Health 앱 접근 권한이 필요합니다.</string>
 	<key>NSHealthUpdateUsageDescription</key>
-	<string>We will sync your data with the Apple Health app to give you better insights</string>
+	<string>걸음 수 데이터를 기록하기 위해 Apple Health 앱 쓰기 권한이 필요합니다.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>This app does not use local network.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>

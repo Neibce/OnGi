@@ -33,7 +33,7 @@ dependencies:
   image_picker: ^1.1.2
   url_launcher: ^6.2.1
   flutter_local_notifications: ^19.4.0
-  health: ^13.1.2
+  health_kit_reporter: ^2.3.1
 
 dev_dependencies:
   flutter_test:
