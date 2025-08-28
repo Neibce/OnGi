@@ -28,7 +28,7 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
   final List<Widget> _screens = [
     HomeScreen(key: homeScreenKey),
     HealthHomeScreen(key: healthHomeScreenKey),
-    const PhotoCalendarScreen(),
+    PhotoCalendarScreen(key: photoCalendarScreenKey),
     const ProfileScreen(),
   ];
 
@@ -125,6 +125,20 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     }
   }
 
+  Future<void> _refreshPhotoData() async {
+    // 마음기록(앨범) 화면의 데이터를 백그라운드에서 새로고침
+    try {
+      final photoCalendarScreenState = photoCalendarScreenKey.currentState;
+      if (photoCalendarScreenState != null) {
+        // 백그라운드에서 조용히 새로고침 수행
+        await photoCalendarScreenState.refreshPhotoCalendar();
+      }
+    } catch (e) {
+      // 새로고침 실패 시 조용히 처리
+      print('마음기록 데이터 새로고침 실패 (조용히 처리됨): $e');
+    }
+  }
+
   void _onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
@@ -142,6 +156,11 @@ class _BottomNavScreenState extends State<BottomNavScreen> {
     // 건강기록 탭(index=1) 선택 시 백그라운드 새로고침
     if (index == 1) {
       _refreshHealthData();
+    }
+    
+    // 마음기록(앨범) 탭(index=2) 선택 시 백그라운드 새로고침
+    if (index == 2) {
+      _refreshPhotoData();
     }
   }
 

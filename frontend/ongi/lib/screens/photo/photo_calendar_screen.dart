@@ -14,6 +14,9 @@ class PhotoCalendarScreen extends StatefulWidget {
   State<PhotoCalendarScreen> createState() => _PhotoCalendarScreenState();
 }
 
+// 전역 키를 사용해서 외부에서 새로고침 메서드에 접근할 수 있도록 함
+final GlobalKey<_PhotoCalendarScreenState> photoCalendarScreenKey = GlobalKey<_PhotoCalendarScreenState>();
+
 class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
   String _currentView = 'calendar';
   DateTime _focusedDay = DateTime.now();
@@ -31,7 +34,22 @@ class _PhotoCalendarScreenState extends State<PhotoCalendarScreen> {
     _fetchCalendarDataForMonth(_focusedDay);
   }
 
-  void _goBackToCalendar() => setState(() => _currentView = 'calendar');
+  // 외부에서 호출 가능한 새로고침 메서드
+  Future<void> refreshPhotoCalendar() async {
+    try {
+      await _fetchCalendarDataForMonth(_focusedDay);
+    } catch (e) {
+      print('마음기록 캘린더 새로고침 실패: $e');
+    }
+  }
+
+  void _goBackToCalendar() {
+    setState(() => _currentView = 'calendar');
+    // 캘린더로 복귀 시 자동 새로고침
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      refreshPhotoCalendar();
+    });
+  }
 
   Widget _dayCellBuilder(
     BuildContext context,
