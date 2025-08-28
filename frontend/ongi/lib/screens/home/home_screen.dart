@@ -8,6 +8,9 @@ import 'package:ongi/screens/reward_screen.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:ongi/screens/home/home_donutCapsule.dart';
 
+// HomeScreen을 외부에서 접근할 수 있도록 GlobalKey 추가
+final GlobalKey<_HomeScreenState> homeScreenKey = GlobalKey<_HomeScreenState>();
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -18,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _username = '사용자';
   String _currentView = 'home';
+  final GlobalKey<HomeCapsuleSectionState> _homeCapsuleKey = GlobalKey<HomeCapsuleSectionState>();
 
   @override
   void initState() {
@@ -44,6 +48,16 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _currentView = 'home';
     });
+  }
+
+  // 외부에서 호출할 수 있는 조용한 새로고침 메서드
+  Future<void> refreshHomeData() async {
+    try {
+      print('홈 화면 조용한 새로고침 시작');
+      _homeCapsuleKey.currentState?.refreshAllData();
+    } catch (e) {
+      print('홈 데이터 새로고침 실패 (조용히 처리됨): $e');
+    }
   }
 
   Widget _buildCurrentView() {
@@ -98,7 +112,10 @@ class _HomeScreenState extends State<HomeScreen> {
             SizedBox(height: MediaQuery.of(context).size.height * 0.13),
             HomeOngiText(username: _username),
             SizedBox(height: MediaQuery.of(context).size.height * 0.01),
-            HomeCapsuleSection(onGraphTap: () => _changeView('graph')),
+            HomeCapsuleSection(
+              key: _homeCapsuleKey,
+              onGraphTap: () => _changeView('graph'),
+            ),
           ],
         ),
         Positioned(

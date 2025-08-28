@@ -18,10 +18,10 @@ class HomeCapsuleSection extends StatefulWidget {
   const HomeCapsuleSection({super.key, this.onGraphTap, this.onRefresh});
 
   @override
-  State<HomeCapsuleSection> createState() => _HomeCapsuleSectionState();
+  State<HomeCapsuleSection> createState() => HomeCapsuleSectionState();
 }
 
-class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
+class HomeCapsuleSectionState extends State<HomeCapsuleSection> {
   String? _token;
   double? todayTemperature;
   bool isLoading = true;
@@ -47,11 +47,45 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
     }
   }
 
+  // 가족 코드가 없으면 서버에서 가져와서 저장
+  Future<void> ensureFamilyCode() async {
+    final userInfo = await PrefsManager.getUserInfo();
+    if (userInfo['familycode'] == null || userInfo['familycode']!.isEmpty) {
+      final token = await PrefsManager.getAccessToken();
+      if (token == null) return;
+      
+      try {
+        final url = Uri.parse(
+          'https://ongi-1049536928483.asia-northeast3.run.app/family',
+        );
+        final response = await http.get(
+          url,
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        );
+        
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          await PrefsManager.saveFamilyCodeAndName(
+            data['code'] ?? '',
+            data['name'] ?? '',
+          );
+          print('가족 코드 자동 저장 완료: ${data['code']}');
+        }
+      } catch (e) {
+        print('가족 코드 가져오기 실패: $e');
+      }
+    }
+  }
+
 
   // 전체 데이터 새로고침
   void refreshAllData() {
     print('HomeCapsuleSection 전체 데이터 새로고침');
     fetchTodayTemperature();
+    fetchTemperatureSummary(); // 도넛그래프 데이터도 새로고침
     _buttonColumnKey.currentState?.refreshData();
     if (widget.onRefresh != null) {
       widget.onRefresh!();
@@ -75,6 +109,9 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
     });
 
     try {
+      // 가족 코드가 없으면 먼저 가져오기
+      await ensureFamilyCode();
+      
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
       if (familyCode == null || familyCode.isEmpty) {
@@ -117,6 +154,9 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
     });
 
     try {
+      // 가족 코드가 없으면 먼저 가져오기
+      await ensureFamilyCode();
+      
       final userInfo = await PrefsManager.getUserInfo();
       final familyCode = userInfo['familycode'];
       if (familyCode == null || familyCode.isEmpty) {
@@ -130,8 +170,6 @@ class _HomeCapsuleSectionState extends State<HomeCapsuleSection> {
 
       final List<dynamic> memberIncreaseTemperatures =
           summary['memberIncreaseTemperatures'] ?? [];
-      final double totalIncreaseTemperature =
-          summary['totalFamilyIncreaseTemperature'] ?? 0;
 
       setState(() {
         // 1. 개인 기여도만 계산: userId가 null이 아닌 데이터만 처리
@@ -530,7 +568,7 @@ class _ButtonColumnState extends State<ButtonColumn> with WidgetsBindingObserver
 
     try {
       // 병렬로 데이터 로드
-      final futures = await Future.wait([
+      await Future.wait([
         _loadPillData(),
         _loadPainData(),
         _loadStepData(),
@@ -794,7 +832,8 @@ class _ButtonColumnState extends State<ButtonColumn> with WidgetsBindingObserver
   Future<void> _loadStepData() async {
     try {
       print('걸음 수 데이터 로딩 시작');
-      final totalSteps = await StepService.getTodayTotalSteps();
+      final stepService = StepService();
+      final totalSteps = await stepService.getTodaySteps();
       print('걸음 수 응답: $totalSteps');
       setState(() {
         if (_isChild) {

@@ -5,7 +5,7 @@ import 'package:ongi/screens/login/login_pw_screen.dart';
 import 'package:ongi/screens/splash_screen.dart';
 import 'package:ongi/screens/signup/password_screen.dart';
 import 'package:ongi/services/fcm_service.dart';
-import 'package:ongi/services/health_data_service.dart';
+import 'package:ongi/services/step_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -78,15 +78,22 @@ void _initializeFCMIfLoggedIn() async {
 
 void _initializeHealthData() async {
   try {
-    final healthDataService = HealthDataService();
-    final hasPermission = await healthDataService.setupHealthData();
+    final stepService = StepService();
+    final hasPermission = await stepService.requestPermissions();
     if (hasPermission) {
-      print('앱 시작 시 Health 권한 획득 성공');
+      print('앱 시작 시 HealthKit 권한 획득 성공');
+      // 앱 시작 시 전역으로 걸음수 관찰 시작 (백그라운드 전달 등록)
+      await StepService.startObserving(
+        onStepsChanged: (int steps) {
+          // 전역 관찰 콜백: 필요 시 로깅만 수행 (업로드는 StepService 내부에서 수행)
+          print('전역 관찰: 걸음 수 변경 감지 -> $steps');
+        },
+      );
     } else {
-      print('앱 시작 시 Health 권한 획득 실패 또는 거부됨');
+      print('앱 시작 시 HealthKit 권한 획득 실패 또는 거부됨');
     }
   } catch (e) {
-    print('앱 시작 시 Health 초기화 오류: $e');
+    print('앱 시작 시 HealthKit 초기화 오류: $e');
   }
 }
 

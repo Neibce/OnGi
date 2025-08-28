@@ -22,6 +22,9 @@ class HealthHomeScreen extends StatefulWidget {
   State<HealthHomeScreen> createState() => _HealthHomeScreenState();
 }
 
+// 전역 키를 사용해서 외부에서 새로고침 메서드에 접근할 수 있도록 함
+final GlobalKey<_HealthHomeScreenState> healthHomeScreenKey = GlobalKey<_HealthHomeScreenState>();
+
 class _HealthHomeScreenState extends State<HealthHomeScreen> {
   String username = '사용자';
   String _currentView = 'home'; // 'home', 'pain', 'pills', 'exercise', 'steps'
@@ -117,6 +120,22 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     ]);
   }
 
+  // 외부에서 호출 가능한 새로고침 메서드
+  Future<void> refreshHealthData() async {
+    try {
+      if (_isChild) {
+        // 자녀인 경우 부모 목록도 새로고침
+        await _loadParentMembers();
+      } else {
+        // 부모인 경우 바로 데이터 새로고침
+        await _loadAllData();
+      }
+    } catch (e) {
+      // 새로고침 실패 시 조용히 처리
+      print('건강 데이터 새로고침 실패: $e');
+    }
+  }
+
   void _onParentSelected(String parentId) {
     setState(() {
       _selectedParentId = parentId;
@@ -197,12 +216,10 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
 
   Future<void> _loadStep() async {
     try {
-      final now = DateTime.now();
-      final dateKey =
-          "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
       final stepService = StepService();
 
-      final serverData = await stepService.getSteps(date: dateKey);
+      // 오늘 데이터를 가져올 때는 date 파라미터를 생략
+      final serverData = await stepService.getStepsFromServer();
 
       int todaySteps = 0;
       if (serverData != null) {
@@ -818,11 +835,15 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
       return _buildNoParentView();
     }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(bottom: 40),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+    return RefreshIndicator(
+      onRefresh: refreshHealthData,
+      color: AppColors.ongiOrange,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(bottom: 40),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           const SizedBox(height: 130),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -1177,6 +1198,7 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
           ),
         ],
       ),
+      ),
     );
   }
 
@@ -1194,3 +1216,4 @@ class _HealthHomeScreenState extends State<HealthHomeScreen> {
     );
   }
 }
+
