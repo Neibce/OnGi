@@ -6,7 +6,9 @@ import 'package:ongi/models/maum_log.dart';
 import 'package:ongi/services/maum_log_service.dart';
 import 'package:ongi/services/family_service.dart';
 import 'package:ongi/utils/prefs_manager.dart';
-import 'dart:ui'; // Added for ImageFilter
+import 'dart:ui';
+
+import '../add_record_screen.dart'; // Added for ImageFilter
 
 class PhotoDateScreen extends StatefulWidget {
   final String date;
@@ -173,22 +175,47 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
     }
 
     if (_maumLogResponse == null || _maumLogResponse!.maumLogDtos.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.photo_camera_outlined,
-              color: AppColors.ongiOrange,
-              size: 48,
-            ),
-            SizedBox(height: 16),
-            Text(
-              '이 날의 마음 기록이 없습니다',
-              style: TextStyle(
-                color: AppColors.ongiOrange,
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.ongiOrange,
+                fixedSize: const Size(270, 310),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const AddRecordScreen()),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Text(
+                    '마음기록을',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w200,
+                      fontSize: 36,
+                      height: 1.2,
+                      color: Colors.white,
+                    ),
+                  ),
+                  const Text(
+                    '업로드\n해볼까요?',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 36,
+                      height: 1.2,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -282,7 +309,10 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                               maxWidth: cardWidth + 60,
                               maxHeight: cardHeight + 60,
                               child: ImageFiltered(
-                                imageFilter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                                imageFilter: ImageFilter.blur(
+                                  sigmaX: 30,
+                                  sigmaY: 30,
+                                ),
                                 child: Image.network(
                                   maumLog.backPresignedUrl,
                                   width: cardWidth + 60,
@@ -374,24 +404,28 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                   maxWidth: 88 + 40,
                                   maxHeight: 100 + 40,
                                   child: ImageFiltered(
-                                    imageFilter: ImageFilter.blur(sigmaX: 25, sigmaY: 25),
+                                    imageFilter: ImageFilter.blur(
+                                      sigmaX: 25,
+                                      sigmaY: 25,
+                                    ),
                                     child: Image.network(
                                       maumLog.frontPresignedUrl,
                                       width: 88 + 40,
                                       height: 100 + 40,
                                       fit: BoxFit.cover,
-                                      errorBuilder: (context, error, stackTrace) {
-                                        return Container(
-                                          width: 88 + 40,
-                                          height: 100 + 40,
-                                          color: Colors.grey[300],
-                                          child: const Icon(
-                                            Icons.broken_image,
-                                            color: Colors.grey,
-                                            size: 24,
-                                          ),
-                                        );
-                                      },
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                            return Container(
+                                              width: 88 + 40,
+                                              height: 100 + 40,
+                                              color: Colors.grey[300],
+                                              child: const Icon(
+                                                Icons.broken_image,
+                                                color: Colors.grey,
+                                                size: 24,
+                                              ),
+                                            );
+                                          },
                                     ),
                                   ),
                                 ),
@@ -437,15 +471,19 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     FutureBuilder<String>(
-                                      future: PrefsManager.getProfileImagePathByUserName(
-                                        maumLog.uploader.name,
-                                        _familyMembers,
-                                      ),
+                                      future:
+                                          PrefsManager.getProfileImagePathByUserName(
+                                            maumLog.uploader.name,
+                                            _familyMembers,
+                                          ),
                                       builder: (context, snapshot) {
                                         final profileImagePath =
                                             snapshot.data ??
                                             PrefsManager.getProfileImagePath(0);
-                                        return Image.asset(profileImagePath, width: 30);
+                                        return Image.asset(
+                                          profileImagePath,
+                                          width: 30,
+                                        );
                                       },
                                     ),
                                     const SizedBox(width: 8),
@@ -462,7 +500,10 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 6,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(8),
@@ -483,7 +524,7 @@ class _PhotoDateScreenState extends State<PhotoDateScreen> {
                         ),
                         const SizedBox(height: 8),
                         // 위치 정보가 유효한 경우에만 표시
-                        if (maumLog.location.isNotEmpty && 
+                        if (maumLog.location.isNotEmpty &&
                             maumLog.location != "위치 정보를 불러올 수 없습니다.")
                           Align(
                             alignment: Alignment.center,
