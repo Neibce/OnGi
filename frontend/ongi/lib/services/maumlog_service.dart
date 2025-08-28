@@ -189,4 +189,28 @@ class MaumlogService {
       throw Exception('마음기록 리스트를 불러오지 못했습니다');
     }
   }
+
+  // 재촉하기 API 호출
+  Future<void> sendReminder({
+    required String accessToken,
+  }) async {
+    final url = Uri.parse('$baseUrl/maum-log/reminder');
+    print('🔔 재촉하기 API 호출 URL: $url');
+    
+    final response = await http.post(
+      url,
+      headers: {
+        "Authorization": "Bearer $accessToken",
+      },
+    );
+
+    print('📡 재촉하기 응답 상태: ${response.statusCode}');
+    print('📄 재촉하기 응답 본문: ${response.body}');
+
+    if (response.statusCode != 200 && response.statusCode != 201) {
+      throw Exception('재촉하기 알림 전송 실패: Status ${response.statusCode}, Body: ${response.body}');
+    }
+    
+    print('✅ 재촉하기 알림 전송 성공');
+  }
 }

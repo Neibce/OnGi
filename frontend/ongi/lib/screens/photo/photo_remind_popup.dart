@@ -4,6 +4,8 @@ import 'package:flutter_svg/svg.dart';
 import 'package:ongi/core/app_orange_background.dart';
 import 'package:ongi/core/app_colors.dart';
 import 'package:ongi/screens/bottom_nav.dart';
+import 'package:ongi/services/maumlog_service.dart';
+import 'package:ongi/utils/prefs_manager.dart';
 
 class PhotoRemindPopup extends StatelessWidget {
   const PhotoRemindPopup({super.key});
@@ -117,10 +119,14 @@ class PhotoRemindPopup extends StatelessWidget {
                                     );
                                   });
 
-                                  // TODO: 실제 API 호출로 대체
-                                  await Future.delayed(
-                                    const Duration(milliseconds: 500),
-                                  );
+                                  // 실제 재촉하기 API 호출
+                                  final accessToken = await PrefsManager.getAccessToken();
+                                  if (accessToken == null) {
+                                    throw Exception('로그인이 필요합니다. 다시 로그인해주세요.');
+                                  }
+
+                                  final service = MaumlogService();
+                                  await service.sendReminder(accessToken: accessToken);
 
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -169,10 +175,10 @@ class PhotoRemindPopup extends StatelessWidget {
                                 } catch (e) {
                                   if (context.mounted) {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
+                                      SnackBar(
                                         content: Text(
                                           '알림 전송에 실패했습니다. 다시 시도해주세요.',
-                                          style: TextStyle(
+                                          style: const TextStyle(
                                             fontSize: 16,
                                             fontWeight: FontWeight.w500,
                                           ),
