@@ -77,6 +77,12 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     // 다른 화면에서 돌아왔을 때 부모 목록 새로고침
     if (_isChild && mounted) {
       _refreshParentMembers();
+    } else if (!_isChild && mounted) {
+      if (hasSelectedParts && !_isInputMode) {
+        setState(() {
+          _isInputMode = true;
+        });
+      }
     }
   }
 
@@ -197,11 +203,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
 
         setState(() {
           _painRecords = todayPainRecords;
-          // 입력 모드가 아닐 때만 기록에서 신체 부위 업데이트
+          _updateBodyPartsFromRecords();
           if (!_isInputMode) {
             _updateBodyPartsFromRecords();
           }
-          // 스트레칭 버튼은 통증 기록이 있고, 자녀가 아닐 때만 표시
           _isStretchingVisible = !_isChild && _painRecords.isNotEmpty;
         });
       }
