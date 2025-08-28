@@ -197,7 +197,10 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
 
         setState(() {
           _painRecords = todayPainRecords;
-          _updateBodyPartsFromRecords();
+          // 입력 모드가 아닐 때만 기록에서 신체 부위 업데이트
+          if (!_isInputMode) {
+            _updateBodyPartsFromRecords();
+          }
           // 스트레칭 버튼은 통증 기록이 있고, 자녀가 아닐 때만 표시
           _isStretchingVisible = !_isChild && _painRecords.isNotEmpty;
         });
@@ -211,15 +214,13 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
     }
   }
 
-  // 기록에서 BodyParts 업데이트
+  // 기록에서 BodyParts 업데이트 (조회 모드에서만 사용)
   void _updateBodyPartsFromRecords() {
     if (_painRecords.isEmpty) {
       setState(() {
         _bodyParts = const BodyParts();
-        // 가슴/등 상태 초기화
         _chestSelected = false;
         _backSelected = false;
-        // 복부 세부 부위 상태 초기화
         _abdomenSelected = false;
         _waistSelected = false;
         _hipSelected = false;
@@ -239,10 +240,9 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
 
     BodyParts newBodyParts = const BodyParts();
 
-    // 가슴/등 상태 초기화
+    // 기록에서 읽어올 때는 항상 초기화
     _chestSelected = false;
     _backSelected = false;
-    // 복부 세부 부위 상태 초기화
     _abdomenSelected = false;
     _waistSelected = false;
     _hipSelected = false;
@@ -357,21 +357,28 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       if (isFrontView) {
         // 앞면: 가슴 선택 상태만 반영
         _bodyParts = _bodyParts.copyWith(upperBody: _chestSelected);
-        print('디버깅 - 앞면 뷰: 가슴 선택됨 = $_chestSelected');
+        // 앞면: lowerBody는 복부 상태 반영
+        _bodyParts = _bodyParts.copyWith(lowerBody: _abdomenSelected);
       } else {
         // 뒷면: 등 선택 상태만 반영
         _bodyParts = _bodyParts.copyWith(upperBody: _backSelected);
-        print('디버깅 - 뒷면 뷰: 등 선택됨 = $_backSelected');
+
+        // 뒷면: lowerBody는 허리 상태 반영
+        _bodyParts = _bodyParts.copyWith(lowerBody: _waistSelected);
       }
       
-      // 복부 부위들을 라이브러리 속성에 매핑
-      // abdomen: 실제 복부만
-      _bodyParts = _bodyParts.copyWith(abdomen: _abdomenSelected);
-      // vestibular: 허리, 골반, 엉덩이
-      _bodyParts = _bodyParts.copyWith(vestibular: _waistSelected || _pelvisSelected || _hipSelected);
-      
-      print('디버깅 - 업데이트된 _bodyParts: $_bodyParts');
-      print('디버깅 - 복부 부위 상태: abdomen=$_abdomenSelected, waist=$_waistSelected, pelvis=$_pelvisSelected, hip=$_hipSelected');
+      // 골반/엉덩이도 앞면/뒷면에 따라 다르게 처리
+      if (isFrontView) {
+        // 앞면: abdomen은 골반 상태 반영
+        _bodyParts = _bodyParts.copyWith(abdomen: _pelvisSelected);
+        _bodyParts = _bodyParts.copyWith(vestibular: _hipSelected);
+      } else {
+        // 뒷면: abdomen은 엉덩이 상태 반영
+        _bodyParts = _bodyParts.copyWith(abdomen: _hipSelected);
+
+        // 뒷면: vestibular는 골반 상태 반영
+        _bodyParts = _bodyParts.copyWith(vestibular: _pelvisSelected);
+      }
     });
   }
 
@@ -696,9 +703,6 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       for (var record in _painRecords) {
         print('디버깅 - painArea 원본: ${record['painArea']}');
         print('디버깅 - painArea 타입: ${record['painArea'].runtimeType}');
-        print(
-          '디버깅 - 한글 변환: ${_convertPainAreaToKorean(record['painArea'].toString())}',
-        );
       }
 
       final koreanAreas = _painRecords
@@ -820,32 +824,34 @@ class _HealthStatusInputScreenState extends State<HealthStatusInputScreen> {
       // 앞면 선택은 유지
     }
 
-    // 복부 부위 선택 상태 업데이트
+    // 복부 부위 선택 상태 업데이트 (앞면/뒷면에 따라 다름)
+    final lowerBodySelected = partsString.contains('lowerBody: true');
     final abdomenSelected = partsString.contains('abdomen: true');
     final vestibularSelected = partsString.contains('vestibular: true');
 
-    // 복부 부위 토글 처리 (단순화를 위해 abdomen은 실제 복부, vestibular는 허리/골반/엉덩이로 묶어서 처리)
-    if (abdomenSelected && !_abdomenSelected) {
-      _abdomenSelected = true;
-    } else if (abdomenSelected && _abdomenSelected) {
-      _abdomenSelected = false;
+    // lowerBody 선택 처리 (가슴/등처럼 앞/뒤 구분)
+    if (isFrontView) {
+      // 앞면에서는 복부만 선택/해제
+      _abdomenSelected = lowerBodySelected;
+      // 뒷면 선택은 유지
+    } else {
+      // 뒷면에서는 허리만 선택/해제
+      _waistSelected = lowerBodySelected;
+      // 앞면 선택은 유지
     }
 
-    if (vestibularSelected && !(_waistSelected || _pelvisSelected || _hipSelected)) {
-      // vestibular이 선택되었는데 하위 부위가 모두 비선택 상태면 모두 선택
-      _waistSelected = true;
-      _pelvisSelected = true;
-      _hipSelected = true;
-    } else if (vestibularSelected && (_waistSelected || _pelvisSelected || _hipSelected)) {
-      // vestibular이 선택되었는데 일부 하위 부위가 이미 선택되어 있으면 모두 해제
-      _waistSelected = false;
-      _pelvisSelected = false;
-      _hipSelected = false;
+    // abdomen/vestibular 선택 처리 (앞면/뒷면에 따라 다름)
+    if (isFrontView) {
+      _pelvisSelected = abdomenSelected;
+      _hipSelected = vestibularSelected;
+    } else {
+      _hipSelected = abdomenSelected;
+      _pelvisSelected = vestibularSelected;
     }
 
-    // upperBody, abdomen, vestibular 제외하고 다른 부위들만 업데이트
     BodyParts updatedParts = parts.copyWith(
       upperBody: false,
+      lowerBody: false,
       abdomen: false,
       vestibular: false,
     );
