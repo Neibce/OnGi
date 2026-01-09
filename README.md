@@ -1,5 +1,7 @@
 # 온기 – 부모와 자식 간 건강 관리 및 정서적 소통을 위한 어플리케이션
 
+[English](./README_EN.md)
+
 <img width="1178" height="785" alt="온기_썸네일" src="https://github.com/user-attachments/assets/9238452e-313e-43a8-9018-b63846da6716" />
 
 ---
